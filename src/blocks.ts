@@ -47,10 +47,10 @@ export const motion_turnleft = new ProtoBlock({
 export const motion_goto_menu = new ProtoBlock({
     opcode: 'motion_goto_menu',
     inputs: {
-        TO: StringInput,
+        TO: StringField,
     },
-    execute: function* ({TO}, ctx) {
-        return ctx.evaluateFast(TO);
+    execute: function* ({TO}) {
+        return TO;
     },
     pure: true,
 });
@@ -137,10 +137,10 @@ export const motion_glideto = new ProtoBlock({
 export const motion_glideto_menu = new ProtoBlock({
     opcode: 'motion_glideto_menu',
     inputs: {
-        TO: StringInput,
+        TO: StringField,
     },
-    execute: function* ({TO}, ctx) {
-        return ctx.evaluateFast(TO);
+    execute: function* ({TO}) {
+        return TO;
     },
     pure: true,
 });
@@ -174,10 +174,10 @@ export const motion_pointindirection = new ProtoBlock({
 export const motion_pointtowards_menu = new ProtoBlock({
     opcode: 'motion_pointtowards_menu',
     inputs: {
-        TOWARDS: StringInput,
+        TOWARDS: StringField,
     },
-    execute: function* ({TOWARDS}, ctx) {
-        return ctx.evaluateFast(TOWARDS);
+    execute: function* ({TOWARDS}) {
+        return TOWARDS;
     },
     pure: true,
 });
@@ -251,12 +251,11 @@ export const motion_sety = new ProtoBlock({
 export const motion_setrotationstyle = new ProtoBlock({
     opcode: 'motion_setrotationstyle',
     inputs: {
-        STYLE: StringInput,
+        STYLE: StringField,
     },
     execute: function* ({STYLE}, ctx) {
-        const style = toString(ctx.evaluateFast(STYLE));
-        if (style === 'left-right' || style === 'don\'t rotate' || style === 'all around') {
-            ctx.target.rotationStyle = style;
+        if (STYLE === 'left-right' || STYLE === 'don\'t rotate' || STYLE === 'all around') {
+            ctx.target.rotationStyle = STYLE;
         }
     },
 });
@@ -340,10 +339,10 @@ const setBackdrop = function(stage: Target, backdrop: string | number | boolean)
 export const looks_costume = new ProtoBlock({
     opcode: 'looks_costume',
     inputs: {
-        COSTUME: StringInput,
+        COSTUME: StringField,
     },
-    execute: function* ({COSTUME}, ctx) {
-        return ctx.evaluateFast(COSTUME);
+    execute: function* ({COSTUME}) {
+        return COSTUME;
     },
     pure: true,
 });
@@ -370,10 +369,10 @@ export const looks_nextcostume = new ProtoBlock({
 export const looks_backdrops = new ProtoBlock({
     opcode: 'looks_backdrops',
     inputs: {
-        BACKDROP: StringInput,
+        BACKDROP: StringField,
     },
-    execute: function* ({BACKDROP}, ctx) {
-        return ctx.evaluateFast(BACKDROP);
+    execute: function* ({BACKDROP}) {
+        return BACKDROP;
     },
     pure: true,
 });
@@ -441,13 +440,12 @@ export const looks_hide = new ProtoBlock({
 export const looks_gotofrontback = new ProtoBlock({
     opcode: 'looks_gotofrontback',
     inputs: {
-        FRONT_BACK: StringInput,
+        FRONT_BACK: StringField,
     },
     execute: function* ({FRONT_BACK}, ctx) {
-        const frontBack = toString(ctx.evaluateFast(FRONT_BACK));
-        if (frontBack === 'front') {
+        if (FRONT_BACK === 'front') {
             ctx.project.moveTargetToFront(ctx.target);
-        } else if (frontBack === 'back') {
+        } else if (FRONT_BACK === 'back') {
             ctx.project.moveTargetToBack(ctx.target);
         }
     },
@@ -457,12 +455,11 @@ export const looks_goforwardbackwardlayers = new ProtoBlock({
     opcode: 'looks_goforwardbackwardlayers',
     inputs: {
         NUM: NumberInput,
-        FORWARD_BACKWARD: StringInput,
+        FORWARD_BACKWARD: StringField,
     },
     execute: function* ({NUM, FORWARD_BACKWARD}, ctx) {
         let num = toNumber(ctx.evaluateFast(NUM));
-        const forwardBackward = toString(ctx.evaluateFast(FORWARD_BACKWARD));
-        if (forwardBackward === 'backward') num = -num;
+        if (FORWARD_BACKWARD === 'backward') num = -num;
         ctx.project.moveTargetForwardBackwardLayers(ctx.target, num);
     },
 });
@@ -868,13 +865,12 @@ export const operator_round = new ProtoBlock({
 export const operator_mathop = new ProtoBlock({
     opcode: 'operator_mathop',
     inputs: {
-        OPERATOR: StringInput,
+        OPERATOR: StringField,
         NUM: NumberInput,
     },
     execute: function* ({OPERATOR, NUM}, ctx) {
-        const operator = toString(ctx.evaluateFast(OPERATOR));
         const num = toNumber(ctx.evaluateFast(NUM));
-        switch (operator) {
+        switch (OPERATOR) {
             case 'abs': return Math.abs(num);
             case 'floor': return Math.floor(num);
             case 'ceiling': return Math.ceil(num);
