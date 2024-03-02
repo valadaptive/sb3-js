@@ -1,14 +1,14 @@
 import {
     BlockInput,
     BooleanInput,
-    BroadcastField,
+    VariableField,
     NumberInput,
     ProtoBlock,
     StackInput,
     StringField,
     StringInput,
 } from './block.js';
-import {compare, isInt, isWhiteSpace, toBoolean, toNumber, toString} from './cast.js';
+import {compare, equals, isInt, isWhiteSpace, toBoolean, toListIndex, toNumber, toString} from './cast.js';
 import {BroadcastEvent, GreenFlagEvent, KeyPressedEvent, SwitchBackdropEvent} from './events.js';
 import IO from './io.js';
 import Target from './target.js';
@@ -550,7 +550,7 @@ export const event_whenbackdropswitchesto = new ProtoBlock({
 export const event_whenbroadcastreceived = new ProtoBlock({
     opcode: 'event_whenbroadcastreceived',
     inputs: {
-        BROADCAST_OPTION: BroadcastField,
+        BROADCAST_OPTION: VariableField,
     },
     execute: function* ({BROADCAST_OPTION}, ctx, event) {
         if (event.broadcast !== BROADCAST_OPTION.value.toUpperCase()) {
@@ -567,7 +567,7 @@ export const event_whenbroadcastreceived = new ProtoBlock({
 export const event_broadcast_menu = new ProtoBlock({
     opcode: 'event_broadcast_menu',
     inputs: {
-        BROADCAST_OPTION: BroadcastField,
+        BROADCAST_OPTION: VariableField,
     },
     execute: function* ({BROADCAST_OPTION}) {
         return BROADCAST_OPTION.value;
@@ -1105,6 +1105,229 @@ export const operator_mathop = new ProtoBlock({
     pure: true,
     returnType: ['number'],
 });
+
+/**
+ * Data
+ */
+
+const lookupOrCreateVariable = (name: string, ctx: BlockContext): number | string | boolean => {
+    let value = ctx.target.variables.get(name);
+    // Check local variables first, then global variables
+    if (value === undefined) value = ctx.stage.variables.get(name);
+    if (value !== undefined) return value;
+    // Create the variable locally if it doesn't exist
+    ctx.target.variables.set(name, 0);
+    return 0;
+};
+
+const lookupOrCreateList = (name: string, ctx: BlockContext): (number | string | boolean)[] => {
+    let value = ctx.target.lists.get(name);
+    // Check local lists first, then global lists
+    if (value === undefined) value = ctx.stage.lists.get(name);
+    if (value !== undefined) return value;
+    const list: (number | string | boolean)[] = [];
+    ctx.target.lists.set(name, list);
+    return list;
+};
+
+export const data_variable = new ProtoBlock({
+    opcode: 'data_variable',
+    inputs: {
+        VARIABLE: VariableField,
+    },
+    execute: function* ({VARIABLE}, ctx) {
+        return lookupOrCreateVariable(VARIABLE.value, ctx);
+    },
+});
+
+export const data_setvariableto = new ProtoBlock({
+    opcode: 'data_setvariableto',
+    inputs: {
+        VARIABLE: VariableField,
+        VALUE: NumberInput,
+    },
+    execute: function* ({VARIABLE, VALUE}, ctx) {
+        const value = ctx.evaluateFast(VALUE);
+        ctx.target.variables.set(VARIABLE.value, value);
+    },
+});
+
+export const data_changevariableby = new ProtoBlock({
+    opcode: 'data_changevariableby',
+    inputs: {
+        VARIABLE: VariableField,
+        VALUE: NumberInput,
+    },
+    execute: function* ({VARIABLE, VALUE}, ctx) {
+        const increment = toNumber(ctx.evaluateFast(VALUE));
+        const value = toNumber(lookupOrCreateVariable(VARIABLE.value, ctx));
+        ctx.target.variables.set(VARIABLE.value, value + increment);
+    },
+});
+
+export const data_listcontents = new ProtoBlock({
+    opcode: 'data_listcontents',
+    inputs: {
+        LIST: VariableField,
+    },
+    execute: function* ({LIST}, ctx) {
+        const list = lookupOrCreateList(LIST.value, ctx);
+
+        // If the list is all single letters, join them together. Otherwise, join with spaces.
+        let allSingleLetters = true;
+        for (const item of list) {
+            if (typeof item !== 'string' || item.length !== 1) {
+                allSingleLetters = false;
+                break;
+            }
+        }
+
+        if (allSingleLetters) {
+            return list.join('');
+        }
+        return list.join(' ');
+    },
+});
+
+export const data_addtolist = new ProtoBlock({
+    opcode: 'data_addtolist',
+    inputs: {
+        ITEM: StringInput,
+        LIST: VariableField,
+    },
+    execute: function* ({ITEM, LIST}, ctx) {
+        const item = ctx.evaluateFast(ITEM);
+        // TODO: Scratch limits lists to 200000 items. Not sure if that behavior is worth replicating
+        lookupOrCreateList(LIST.value, ctx).push(item);
+    },
+});
+
+export const data_deleteoflist = new ProtoBlock({
+    opcode: 'data_deleteoflist',
+    inputs: {
+        INDEX: NumberInput,
+        LIST: VariableField,
+    },
+    execute: function* ({INDEX, LIST}, ctx) {
+        const index = ctx.evaluateFast(INDEX);
+        const list = lookupOrCreateList(LIST.value, ctx);
+        if (index === 'all') {
+            list.length = 0;
+            return;
+        }
+        const numIndex = toListIndex(index, list.length);
+        if (numIndex !== 0) list.splice(numIndex - 1, 1);
+    },
+});
+
+export const data_deletealloflist = new ProtoBlock({
+    opcode: 'data_deletealloflist',
+    inputs: {
+        LIST: VariableField,
+    },
+    execute: function* ({LIST}, ctx) {
+        lookupOrCreateList(LIST.value, ctx).length = 0;
+    },
+});
+
+export const data_insertatlist = new ProtoBlock({
+    opcode: 'data_insertatlist',
+    inputs: {
+        ITEM: StringInput,
+        INDEX: NumberInput,
+        LIST: VariableField,
+    },
+    execute: function* ({ITEM, INDEX, LIST}, ctx) {
+        const item = ctx.evaluateFast(ITEM);
+        const index = ctx.evaluateFast(INDEX);
+        const list = lookupOrCreateList(LIST.value, ctx);
+        const numIndex = toListIndex(index, list.length);
+        if (numIndex !== 0) list.splice(numIndex - 1, 0, item);
+    },
+});
+
+export const data_replaceitemoflist = new ProtoBlock({
+    opcode: 'data_replaceitemoflist',
+    inputs: {
+        ITEM: StringInput,
+        INDEX: NumberInput,
+        LIST: VariableField,
+    },
+    execute: function* ({ITEM, INDEX, LIST}, ctx) {
+        const item = ctx.evaluateFast(ITEM);
+        const index = ctx.evaluateFast(INDEX);
+        const list = lookupOrCreateList(LIST.value, ctx);
+        const numIndex = toListIndex(index, list.length);
+        if (numIndex !== 0) list[numIndex - 1] = item;
+    },
+});
+
+export const data_itemoflist = new ProtoBlock({
+    opcode: 'data_itemoflist',
+    inputs: {
+        INDEX: NumberInput,
+        LIST: VariableField,
+    },
+    execute: function* ({INDEX, LIST}, ctx) {
+        const index = ctx.evaluateFast(INDEX);
+        const list = lookupOrCreateList(LIST.value, ctx);
+        const numIndex = toListIndex(index, list.length);
+        if (numIndex !== 0) return list[numIndex - 1];
+        return '';
+    },
+});
+
+export const data_itemnumoflist = new ProtoBlock({
+    opcode: 'data_itemnumoflist',
+    inputs: {
+        ITEM: StringInput,
+        LIST: VariableField,
+    },
+    execute: function* ({ITEM, LIST}, ctx) {
+        const item = ctx.evaluateFast(ITEM);
+        const list = lookupOrCreateList(LIST.value, ctx);
+
+        // Use Scratch-style equality test.
+        for (let i = 0; i < list.length; i++) {
+            if (equals(list[i], item)) return i + 1;
+        }
+
+        return 0;
+    },
+    returnType: ['number'],
+});
+
+export const data_lengthoflist = new ProtoBlock({
+    opcode: 'data_lengthoflist',
+    inputs: {
+        LIST: VariableField,
+    },
+    execute: function* ({LIST}, ctx) {
+        return lookupOrCreateList(LIST.value, ctx).length;
+    },
+    returnType: ['number'],
+});
+
+export const data_listcontainsitem = new ProtoBlock({
+    opcode: 'data_listcontainsitem',
+    inputs: {
+        ITEM: StringInput,
+        LIST: VariableField,
+    },
+    execute: function* ({ITEM, LIST}, ctx) {
+        const item = ctx.evaluateFast(ITEM);
+        const list = lookupOrCreateList(LIST.value, ctx);
+        for (const listItem of list) {
+            if (equals(listItem, item)) return true;
+        }
+        return false;
+    },
+    returnType: ['boolean'],
+});
+
+/**
+ * Custom Blocks
+ */
 
 // This block doesn't do anything, and is replaced by the parser with the actual custom block prototype. It exists so
 // that the parser can parse a procedures_definition as a normal block.

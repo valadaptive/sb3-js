@@ -120,9 +120,13 @@ const sb3InputPrimitiveSchema = [
     },
     {
         type: 'tuple',
-        // for broadcast primitives, they save the name of the broadcast and the ID
+        // name/ID pairs
         items: [
-            {type: 'literal', value: CompressedPrimitiveType.BROADCAST_PRIMITIVE},
+            [
+                {type: 'literal', value: CompressedPrimitiveType.BROADCAST_PRIMITIVE},
+                {type: 'literal', value: CompressedPrimitiveType.VAR_PRIMITIVE},
+                {type: 'literal', value: CompressedPrimitiveType.LIST_PRIMITIVE},
+            ],
             'string',
             'string',
         ],
@@ -135,15 +139,6 @@ const sb3InputPrimitiveSchema = [
                 {type: 'literal', value: CompressedPrimitiveType.LIST_PRIMITIVE},
             ],
             'string',
-        ],
-    },
-    {
-        type: 'tuple',
-        items: [
-            [
-                {type: 'literal', value: CompressedPrimitiveType.VAR_PRIMITIVE},
-                {type: 'literal', value: CompressedPrimitiveType.LIST_PRIMITIVE},
-            ],
             'string',
             // top-level variable/list primitive; Scratch saves the x and y position of the block
             'number',
@@ -328,17 +323,31 @@ const parseBlockInput = (
             case CompressedPrimitiveType.ANGLE_NUM_PRIMITIVE:
             case CompressedPrimitiveType.COLOR_PICKER_PRIMITIVE:
             case CompressedPrimitiveType.TEXT_PRIMITIVE:
-            case CompressedPrimitiveType.VAR_PRIMITIVE:
-            case CompressedPrimitiveType.LIST_PRIMITIVE:
                 parsedInput = value;
                 break;
-            case CompressedPrimitiveType.BROADCAST_PRIMITIVE: {
+
+            case CompressedPrimitiveType.VAR_PRIMITIVE: {
+                parsedInput = new Block({
+                    proto: allBlocks.data_variable,
+                    id,
+                    inputValues: {VARIABLE: {value, id}},
+                });
+                break;
+            }
+            case CompressedPrimitiveType.LIST_PRIMITIVE: {
+                parsedInput = new Block({
+                    proto: allBlocks.data_listcontents,
+                    id,
+                    inputValues: {LIST: {value, id}},
+                });
+                break;
+            }
+            case CompressedPrimitiveType.BROADCAST_PRIMITIVE:
                 parsedInput = new Block({
                     proto: allBlocks.event_broadcast_menu,
                     id,
                     inputValues: {BROADCAST_OPTION: {value, id}},
                 });
-            }
         }
     }
 

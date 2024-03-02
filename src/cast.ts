@@ -43,6 +43,29 @@ export const toString = (value: string | number | boolean | void): string => {
     return String(value);
 };
 
+/**
+ * Cast a value to a 1-based list index, handling special values like 'last' and 'random'. Returns 0 if the index isn't
+ * valid (e.g. out of bounds or some arbitrary string).
+ * @param value The value to cast to a list index.
+ * @param length The length of the list.
+ * @returns 1-based list index, or 0 if the index isn't valid.
+ */
+export const toListIndex = (value: string | number | boolean | void, length: number): number => {
+    if (typeof value !== 'number') {
+        if (value === 'last') {
+            return length;
+        }
+
+        if (value === 'random' || value === 'any') {
+            if (length === 0) return 0;
+            return Math.floor(Math.random() * length) + 1;
+        }
+    }
+    value = Math.floor(toNumber(value));
+    if (value < 1 || value > length) return 0;
+    return value;
+};
+
 export const isWhiteSpace = (value: string | number | boolean): boolean =>
     typeof value === 'string' && value.trim().length === 0;
 

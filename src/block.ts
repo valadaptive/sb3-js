@@ -140,7 +140,7 @@ export const StringInput = new BlockInput('string', unionInput('number', 'string
 export const BooleanInput = new BlockInput('boolean', unionInput('number', 'string', 'boolean', 'block'));
 export const StackInput = new BlockInput('stack', arrayInput('block'));
 export const StringField = new BlockInput('string', 'string');
-export const BroadcastField = new BlockInput('broadcast', objectInput({value: 'string', id: 'string'}));
+export const VariableField = new BlockInput('variable', objectInput({value: 'string', id: 'string'}));
 
 export type BlockReturnType = ('string' | 'number' | 'boolean')[];
 
