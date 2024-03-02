@@ -1,0 +1,2739 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`comparison and equality compare "     " "     " 1`] = `0`;
+
+exports[`comparison and equality compare "     " " apple " 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "" 1`] = `1`;
+
+exports[`comparison and equality compare "     " "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "     " "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "     " "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "     " "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "-Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "0" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "     " -0 1`] = `-1`;
+
+exports[`comparison and equality compare "     " -4 1`] = `-1`;
+
+exports[`comparison and equality compare "     " -Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "     " 0 1`] = `-1`;
+
+exports[`comparison and equality compare "     " 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "     " 5 1`] = `-1`;
+
+exports[`comparison and equality compare "     " 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "     " Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "     " NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "     " false 1`] = `-1`;
+
+exports[`comparison and equality compare "     " true 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "     " 1`] = `1`;
+
+exports[`comparison and equality compare " apple " " apple " 1`] = `0`;
+
+exports[`comparison and equality compare " apple " "" 1`] = `1`;
+
+exports[`comparison and equality compare " apple " "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare " apple " "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare " apple " "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare " apple " "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "-Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "0" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "5" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "false" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "true" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " "　" 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " -0 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " -4 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " -Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " 0 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " 5 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " NaN 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " false 1`] = `-1`;
+
+exports[`comparison and equality compare " apple " true 1`] = `-1`;
+
+exports[`comparison and equality compare "" "     " 1`] = `-1`;
+
+exports[`comparison and equality compare "" " apple " 1`] = `-1`;
+
+exports[`comparison and equality compare "" "" 1`] = `0`;
+
+exports[`comparison and equality compare "" "\\n" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "\\r\\t\\n\\t\\n" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "\\u000b\\f﻿" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "-Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "0" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "" -0 1`] = `-1`;
+
+exports[`comparison and equality compare "" -4 1`] = `-1`;
+
+exports[`comparison and equality compare "" -Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "" 0 1`] = `-1`;
+
+exports[`comparison and equality compare "" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "" false 1`] = `-1`;
+
+exports[`comparison and equality compare "" true 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "     " 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" " apple " 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "" 1`] = `1`;
+
+exports[`comparison and equality compare "\\n" "\\n" 1`] = `0`;
+
+exports[`comparison and equality compare "\\n" "\\r\\t\\n\\t\\n" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "\\u000b\\f﻿" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "-Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "0" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" -0 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" -4 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" -Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" 0 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" false 1`] = `-1`;
+
+exports[`comparison and equality compare "\\n" true 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "     " 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" " apple " 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "" 1`] = `1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "\\r\\t\\n\\t\\n" 1`] = `0`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "-Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "0" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" -0 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" -4 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" -Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" 0 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" false 1`] = `-1`;
+
+exports[`comparison and equality compare "\\r\\t\\n\\t\\n" true 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "     " 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" " apple " 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "" 1`] = `1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "\\r\\t\\n\\t\\n" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "\\u000b\\f﻿" 1`] = `0`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "-Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "0" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" -0 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" -4 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" -Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" 0 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" false 1`] = `-1`;
+
+exports[`comparison and equality compare "\\u000b\\f﻿" true 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "-0" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "-0" "" 1`] = `1`;
+
+exports[`comparison and equality compare "-0" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "-0" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "-0" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "-0" "-0" 1`] = `0`;
+
+exports[`comparison and equality compare "-0" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "-0" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "-0" "0" 1`] = `0`;
+
+exports[`comparison and equality compare "-0" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" -0 1`] = `0`;
+
+exports[`comparison and equality compare "-0" -4 1`] = `1`;
+
+exports[`comparison and equality compare "-0" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "-0" 0 1`] = `0`;
+
+exports[`comparison and equality compare "-0" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "-0" false 1`] = `0`;
+
+exports[`comparison and equality compare "-0" true 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "-4" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "-4" "" 1`] = `1`;
+
+exports[`comparison and equality compare "-4" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "-4" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "-4" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "-4" "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "-4" 1`] = `0`;
+
+exports[`comparison and equality compare "-4" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "-4" "0" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" -0 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" -4 1`] = `0`;
+
+exports[`comparison and equality compare "-4" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "-4" 0 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" false 1`] = `-1`;
+
+exports[`comparison and equality compare "-4" true 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "-Infinity" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "-Infinity" "" 1`] = `1`;
+
+exports[`comparison and equality compare "-Infinity" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "-Infinity" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "-Infinity" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "-Infinity" "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "-Infinity" 1`] = `0`;
+
+exports[`comparison and equality compare "-Infinity" "0" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" -0 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" -4 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" -Infinity 1`] = `0`;
+
+exports[`comparison and equality compare "-Infinity" 0 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" false 1`] = `-1`;
+
+exports[`comparison and equality compare "-Infinity" true 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "0" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "0" "" 1`] = `1`;
+
+exports[`comparison and equality compare "0" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "0" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "0" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "0" "-0" 1`] = `0`;
+
+exports[`comparison and equality compare "0" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "0" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "0" "0" 1`] = `0`;
+
+exports[`comparison and equality compare "0" "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "0" -0 1`] = `0`;
+
+exports[`comparison and equality compare "0" -4 1`] = `1`;
+
+exports[`comparison and equality compare "0" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "0" 0 1`] = `0`;
+
+exports[`comparison and equality compare "0" 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare "0" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "0" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "0" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "0" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "0" false 1`] = `0`;
+
+exports[`comparison and equality compare "0" true 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" "0.1" 1`] = `0`;
+
+exports[`comparison and equality compare "0.1" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "5" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" -0 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" -4 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" 0 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" 0.1 1`] = `0`;
+
+exports[`comparison and equality compare "0.1" 5 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "0.1" false 1`] = `1`;
+
+exports[`comparison and equality compare "0.1" true 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "0xa11afacade" 1`] = `0`;
+
+exports[`comparison and equality compare "0xa11afacade" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" "691942378206" 1`] = `0`;
+
+exports[`comparison and equality compare "0xa11afacade" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" -0 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" -4 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" 0 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" 5 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" 691942378206 1`] = `0`;
+
+exports[`comparison and equality compare "0xa11afacade" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "0xa11afacade" false 1`] = `1`;
+
+exports[`comparison and equality compare "0xa11afacade" true 1`] = `1`;
+
+exports[`comparison and equality compare "5" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "5" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "5" "" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "5" "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "5" 1`] = `0`;
+
+exports[`comparison and equality compare "5" "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "5" -0 1`] = `1`;
+
+exports[`comparison and equality compare "5" -4 1`] = `1`;
+
+exports[`comparison and equality compare "5" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "5" 0 1`] = `1`;
+
+exports[`comparison and equality compare "5" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "5" 5 1`] = `0`;
+
+exports[`comparison and equality compare "5" 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare "5" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "5" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "5" false 1`] = `1`;
+
+exports[`comparison and equality compare "5" true 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "0xa11afacade" 1`] = `0`;
+
+exports[`comparison and equality compare "691942378206" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" "691942378206" 1`] = `0`;
+
+exports[`comparison and equality compare "691942378206" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" -0 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" -4 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" 0 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" 5 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" 691942378206 1`] = `0`;
+
+exports[`comparison and equality compare "691942378206" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "691942378206" false 1`] = `1`;
+
+exports[`comparison and equality compare "691942378206" true 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "ApPlE" 1`] = `0`;
+
+exports[`comparison and equality compare "ApPlE" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" "apple" 1`] = `0`;
+
+exports[`comparison and equality compare "ApPlE" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" -0 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" -4 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" 0 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" 5 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "ApPlE" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" false 1`] = `-1`;
+
+exports[`comparison and equality compare "ApPlE" true 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "BANANA" 1`] = `0`;
+
+exports[`comparison and equality compare "BANANA" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" "banana" 1`] = `0`;
+
+exports[`comparison and equality compare "BANANA" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" -0 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" -4 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" 0 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" 5 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "BANANA" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" false 1`] = `-1`;
+
+exports[`comparison and equality compare "BANANA" true 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "FaLsE" 1`] = `0`;
+
+exports[`comparison and equality compare "FaLsE" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "banana" 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" "false" 1`] = `0`;
+
+exports[`comparison and equality compare "FaLsE" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" -0 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" -4 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" 0 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" 5 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "FaLsE" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "FaLsE" false 1`] = `0`;
+
+exports[`comparison and equality compare "FaLsE" true 1`] = `-1`;
+
+exports[`comparison and equality compare "Infinity" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "Infinity" 1`] = `0`;
+
+exports[`comparison and equality compare "Infinity" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "Infinity" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "Infinity" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "banana" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "false" 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "Infinity" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "Infinity" -0 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" -4 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" 0 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" 5 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" Infinity 1`] = `0`;
+
+exports[`comparison and equality compare "Infinity" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "Infinity" false 1`] = `1`;
+
+exports[`comparison and equality compare "Infinity" true 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "NaN" 1`] = `0`;
+
+exports[`comparison and equality compare "NaN" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "NaN" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "banana" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "false" 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "NaN" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "NaN" -0 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" -4 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" 0 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" 5 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" NaN 1`] = `0`;
+
+exports[`comparison and equality compare "NaN" false 1`] = `1`;
+
+exports[`comparison and equality compare "NaN" true 1`] = `-1`;
+
+exports[`comparison and equality compare "TrUe" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "NaN" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "TrUe" 1`] = `0`;
+
+exports[`comparison and equality compare "TrUe" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "banana" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "false" 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" "true" 1`] = `0`;
+
+exports[`comparison and equality compare "TrUe" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "TrUe" -0 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" -4 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" 0 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" 5 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" NaN 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" false 1`] = `1`;
+
+exports[`comparison and equality compare "TrUe" true 1`] = `0`;
+
+exports[`comparison and equality compare "appl" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "appl" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "appl" "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "appl" 1`] = `0`;
+
+exports[`comparison and equality compare "appl" "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" -0 1`] = `1`;
+
+exports[`comparison and equality compare "appl" -4 1`] = `1`;
+
+exports[`comparison and equality compare "appl" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "appl" 0 1`] = `1`;
+
+exports[`comparison and equality compare "appl" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "appl" 5 1`] = `1`;
+
+exports[`comparison and equality compare "appl" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "appl" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" false 1`] = `-1`;
+
+exports[`comparison and equality compare "appl" true 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "apple" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "ApPlE" 1`] = `0`;
+
+exports[`comparison and equality compare "apple" "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "apple" "apple" 1`] = `0`;
+
+exports[`comparison and equality compare "apple" "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" -0 1`] = `1`;
+
+exports[`comparison and equality compare "apple" -4 1`] = `1`;
+
+exports[`comparison and equality compare "apple" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "apple" 0 1`] = `1`;
+
+exports[`comparison and equality compare "apple" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "apple" 5 1`] = `1`;
+
+exports[`comparison and equality compare "apple" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "apple" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" false 1`] = `-1`;
+
+exports[`comparison and equality compare "apple" true 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "banana" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "BANANA" 1`] = `0`;
+
+exports[`comparison and equality compare "banana" "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "banana" "banana" 1`] = `0`;
+
+exports[`comparison and equality compare "banana" "false" 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" -0 1`] = `1`;
+
+exports[`comparison and equality compare "banana" -4 1`] = `1`;
+
+exports[`comparison and equality compare "banana" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "banana" 0 1`] = `1`;
+
+exports[`comparison and equality compare "banana" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "banana" 5 1`] = `1`;
+
+exports[`comparison and equality compare "banana" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "banana" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" false 1`] = `-1`;
+
+exports[`comparison and equality compare "banana" true 1`] = `-1`;
+
+exports[`comparison and equality compare "false" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "false" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "false" "" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "FaLsE" 1`] = `0`;
+
+exports[`comparison and equality compare "false" "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare "false" "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare "false" "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare "false" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "banana" 1`] = `1`;
+
+exports[`comparison and equality compare "false" "false" 1`] = `0`;
+
+exports[`comparison and equality compare "false" "true" 1`] = `-1`;
+
+exports[`comparison and equality compare "false" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "false" -0 1`] = `1`;
+
+exports[`comparison and equality compare "false" -4 1`] = `1`;
+
+exports[`comparison and equality compare "false" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "false" 0 1`] = `1`;
+
+exports[`comparison and equality compare "false" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "false" 5 1`] = `1`;
+
+exports[`comparison and equality compare "false" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "false" Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare "false" NaN 1`] = `-1`;
+
+exports[`comparison and equality compare "false" false 1`] = `0`;
+
+exports[`comparison and equality compare "false" true 1`] = `-1`;
+
+exports[`comparison and equality compare "true" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "true" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "true" "" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "NaN" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "TrUe" 1`] = `0`;
+
+exports[`comparison and equality compare "true" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "banana" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "false" 1`] = `1`;
+
+exports[`comparison and equality compare "true" "true" 1`] = `0`;
+
+exports[`comparison and equality compare "true" "　" 1`] = `-1`;
+
+exports[`comparison and equality compare "true" -0 1`] = `1`;
+
+exports[`comparison and equality compare "true" -4 1`] = `1`;
+
+exports[`comparison and equality compare "true" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "true" 0 1`] = `1`;
+
+exports[`comparison and equality compare "true" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "true" 5 1`] = `1`;
+
+exports[`comparison and equality compare "true" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "true" Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "true" NaN 1`] = `1`;
+
+exports[`comparison and equality compare "true" false 1`] = `1`;
+
+exports[`comparison and equality compare "true" true 1`] = `0`;
+
+exports[`comparison and equality compare "　" "     " 1`] = `1`;
+
+exports[`comparison and equality compare "　" " apple " 1`] = `1`;
+
+exports[`comparison and equality compare "　" "" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "-0" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "-4" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "0" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "5" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "NaN" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "TrUe" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "appl" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "apple" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "banana" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "false" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "true" 1`] = `1`;
+
+exports[`comparison and equality compare "　" "　" 1`] = `0`;
+
+exports[`comparison and equality compare "　" -0 1`] = `1`;
+
+exports[`comparison and equality compare "　" -4 1`] = `1`;
+
+exports[`comparison and equality compare "　" -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "　" 0 1`] = `1`;
+
+exports[`comparison and equality compare "　" 0.1 1`] = `1`;
+
+exports[`comparison and equality compare "　" 5 1`] = `1`;
+
+exports[`comparison and equality compare "　" 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare "　" Infinity 1`] = `1`;
+
+exports[`comparison and equality compare "　" NaN 1`] = `1`;
+
+exports[`comparison and equality compare "　" false 1`] = `1`;
+
+exports[`comparison and equality compare "　" true 1`] = `1`;
+
+exports[`comparison and equality compare -0 "     " 1`] = `1`;
+
+exports[`comparison and equality compare -0 " apple " 1`] = `1`;
+
+exports[`comparison and equality compare -0 "" 1`] = `1`;
+
+exports[`comparison and equality compare -0 "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare -0 "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare -0 "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare -0 "-0" 1`] = `0`;
+
+exports[`comparison and equality compare -0 "-4" 1`] = `1`;
+
+exports[`comparison and equality compare -0 "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare -0 "0" 1`] = `0`;
+
+exports[`comparison and equality compare -0 "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "5" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "false" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "true" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 "　" 1`] = `-1`;
+
+exports[`comparison and equality compare -0 -0 1`] = `0`;
+
+exports[`comparison and equality compare -0 -4 1`] = `1`;
+
+exports[`comparison and equality compare -0 -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare -0 0 1`] = `0`;
+
+exports[`comparison and equality compare -0 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare -0 5 1`] = `-1`;
+
+exports[`comparison and equality compare -0 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare -0 Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare -0 NaN 1`] = `-1`;
+
+exports[`comparison and equality compare -0 false 1`] = `0`;
+
+exports[`comparison and equality compare -0 true 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "     " 1`] = `1`;
+
+exports[`comparison and equality compare -4 " apple " 1`] = `1`;
+
+exports[`comparison and equality compare -4 "" 1`] = `1`;
+
+exports[`comparison and equality compare -4 "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare -4 "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare -4 "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare -4 "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "-4" 1`] = `0`;
+
+exports[`comparison and equality compare -4 "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare -4 "0" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "5" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "false" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "true" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 "　" 1`] = `-1`;
+
+exports[`comparison and equality compare -4 -0 1`] = `-1`;
+
+exports[`comparison and equality compare -4 -4 1`] = `0`;
+
+exports[`comparison and equality compare -4 -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare -4 0 1`] = `-1`;
+
+exports[`comparison and equality compare -4 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare -4 5 1`] = `-1`;
+
+exports[`comparison and equality compare -4 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare -4 Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare -4 NaN 1`] = `-1`;
+
+exports[`comparison and equality compare -4 false 1`] = `-1`;
+
+exports[`comparison and equality compare -4 true 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "     " 1`] = `1`;
+
+exports[`comparison and equality compare -Infinity " apple " 1`] = `1`;
+
+exports[`comparison and equality compare -Infinity "" 1`] = `1`;
+
+exports[`comparison and equality compare -Infinity "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare -Infinity "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare -Infinity "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare -Infinity "-0" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "-4" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "-Infinity" 1`] = `0`;
+
+exports[`comparison and equality compare -Infinity "0" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "5" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "false" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "true" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity "　" 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity -0 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity -4 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity -Infinity 1`] = `0`;
+
+exports[`comparison and equality compare -Infinity 0 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity 5 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity NaN 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity false 1`] = `-1`;
+
+exports[`comparison and equality compare -Infinity true 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "     " 1`] = `1`;
+
+exports[`comparison and equality compare 0 " apple " 1`] = `1`;
+
+exports[`comparison and equality compare 0 "" 1`] = `1`;
+
+exports[`comparison and equality compare 0 "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 0 "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 0 "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare 0 "-0" 1`] = `0`;
+
+exports[`comparison and equality compare 0 "-4" 1`] = `1`;
+
+exports[`comparison and equality compare 0 "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare 0 "0" 1`] = `0`;
+
+exports[`comparison and equality compare 0 "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "5" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "false" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "true" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 "　" 1`] = `-1`;
+
+exports[`comparison and equality compare 0 -0 1`] = `0`;
+
+exports[`comparison and equality compare 0 -4 1`] = `1`;
+
+exports[`comparison and equality compare 0 -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare 0 0 1`] = `0`;
+
+exports[`comparison and equality compare 0 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare 0 5 1`] = `-1`;
+
+exports[`comparison and equality compare 0 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare 0 Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare 0 NaN 1`] = `-1`;
+
+exports[`comparison and equality compare 0 false 1`] = `0`;
+
+exports[`comparison and equality compare 0 true 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "     " 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 " apple " 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "-0" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "-4" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "0" 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 "0.1" 1`] = `0`;
+
+exports[`comparison and equality compare 0.1 "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "5" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "false" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "true" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 "　" 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 -0 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 -4 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 0 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 0.1 1`] = `0`;
+
+exports[`comparison and equality compare 0.1 5 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 NaN 1`] = `-1`;
+
+exports[`comparison and equality compare 0.1 false 1`] = `1`;
+
+exports[`comparison and equality compare 0.1 true 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "     " 1`] = `1`;
+
+exports[`comparison and equality compare 5 " apple " 1`] = `1`;
+
+exports[`comparison and equality compare 5 "" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "-0" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "-4" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "0" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare 5 "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "5" 1`] = `0`;
+
+exports[`comparison and equality compare 5 "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "false" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "true" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 "　" 1`] = `-1`;
+
+exports[`comparison and equality compare 5 -0 1`] = `1`;
+
+exports[`comparison and equality compare 5 -4 1`] = `1`;
+
+exports[`comparison and equality compare 5 -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare 5 0 1`] = `1`;
+
+exports[`comparison and equality compare 5 0.1 1`] = `1`;
+
+exports[`comparison and equality compare 5 5 1`] = `0`;
+
+exports[`comparison and equality compare 5 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare 5 Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare 5 NaN 1`] = `-1`;
+
+exports[`comparison and equality compare 5 false 1`] = `1`;
+
+exports[`comparison and equality compare 5 true 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "     " 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 " apple " 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "-0" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "-4" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "0" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "0xa11afacade" 1`] = `0`;
+
+exports[`comparison and equality compare 691942378206 "5" 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 "691942378206" 1`] = `0`;
+
+exports[`comparison and equality compare 691942378206 "ApPlE" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "BANANA" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "FaLsE" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "appl" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "apple" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "banana" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "false" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "true" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 "　" 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 -0 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 -4 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 0 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 0.1 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 5 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 691942378206 1`] = `0`;
+
+exports[`comparison and equality compare 691942378206 Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 NaN 1`] = `-1`;
+
+exports[`comparison and equality compare 691942378206 false 1`] = `1`;
+
+exports[`comparison and equality compare 691942378206 true 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "     " 1`] = `1`;
+
+exports[`comparison and equality compare Infinity " apple " 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "-0" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "-4" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "0" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "5" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "Infinity" 1`] = `0`;
+
+exports[`comparison and equality compare Infinity "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare Infinity "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare Infinity "appl" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "apple" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "banana" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "false" 1`] = `1`;
+
+exports[`comparison and equality compare Infinity "true" 1`] = `-1`;
+
+exports[`comparison and equality compare Infinity "　" 1`] = `-1`;
+
+exports[`comparison and equality compare Infinity -0 1`] = `1`;
+
+exports[`comparison and equality compare Infinity -4 1`] = `1`;
+
+exports[`comparison and equality compare Infinity -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare Infinity 0 1`] = `1`;
+
+exports[`comparison and equality compare Infinity 0.1 1`] = `1`;
+
+exports[`comparison and equality compare Infinity 5 1`] = `1`;
+
+exports[`comparison and equality compare Infinity 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare Infinity Infinity 1`] = `0`;
+
+exports[`comparison and equality compare Infinity NaN 1`] = `-1`;
+
+exports[`comparison and equality compare Infinity false 1`] = `1`;
+
+exports[`comparison and equality compare Infinity true 1`] = `1`;
+
+exports[`comparison and equality compare NaN "     " 1`] = `1`;
+
+exports[`comparison and equality compare NaN " apple " 1`] = `1`;
+
+exports[`comparison and equality compare NaN "" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "-0" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "-4" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "0" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "0xa11afacade" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "5" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "691942378206" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "NaN" 1`] = `0`;
+
+exports[`comparison and equality compare NaN "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare NaN "appl" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "apple" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "banana" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "false" 1`] = `1`;
+
+exports[`comparison and equality compare NaN "true" 1`] = `-1`;
+
+exports[`comparison and equality compare NaN "　" 1`] = `-1`;
+
+exports[`comparison and equality compare NaN -0 1`] = `1`;
+
+exports[`comparison and equality compare NaN -4 1`] = `1`;
+
+exports[`comparison and equality compare NaN -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare NaN 0 1`] = `1`;
+
+exports[`comparison and equality compare NaN 0.1 1`] = `1`;
+
+exports[`comparison and equality compare NaN 5 1`] = `1`;
+
+exports[`comparison and equality compare NaN 691942378206 1`] = `1`;
+
+exports[`comparison and equality compare NaN Infinity 1`] = `1`;
+
+exports[`comparison and equality compare NaN NaN 1`] = `0`;
+
+exports[`comparison and equality compare NaN false 1`] = `1`;
+
+exports[`comparison and equality compare NaN true 1`] = `-1`;
+
+exports[`comparison and equality compare false "     " 1`] = `1`;
+
+exports[`comparison and equality compare false " apple " 1`] = `1`;
+
+exports[`comparison and equality compare false "" 1`] = `1`;
+
+exports[`comparison and equality compare false "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare false "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare false "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare false "-0" 1`] = `0`;
+
+exports[`comparison and equality compare false "-4" 1`] = `1`;
+
+exports[`comparison and equality compare false "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare false "0" 1`] = `0`;
+
+exports[`comparison and equality compare false "0.1" 1`] = `-1`;
+
+exports[`comparison and equality compare false "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare false "5" 1`] = `-1`;
+
+exports[`comparison and equality compare false "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare false "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare false "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare false "FaLsE" 1`] = `0`;
+
+exports[`comparison and equality compare false "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare false "NaN" 1`] = `-1`;
+
+exports[`comparison and equality compare false "TrUe" 1`] = `-1`;
+
+exports[`comparison and equality compare false "appl" 1`] = `1`;
+
+exports[`comparison and equality compare false "apple" 1`] = `1`;
+
+exports[`comparison and equality compare false "banana" 1`] = `1`;
+
+exports[`comparison and equality compare false "false" 1`] = `0`;
+
+exports[`comparison and equality compare false "true" 1`] = `-1`;
+
+exports[`comparison and equality compare false "　" 1`] = `-1`;
+
+exports[`comparison and equality compare false -0 1`] = `0`;
+
+exports[`comparison and equality compare false -4 1`] = `1`;
+
+exports[`comparison and equality compare false -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare false 0 1`] = `0`;
+
+exports[`comparison and equality compare false 0.1 1`] = `-1`;
+
+exports[`comparison and equality compare false 5 1`] = `-1`;
+
+exports[`comparison and equality compare false 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare false Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare false NaN 1`] = `-1`;
+
+exports[`comparison and equality compare false false 1`] = `0`;
+
+exports[`comparison and equality compare false true 1`] = `-1`;
+
+exports[`comparison and equality compare true "     " 1`] = `1`;
+
+exports[`comparison and equality compare true " apple " 1`] = `1`;
+
+exports[`comparison and equality compare true "" 1`] = `1`;
+
+exports[`comparison and equality compare true "\\n" 1`] = `1`;
+
+exports[`comparison and equality compare true "\\r\\t\\n\\t\\n" 1`] = `1`;
+
+exports[`comparison and equality compare true "\\u000b\\f﻿" 1`] = `1`;
+
+exports[`comparison and equality compare true "-0" 1`] = `1`;
+
+exports[`comparison and equality compare true "-4" 1`] = `1`;
+
+exports[`comparison and equality compare true "-Infinity" 1`] = `1`;
+
+exports[`comparison and equality compare true "0" 1`] = `1`;
+
+exports[`comparison and equality compare true "0.1" 1`] = `1`;
+
+exports[`comparison and equality compare true "0xa11afacade" 1`] = `-1`;
+
+exports[`comparison and equality compare true "5" 1`] = `-1`;
+
+exports[`comparison and equality compare true "691942378206" 1`] = `-1`;
+
+exports[`comparison and equality compare true "ApPlE" 1`] = `1`;
+
+exports[`comparison and equality compare true "BANANA" 1`] = `1`;
+
+exports[`comparison and equality compare true "FaLsE" 1`] = `1`;
+
+exports[`comparison and equality compare true "Infinity" 1`] = `-1`;
+
+exports[`comparison and equality compare true "NaN" 1`] = `1`;
+
+exports[`comparison and equality compare true "TrUe" 1`] = `0`;
+
+exports[`comparison and equality compare true "appl" 1`] = `1`;
+
+exports[`comparison and equality compare true "apple" 1`] = `1`;
+
+exports[`comparison and equality compare true "banana" 1`] = `1`;
+
+exports[`comparison and equality compare true "false" 1`] = `1`;
+
+exports[`comparison and equality compare true "true" 1`] = `0`;
+
+exports[`comparison and equality compare true "　" 1`] = `-1`;
+
+exports[`comparison and equality compare true -0 1`] = `1`;
+
+exports[`comparison and equality compare true -4 1`] = `1`;
+
+exports[`comparison and equality compare true -Infinity 1`] = `1`;
+
+exports[`comparison and equality compare true 0 1`] = `1`;
+
+exports[`comparison and equality compare true 0.1 1`] = `1`;
+
+exports[`comparison and equality compare true 5 1`] = `-1`;
+
+exports[`comparison and equality compare true 691942378206 1`] = `-1`;
+
+exports[`comparison and equality compare true Infinity 1`] = `-1`;
+
+exports[`comparison and equality compare true NaN 1`] = `1`;
+
+exports[`comparison and equality compare true false 1`] = `1`;
+
+exports[`comparison and equality compare true true 1`] = `0`;

@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "Node16",
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "strict": true,
+        "module": "Node16",
+        "target": "ES2022",
+        "noErrorTruncation": true,
+        "outDir": "dist",
+        "lib": ["ESNext", "dom"]
+    },
+    "include": ["src/**/*", "test/**/*", "util/**/*", "./*.cjs", "util/randtest.ts"]
+}
