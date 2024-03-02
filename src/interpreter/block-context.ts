@@ -4,7 +4,7 @@ import Project from '../project.js';
 import Target from '../target.js';
 
 import Interpreter from './interpreter.js';
-import Thread, {ThreadStatus} from './thread.js';
+import Thread from './thread.js';
 
 export type BlockContextParams = {
     io: IO;
@@ -84,8 +84,16 @@ export default class BlockContext {
         }
     }
 
-    stopThread() {
-        this.thread.status = ThreadStatus.DONE;
+    stopOtherTargetThreads() {
+        this.interpreter.stopOtherTargetThreads(this.target, this.thread);
+    }
+
+    *stopThisScript() {
+        this.thread.stopThisScript();
+    }
+
+    *stopAll() {
+        this.interpreter.stopAll();
     }
 
     getParam(name: string): string | number | boolean {

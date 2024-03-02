@@ -13,6 +13,13 @@ export type Params = {
     [paramName: string]: string | number | boolean;
 };
 
+/**
+ * Symbol thrown to stop the current script. Custom procedure blocks will catch this and return from the procedure.
+ * This *could* be done solely with generators, but we don't want anything other than the Thread class driving the
+ * generator function.
+ */
+export const STOP_THIS_SCRIPT = Symbol('STOP_THREAD');
+
 export default class Thread {
     public status: ThreadStatus;
     public script: Block[];
@@ -109,20 +116,28 @@ export default class Thread {
         this.blockContext.target = this.target;
         this.blockContext.thread = this;
 
-        const {done, value} = this.generator.next(this.resolvedValue);
-        if (done) {
-            this.retire();
-        }
-        if (typeof value === 'object' && value instanceof Promise) {
-            // TODO: proper thread park/unpark support will require a way to notify other threads that are parked on
-            // this thread that they can unpark themselves too.
-            this.status = ThreadStatus.PARKED;
-            const generation = this.generation;
-            value.then(resolved => {
-                if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
-                this.resolvedValue = resolved;
-                this.status = ThreadStatus.RUNNING;
-            });
+        try {
+            const {done, value} = this.generator.next(this.resolvedValue);
+            if (done) {
+                this.retire();
+            }
+            if (typeof value === 'object' && value instanceof Promise) {
+                // TODO: proper thread park/unpark support will require a way to notify other threads that are parked on
+                // this thread that they can unpark themselves too.
+                this.status = ThreadStatus.PARKED;
+                const generation = this.generation;
+                value.then(resolved => {
+                    if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
+                    this.resolvedValue = resolved;
+                    this.status = ThreadStatus.RUNNING;
+                });
+            }
+        } catch (e) {
+            if (e === STOP_THIS_SCRIPT) {
+                this.retire();
+            } else {
+                throw e;
+            }
         }
         this.resolvedValue = undefined;
     }
@@ -141,6 +156,10 @@ export default class Thread {
     popFrame(warp: boolean) {
         this.callStack.pop();
         if (warp) this.warpCounter--;
+    }
+
+    stopThisScript() {
+        throw STOP_THIS_SCRIPT;
     }
 
     /**

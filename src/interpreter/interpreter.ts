@@ -53,6 +53,14 @@ export default class Interpreter {
         this.threads.length = 0;
     }
 
+    stopOtherTargetThreads(target: Target, exceptFor: Thread) {
+        for (const thread of this.threads) {
+            if (thread.target === target && thread !== exceptFor) {
+                thread.retire();
+            }
+        }
+    }
+
     public stepThreads() {
         /** How long we can perform computations for before force-yielding. */
         const WORK_TIME = this.stepTime * 0.75;

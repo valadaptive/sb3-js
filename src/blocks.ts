@@ -579,6 +579,22 @@ export const control_repeat_until = new ProtoBlock({
     },
 });
 
+export const control_stop = new ProtoBlock({
+    opcode: 'control_stop',
+    inputs: {
+        STOP_OPTION: StringField,
+    },
+    execute: function* ({STOP_OPTION}, ctx) {
+        if (STOP_OPTION === 'all') {
+            yield* ctx.stopAll();
+        } else if (STOP_OPTION === 'this script') {
+            yield* ctx.stopThisScript();
+        } else if (STOP_OPTION === 'other scripts in sprite') {
+            ctx.stopOtherTargetThreads();
+        }
+    },
+});
+
 /**
  * Sensing
  */

@@ -1,4 +1,5 @@
 import {Block, BlockInput, ProtoBlock, StringInput} from './block.js';
+import {STOP_THIS_SCRIPT} from './interpreter/thread.js';
 
 const STUB = function*() {};
 
@@ -61,7 +62,11 @@ export const makeCustomBlockStub = (
                     // since it has its own call stack and will loop forever, eating up more and more memory.
                     yield;
                 }
-                yield* ctx.evaluate(childScript);
+                try {
+                    yield* ctx.evaluate(childScript);
+                } catch (e) {
+                    if (e !== STOP_THIS_SCRIPT) throw e;
+                }
                 ctx.popFrame(warp);
             };
         },
