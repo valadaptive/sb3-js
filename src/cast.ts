@@ -43,7 +43,7 @@ export const toString = (value: string | number | boolean | void): string => {
     return String(value);
 };
 
-const isWhiteSpace = (value: string | number | boolean): boolean =>
+export const isWhiteSpace = (value: string | number | boolean): boolean =>
     typeof value === 'string' && value.trim().length === 0;
 
 /**

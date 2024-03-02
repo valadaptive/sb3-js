@@ -14,11 +14,10 @@ export default class Target {
     public y: number = 0;
     private _direction: number = 90;
     private _size: number = 100;
-    public visible: boolean = true;
+    private _visible: boolean = true;
     private _rotationStyle: RotationStyle = 'all around';
     public draggable: boolean = false;
-    public layerOrder: number = 0;
-    public currentCostume: number = 0;
+    private _currentCostume: number = 0;
 
     public volume: number = 100;
     public tempo: number = 60;
@@ -41,7 +40,6 @@ export default class Target {
         visible: boolean;
         rotationStyle: RotationStyle;
         draggable: boolean;
-        layerOrder: number;
         currentCostume: number;
         volume: number;
         tempo: number;
@@ -59,7 +57,6 @@ export default class Target {
         this.visible = options.visible;
         this.rotationStyle = options.rotationStyle;
         this.draggable = options.draggable;
-        this.layerOrder = options.layerOrder;
         this.currentCostume = options.currentCostume;
         this.volume = options.volume;
         this.tempo = options.tempo;
@@ -94,6 +91,7 @@ export default class Target {
                     this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
                 };
                 // Register event handler on the runtime to execute this script when its hat block event is fired
+                // TODO: this doesn't result in the correct execution order!
                 this.runtime.addEventListener(eventName, onEvent, {signal});
             }
         }
@@ -108,6 +106,7 @@ export default class Target {
     }
 
     public moveTo(x: number, y: number): void {
+        if (this.sprite.isStage) return;
         this.x = x;
         this.y = y;
         if (this.drawable) {
@@ -120,11 +119,10 @@ export default class Target {
         return this._direction;
     }
 
-    set direction(val: number) {
-        this._direction = val % 360;
-        if (this._direction < 0) {
-            this._direction += 360;
-        }
+    set direction(deg: number) {
+        if (this.sprite.isStage) return;
+        // Wrap degrees from -180 to 180. Not sure if there's any way to make this expression less unwieldy.
+        this._direction = ((((deg + 180) % 360) + 360) % 360) - 180;
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
@@ -135,8 +133,9 @@ export default class Target {
         return this._size;
     }
 
-    set size(val: number) {
-        this._size = val;
+    set size(size: number) {
+        if (this.sprite.isStage) return;
+        this._size = size;
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
@@ -147,11 +146,42 @@ export default class Target {
         return this._rotationStyle;
     }
 
-    set rotationStyle(val: RotationStyle) {
-        this._rotationStyle = val;
+    set rotationStyle(style: RotationStyle) {
+        if (this.sprite.isStage) return;
+        this._rotationStyle = style;
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
+        this.runtime.requestRedraw();
+    }
+
+    get currentCostume(): number {
+        return this._currentCostume;
+    }
+
+    set currentCostume(index: number) {
+        if (Number.isFinite(index)) {
+            const len = this.sprite.costumes.length;
+            // Wrapping modulo (always positive)
+            index = ((Math.round(index) % len) + len) % len;
+        } else {
+            index = 0;
+        }
+
+        this._currentCostume = index;
+        if (this.drawable) {
+            this.drawable.setTransformDirty();
+        }
+        this.runtime.requestRedraw();
+    }
+
+    get visible(): boolean {
+        return this._visible;
+    }
+
+    set visible(visible: boolean) {
+        if (this.sprite.isStage) return;
+        this._visible = visible;
         this.runtime.requestRedraw();
     }
 }

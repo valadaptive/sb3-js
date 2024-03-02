@@ -8,12 +8,12 @@ import Thread, {ThreadStatus} from './thread.js';
 
 export default class Interpreter {
     public turboMode: boolean = false;
+    public currentMSecs = 0;
 
     private stepTime;
     private threads: Thread[];
     private blockContext: BlockContext;
     private redrawRequested = false;
-    private currentMSecs = 0;
 
     constructor(stepTime: number, contextParams: BlockContextParams) {
         this.stepTime = stepTime;
@@ -24,6 +24,7 @@ export default class Interpreter {
     public setProject(project: Project | null) {
         // This is obviously a lie, but with no project, blocks should not be executing anyway
         this.blockContext.project = project!;
+        this.blockContext.stage = project!.stage;
     }
 
     public requestRedraw() {

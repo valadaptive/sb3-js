@@ -106,6 +106,8 @@ export default class Renderer {
         const screenSpaceScalingFactor = this.canvas.width / this.stageSize.width;
 
         for (const target of targets) {
+            if (!target.visible) continue;
+
             const costume = target.sprite.costumes[target.currentCostume];
             let skin = costume.skin;
             if (!skin) {

@@ -155,7 +155,9 @@ type Sb3InputPrimitive = ObjectForSchema<typeof sb3InputPrimitiveSchema>;
 const sb3BlockInputSchema = [
     {
         type: 'tuple',
-        items: [{type: 'literal', value: ShadowInfo.INPUT_SAME_BLOCK_SHADOW}, ['string', sb3InputPrimitiveSchema]],
+        items: [
+            {type: 'literal', value: ShadowInfo.INPUT_SAME_BLOCK_SHADOW}, ['string', [sb3InputPrimitiveSchema, 'null']],
+        ],
     },
     {
         type: 'tuple',
@@ -171,8 +173,8 @@ const sb3BlockInputSchema = [
             {type: 'literal', value: ShadowInfo.INPUT_DIFF_BLOCK_SHADOW},
             // the block comes first, but note that the block can itself be a compressed primitive if it's a
             // data_variable or data_listcontents!
-            ['string', sb3InputPrimitiveSchema],
-            ['string', sb3InputPrimitiveSchema],
+            ['string', [sb3InputPrimitiveSchema, 'null']],
+            ['string', [sb3InputPrimitiveSchema, 'null']],
         ],
     },
 ] as const satisfies Schema;
@@ -391,7 +393,7 @@ const parseTarget = async(
     jsonTarget: Sb3Target | Sb3SpriteTarget,
     loader: Loader,
     runtime: Runtime,
-): Promise<{sprite: Sprite; target: Target}> => {
+): Promise<{sprite: Sprite; target: Target; layerOrder: number}> => {
     const scripts: Block[][] = [];
     for (const blockId in jsonTarget.blocks) {
         if (!Object.prototype.hasOwnProperty.call(jsonTarget.blocks, blockId)) {
@@ -455,7 +457,6 @@ const parseTarget = async(
         draggable: 'draggable' in jsonTarget ? jsonTarget.draggable : false,
         currentCostume: jsonTarget.currentCostume,
         volume: jsonTarget.volume,
-        layerOrder: jsonTarget.layerOrder,
         tempo: jsonTarget.tempo ?? 60,
         videoTransparency: jsonTarget.videoTransparency ?? 50,
         videoState: jsonTarget.videoState ?? 'off',
@@ -463,7 +464,7 @@ const parseTarget = async(
         lists,
     });
 
-    return {sprite, target};
+    return {sprite, target, layerOrder: jsonTarget.layerOrder};
 };
 
 const parseProject = async(projectJsonString: string, loader: Loader, runtime: Runtime): Promise<Project> => {
@@ -477,13 +478,15 @@ const parseProject = async(projectJsonString: string, loader: Loader, runtime: R
     const targets: Target[] = [];
     const sprites: Sprite[] = [];
 
-    const parsedTargetPromises: Promise<{sprite: Sprite; target: Target}>[] = [];
+    const parsedTargetPromises: Promise<{sprite: Sprite; target: Target; layerOrder: number}>[] = [];
 
     for (const jsonTarget of jsonTargets) {
         parsedTargetPromises.push(parseTarget(jsonTarget, loader, runtime));
     }
 
     const parsedTargets = await Promise.all(parsedTargetPromises);
+
+    parsedTargets.sort((a, b) => a.layerOrder - b.layerOrder);
 
     for (const parsedTarget of parsedTargets) {
         const {sprite, target} = parsedTarget;

@@ -12,11 +12,12 @@ export type BlockContextParams = {
 };
 
 export default class BlockContext {
-    public interpreter: Interpreter;
+    private interpreter: Interpreter;
     public io: IO;
     public stageSize: {width: number; height: number};
     public project!: Project;
     public target!: Target;
+    public stage!: Target;
     public thread!: Thread;
 
     constructor(interpreter: Interpreter, params: BlockContextParams) {
@@ -72,7 +73,22 @@ export default class BlockContext {
         return yield promise;
     }
 
+    *waitForMS(ms: number) {
+        const start = this.interpreter.currentMSecs;
+        // "wait" blocks always request a redraw, even if the wait time is 0
+        this.interpreter.requestRedraw();
+        // TODO: Even in scratch-vm, this has a tendency to busy-wait. See if there's a way to park threads without the
+        // execution order or non-determinism issues that occurred with setTimeout.
+        while (this.interpreter.currentMSecs - start < ms) {
+            yield;
+        }
+    }
+
     stopThread() {
         this.thread.status = ThreadStatus.DONE;
+    }
+
+    get currentTime() {
+        return this.interpreter.currentMSecs;
     }
 }

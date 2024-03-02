@@ -98,6 +98,8 @@ export default class Thread {
             this.retire();
         }
         if (typeof value === 'object' && value instanceof Promise) {
+            // TODO: proper thread park/unpark support will require a way to notify other threads that are parked on
+            // this thread that they can unpark themselves too.
             this.status = ThreadStatus.PARKED;
             const generation = this.generation;
             value.then(resolved => {
