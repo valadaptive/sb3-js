@@ -1,6 +1,7 @@
 - Basic interpreter (done)
 - Basic renderer (done)
 - Custom block support
+- Clones
 - Promise-throwing stuff for async reporters
 - Graphic effects
 - Fencing

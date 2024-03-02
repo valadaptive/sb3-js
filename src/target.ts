@@ -72,7 +72,8 @@ export default class Target {
     }
 
     private setUpScriptListeners(): () => void {
-        const unregisterCallbacks: (() => void)[] = [];
+        const abortController = new AbortController();
+        const signal = abortController.signal;
 
         for (const script of this.sprite.scripts) {
             const topBlock = script[0];
@@ -93,17 +94,12 @@ export default class Target {
                     this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
                 };
                 // Register event handler on the runtime to execute this script when its hat block event is fired
-                this.runtime.addEventListener(eventName, onEvent);
-                unregisterCallbacks.push(() => {
-                    this.runtime.removeEventListener(eventName, onEvent);
-                });
+                this.runtime.addEventListener(eventName, onEvent, {signal});
             }
         }
 
         return () => {
-            for (const unregister of unregisterCallbacks) {
-                unregister();
-            }
+            abortController.abort();
         };
     }
 

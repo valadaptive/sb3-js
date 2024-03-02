@@ -1,16 +1,28 @@
 import {Block, BlockGenerator} from '../block.js';
-
+import IO from '../io.js';
+import Project from '../project.js';
 import Target from '../target.js';
+
 import Interpreter from './interpreter.js';
 import Thread, {ThreadStatus} from './thread.js';
 
+export type BlockContextParams = {
+    io: IO;
+    stageSize: {width: number; height: number};
+};
+
 export default class BlockContext {
     public interpreter: Interpreter;
+    public io: IO;
+    public stageSize: {width: number; height: number};
+    public project!: Project;
     public target!: Target;
     public thread!: Thread;
 
-    constructor(interpreter: Interpreter) {
+    constructor(interpreter: Interpreter, params: BlockContextParams) {
         this.interpreter = interpreter;
+        this.io = params.io;
+        this.stageSize = params.stageSize;
     }
 
     *evaluate(input: Block | Block[] | string | number | boolean): BlockGenerator {

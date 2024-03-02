@@ -1,5 +1,5 @@
-import {NumberInput, ProtoBlock, StackInput} from './block.js';
-import {toNumber} from './cast.js';
+import {NumberInput, ProtoBlock, StackInput, StringInput} from './block.js';
+import {toNumber, toString} from './cast.js';
 import {GreenFlagEvent} from './events.js';
 
 /**
@@ -39,6 +39,41 @@ export const motion_turnleft = new ProtoBlock({
     execute: function* ({DEGREES}, ctx) {
         const degrees = toNumber(ctx.evaluateFast(DEGREES));
         ctx.target.direction -= degrees;
+    },
+});
+
+export const motion_goto_menu = new ProtoBlock({
+    opcode: 'motion_goto_menu',
+    inputs: {
+        TO: StringInput,
+    },
+    execute: function* ({TO}, ctx) {
+        return ctx.evaluateFast(TO);
+    },
+    pure: true,
+});
+
+export const motion_goto = new ProtoBlock({
+    opcode: 'motion_goto',
+    inputs: {
+        TO: StringInput,
+    },
+    execute: function* ({TO}, ctx) {
+        const target = toString(ctx.evaluateFast(TO));
+        if (target === '_mouse_') {
+            const x = ctx.io.mousePosition.x;
+            const y = ctx.io.mousePosition.y;
+            ctx.target.moveTo(x, y);
+        } else if (target === '_random_') {
+            const x = (Math.random() * ctx.stageSize.width) - (ctx.stageSize.width / 2);
+            const y = (Math.random() * ctx.stageSize.height) - (ctx.stageSize.height / 2);
+            ctx.target.moveTo(x, y);
+        } else {
+            const other = ctx.project.getTargetByName(target);
+            if (other) {
+                ctx.target.moveTo(other.x, other.y);
+            }
+        }
     },
 });
 

@@ -1,7 +1,9 @@
 import {Block} from '../block.js';
+import Project from '../project.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
-import BlockContext from './block-context.js';
+
+import BlockContext, {BlockContextParams} from './block-context.js';
 import Thread, {ThreadStatus} from './thread.js';
 
 export default class Interpreter {
@@ -13,10 +15,15 @@ export default class Interpreter {
     private redrawRequested = false;
     private currentMSecs = 0;
 
-    constructor(stepTime: number) {
+    constructor(stepTime: number, contextParams: BlockContextParams) {
         this.stepTime = stepTime;
         this.threads = [];
-        this.blockContext = new BlockContext(this);
+        this.blockContext = new BlockContext(this, contextParams);
+    }
+
+    public setProject(project: Project | null) {
+        // This is obviously a lie, but with no project, blocks should not be executing anyway
+        this.blockContext.project = project!;
     }
 
     public requestRedraw() {

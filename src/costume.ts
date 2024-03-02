@@ -48,21 +48,21 @@ export default class Costume {
         }
 
         return new Promise((resolve, reject) => {
-            const resolver = () => {
+            const abortController = new AbortController();
+            const signal = abortController.signal;
+
+            image.addEventListener('load', () => {
                 resolve(new Costume(
                     name, image, {width: image.naturalWidth, height: image.naturalHeight}, params));
                 URL.revokeObjectURL(url);
-                image.removeEventListener('load', resolver);
-                image.removeEventListener('error', errorHandler);
-            };
-            const errorHandler = () => {
+                abortController.abort();
+            }, {signal});
+
+            image.addEventListener('error', () => {
                 reject(new Error(`Failed to load image: ${image.src}`));
                 URL.revokeObjectURL(url);
-                image.removeEventListener('load', resolver);
-                image.removeEventListener('error', errorHandler);
-            };
-            image.addEventListener('load', resolver);
-            image.addEventListener('error', errorHandler);
+                abortController.abort();
+            }, {signal});
         });
     }
 }

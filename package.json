@@ -7,7 +7,7 @@
     "lint": "eslint \"./src\" \"./test\" --ext .js,.ts",
     "build": "tsc",
     "watch": "rollup --watch -c rollup.config.js",
-    "dev": "rollup --watch -c rollup.config.js & sirv ./ --port 8000"
+    "dev": "rollup --watch -c rollup.config.js & sirv ./ --port 8000 -D"
   },
   "author": "valadaptive",
   "license": "ISC OR MIT OR Apache-2.0",

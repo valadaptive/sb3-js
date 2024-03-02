@@ -6,7 +6,7 @@ import BitmapSkin from './bitmap-skin.js';
 import SVGSkin from './svg-skin.js';
 
 export default class Renderer {
-    private readonly canvas;
+    public readonly canvas;
     private readonly gl;
     private readonly stageSize: {width: number; height: number};
     private readonly spriteShader: Shader;
@@ -135,5 +135,9 @@ export default class Renderer {
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
         }
+    }
+
+    public destroy() {
+        this.gl.getExtension('WEBGL_lose_context')?.loseContext();
     }
 }
