@@ -95,3 +95,27 @@ export const compare = (v1: string | number | boolean, v2: string | number | boo
 export const equals = (v1: string | number | boolean, v2: string | number | boolean): boolean => {
     return compare(v1, v2) === 0;
 };
+
+/**
+ * Check if a (loosely-typed) value is an integer. Notably, this returns false for decimal strings, een ones that are
+ * representable as integers (e.g. "1.0").
+ * @param value The value to check.
+ */
+export const isInt = (value: string | number | boolean): boolean => {
+    if (typeof value === 'number') {
+        // NaN counts as an integer to Scratch.
+        return Number.isInteger(value) || Number.isNaN(value);
+    }
+
+    if (typeof value === 'boolean') {
+        // After being cast to numbers, booleans are always integers.
+        return true;
+    }
+
+    if (typeof value === 'string') {
+        return !value.includes('.');
+    }
+
+    // This should be unreachable, but TypeScript can't infer that.
+    return false;
+};

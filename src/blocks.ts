@@ -1,5 +1,5 @@
-import {NumberInput, ProtoBlock, StackInput, StringInput} from './block.js';
-import {isWhiteSpace, toNumber, toString} from './cast.js';
+import {BooleanInput, NumberInput, ProtoBlock, StackInput, StringInput} from './block.js';
+import {compare, isInt, isWhiteSpace, toBoolean, toNumber, toString} from './cast.js';
 import {GreenFlagEvent} from './events.js';
 import BlockContext from './interpreter/block-context.js';
 import Target from './target.js';
@@ -526,4 +526,299 @@ export const control_forever = new ProtoBlock({
             yield;
         }
     },
+});
+
+/**
+ * Operators
+ */
+
+export const operator_add = new ProtoBlock({
+    opcode: 'operator_add',
+    inputs: {
+        NUM1: NumberInput,
+        NUM2: NumberInput,
+    },
+    execute: function* ({NUM1, NUM2}, ctx) {
+        const a = toNumber(ctx.evaluateFast(NUM1));
+        const b = toNumber(ctx.evaluateFast(NUM2));
+        return toNumber(a) + toNumber(b);
+    },
+    pure: true,
+    returnType: ['number'],
+});
+
+export const operator_subtract = new ProtoBlock({
+    opcode: 'operator_subtract',
+    inputs: {
+        NUM1: NumberInput,
+        NUM2: NumberInput,
+    },
+    execute: function* ({NUM1, NUM2}, ctx) {
+        const a = toNumber(ctx.evaluateFast(NUM1));
+        const b = toNumber(ctx.evaluateFast(NUM2));
+        return toNumber(a) - toNumber(b);
+    },
+    pure: true,
+    returnType: ['number'],
+});
+
+export const operator_multiply = new ProtoBlock({
+    opcode: 'operator_multiply',
+    inputs: {
+        NUM1: NumberInput,
+        NUM2: NumberInput,
+    },
+    execute: function* ({NUM1, NUM2}, ctx) {
+        const a = toNumber(ctx.evaluateFast(NUM1));
+        const b = toNumber(ctx.evaluateFast(NUM2));
+        return toNumber(a) * toNumber(b);
+    },
+    pure: true,
+    returnType: ['number'],
+});
+
+export const operator_divide = new ProtoBlock({
+    opcode: 'operator_divide',
+    inputs: {
+        NUM1: NumberInput,
+        NUM2: NumberInput,
+    },
+    execute: function* ({NUM1, NUM2}, ctx) {
+        const a = toNumber(ctx.evaluateFast(NUM1));
+        const b = toNumber(ctx.evaluateFast(NUM2));
+        return toNumber(a) / toNumber(b);
+    },
+    pure: true,
+    returnType: ['number'],
+});
+
+export const operator_random = new ProtoBlock({
+    opcode: 'operator_random',
+    inputs: {
+        FROM: NumberInput,
+        TO: NumberInput,
+    },
+    execute: function* ({FROM, TO}, ctx) {
+        const origFrom = ctx.evaluateFast(FROM);
+        const origTo = ctx.evaluateFast(TO);
+        let from = toNumber(origFrom);
+        let to = toNumber(origTo);
+        if (from > to) [from, to] = [to, from];
+        // If both arguments are "int-ish", return an integer. Otherwise, return a float.
+        if (isInt(origFrom) && isInt(origTo)) {
+            return Math.floor(Math.random() * (to - from + 1)) + from;
+        }
+        return (Math.random() * (to - from)) + from;
+    },
+    returnType: ['number'],
+});
+
+export const operator_lt = new ProtoBlock({
+    opcode: 'operator_lt',
+    inputs: {
+        OPERAND1: NumberInput,
+        OPERAND2: NumberInput,
+    },
+    execute: function* ({OPERAND1, OPERAND2}, ctx) {
+        const a = toNumber(ctx.evaluateFast(OPERAND1));
+        const b = toNumber(ctx.evaluateFast(OPERAND2));
+        return compare(a, b) < 0;
+    },
+    pure: true,
+    returnType: ['boolean'],
+});
+
+export const operator_equals = new ProtoBlock({
+    opcode: 'operator_equals',
+    inputs: {
+        OPERAND1: NumberInput,
+        OPERAND2: NumberInput,
+    },
+    execute: function* ({OPERAND1, OPERAND2}, ctx) {
+        const a = ctx.evaluateFast(OPERAND1);
+        const b = ctx.evaluateFast(OPERAND2);
+        return compare(a, b) === 0;
+    },
+    pure: true,
+    returnType: ['boolean'],
+});
+
+export const operator_gt = new ProtoBlock({
+    opcode: 'operator_gt',
+    inputs: {
+        OPERAND1: NumberInput,
+        OPERAND2: NumberInput,
+    },
+    execute: function* ({OPERAND1, OPERAND2}, ctx) {
+        const a = toNumber(ctx.evaluateFast(OPERAND1));
+        const b = toNumber(ctx.evaluateFast(OPERAND2));
+        return compare(a, b) > 0;
+    },
+    pure: true,
+    returnType: ['boolean'],
+});
+
+export const operator_and = new ProtoBlock({
+    opcode: 'operator_and',
+    inputs: {
+        OPERAND1: BooleanInput,
+        OPERAND2: BooleanInput,
+    },
+    execute: function* ({OPERAND1, OPERAND2}, ctx) {
+        const a = toBoolean(ctx.evaluateFast(OPERAND1));
+        const b = toBoolean(ctx.evaluateFast(OPERAND2));
+        return a && b;
+    },
+    pure: true,
+    returnType: ['boolean'],
+});
+
+export const operator_or = new ProtoBlock({
+    opcode: 'operator_or',
+    inputs: {
+        OPERAND1: BooleanInput,
+        OPERAND2: BooleanInput,
+    },
+    execute: function* ({OPERAND1, OPERAND2}, ctx) {
+        const a = toBoolean(ctx.evaluateFast(OPERAND1));
+        const b = toBoolean(ctx.evaluateFast(OPERAND2));
+        return a || b;
+    },
+    pure: true,
+    returnType: ['boolean'],
+});
+
+export const operator_not = new ProtoBlock({
+    opcode: 'operator_not',
+    inputs: {
+        OPERAND: BooleanInput,
+    },
+    execute: function* ({OPERAND}, ctx) {
+        return !toBoolean(ctx.evaluateFast(OPERAND));
+    },
+    pure: true,
+    returnType: ['boolean'],
+});
+
+export const operator_join = new ProtoBlock({
+    opcode: 'operator_join',
+    inputs: {
+        STRING1: StringInput,
+        STRING2: StringInput,
+    },
+    execute: function* ({STRING1, STRING2}, ctx) {
+        const a = toString(ctx.evaluateFast(STRING1));
+        const b = toString(ctx.evaluateFast(STRING2));
+        return a + b;
+    },
+    pure: true,
+    returnType: ['string'],
+});
+
+export const operator_letter_of = new ProtoBlock({
+    opcode: 'operator_letter_of',
+    inputs: {
+        LETTER: NumberInput,
+        STRING: StringInput,
+    },
+    execute: function* ({LETTER, STRING}, ctx) {
+        const letter = toNumber(ctx.evaluateFast(LETTER));
+        const string = toString(ctx.evaluateFast(STRING));
+        if (letter < 1 || letter > string.length) return '';
+        return string[letter - 1];
+    },
+    pure: true,
+    returnType: ['string'],
+});
+
+export const operator_length = new ProtoBlock({
+    opcode: 'operator_length',
+    inputs: {
+        STRING: StringInput,
+    },
+    execute: function* ({STRING}, ctx) {
+        const string = toString(ctx.evaluateFast(STRING));
+        return string.length;
+    },
+    pure: true,
+    returnType: ['number'],
+});
+
+export const operator_contains = new ProtoBlock({
+    opcode: 'operator_contains',
+    inputs: {
+        STRING1: StringInput,
+        STRING2: StringInput,
+    },
+    execute: function* ({STRING1, STRING2}, ctx) {
+        const a = toString(ctx.evaluateFast(STRING1));
+        const b = toString(ctx.evaluateFast(STRING2));
+        if (a.includes(b)) return true;
+        return a.toLowerCase().includes(b.toLowerCase());
+    },
+    pure: true,
+    returnType: ['boolean'],
+});
+
+export const operator_mod = new ProtoBlock({
+    opcode: 'operator_mod',
+    inputs: {
+        NUM1: NumberInput,
+        NUM2: NumberInput,
+    },
+    execute: function* ({NUM1, NUM2}, ctx) {
+        const a = toNumber(ctx.evaluateFast(NUM1));
+        const b = toNumber(ctx.evaluateFast(NUM2));
+        // Floor-division modulus ("wrapping" behavior)
+        return ((a % b) + b) % b;
+    },
+    pure: true,
+    returnType: ['number'],
+});
+
+export const operator_round = new ProtoBlock({
+    opcode: 'operator_round',
+    inputs: {
+        NUM: NumberInput,
+    },
+    execute: function* ({NUM}, ctx) {
+        const num = toNumber(ctx.evaluateFast(NUM));
+        return Math.round(num);
+    },
+    pure: true,
+    returnType: ['number'],
+});
+
+export const operator_mathop = new ProtoBlock({
+    opcode: 'operator_mathop',
+    inputs: {
+        OPERATOR: StringInput,
+        NUM: NumberInput,
+    },
+    execute: function* ({OPERATOR, NUM}, ctx) {
+        const operator = toString(ctx.evaluateFast(OPERATOR));
+        const num = toNumber(ctx.evaluateFast(NUM));
+        switch (operator) {
+            case 'abs': return Math.abs(num);
+            case 'floor': return Math.floor(num);
+            case 'ceiling': return Math.ceil(num);
+            case 'sqrt': return Math.sqrt(num);
+            case 'sin': return Math.sin(num * Math.PI / 180);
+            case 'cos': return Math.cos(num * Math.PI / 180);
+            // TODO: Scratch returns Infinity for asymptotes
+            case 'tan': return Math.tan(num * Math.PI / 180);
+            case 'asin': return Math.asin(num) * 180 / Math.PI;
+            case 'acos': return Math.acos(num) * 180 / Math.PI;
+            case 'atan': return Math.atan(num) * 180 / Math.PI;
+            case 'ln': return Math.log(num);
+            // TODO: Scratch does Math.log(num) / Math.LN10, which is less precise and gives slightly different results.
+            // Does that really matter?
+            case 'log': return Math.log10(num);
+            case 'e ^': return Math.exp(num);
+            case '10 ^': return Math.pow(10, num);
+            default: return 0;
+        }
+    },
+    pure: true,
+    returnType: ['number'],
 });
