@@ -2,9 +2,10 @@ import {Block, BlockGenerator, ProtoBlock} from '../block.js';
 import IO from '../io.js';
 import Project from '../project.js';
 import Target from '../target.js';
+import {TypedEvent} from '../typed-events.js';
 
 import Interpreter from './interpreter.js';
-import Thread from './thread.js';
+import Thread, {PARK_THREAD, ThreadStatus} from './thread.js';
 
 export type BlockContextParams = {
     io: IO;
@@ -94,6 +95,44 @@ export default class BlockContext {
 
     *stopAll() {
         this.interpreter.stopAll();
+    }
+
+    *park() {
+        yield PARK_THREAD;
+    }
+
+    /**
+     * Yield until all given threads have finished running.
+     */
+    *waitOnThreads(threads: Thread[]) {
+        const thisThread = this.thread;
+        while (true) {
+            let anyThreadsActive = false;
+
+            for (const thread of threads) {
+                // Yield if any threads are still running.
+                if (thread.status === ThreadStatus.RUNNING) {
+                    anyThreadsActive = true;
+                }
+                // If we're waiting on a parked thread, park ourselves until it unparks.
+                if (thread.status === ThreadStatus.PARKED) {
+                    thread.onUnpark(() => thisThread.resume());
+                    yield* this.park();
+                    anyThreadsActive = true;
+                    break;
+                }
+            }
+
+            if (!anyThreadsActive) {
+                break;
+            }
+
+            yield;
+        }
+    }
+
+    startHats<T extends string>(eventName: T, event: TypedEvent<T>): Thread[] | null {
+        return this.interpreter.startHats(eventName, event);
     }
 
     getParam(name: string): string | number | boolean {

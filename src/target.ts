@@ -1,4 +1,5 @@
 import {SomeProtoBlock} from './block.js';
+import Thread from './interpreter/thread.js';
 import Drawable from './renderer/drawable.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
@@ -29,7 +30,7 @@ export default class Target {
 
     private scriptListenerCleanup: (() => void);
     public drawable: Drawable | null = null;
-    private hatListeners: Map<string, ((evt: TypedEvent) => void)[]> = new Map();
+    private hatListeners: Map<string, ((evt: TypedEvent) => Thread)[]> = new Map();
 
     constructor(options: {
         runtime: Runtime;
@@ -89,7 +90,7 @@ export default class Target {
                         : never);
 
                 const onEvent = (evt: TypedEvent) => {
-                    this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
+                    return this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
                 };
                 this.addHatListener(eventName, onEvent, signal);
             }
@@ -105,15 +106,15 @@ export default class Target {
      * targets' current execution order.
      */
     private addHatListener<T extends string>(
-        eventName: T, listener: (evt: TypedEvent<T>) => void, signal: AbortSignal) {
+        eventName: T, listener: (evt: TypedEvent<T>) => Thread, signal: AbortSignal) {
         let hatListeners = this.hatListeners.get(eventName);
         if (!hatListeners) {
             hatListeners = [];
             this.hatListeners.set(eventName, hatListeners);
         }
-        hatListeners.push(listener as (evt: TypedEvent) => void);
+        hatListeners.push(listener as (evt: TypedEvent) => Thread);
         signal.addEventListener('abort', () => {
-            const index = hatListeners!.indexOf(listener as (evt: TypedEvent) => void);
+            const index = hatListeners!.indexOf(listener as (evt: TypedEvent) => Thread);
             if (index !== -1) {
                 hatListeners!.splice(index, 1);
             }
@@ -122,11 +123,13 @@ export default class Target {
 
     public fireHatListener<T extends string>(eventName: T, evt: TypedEvent<T>) {
         const listeners = this.hatListeners.get(eventName);
-        if (!listeners) return;
+        if (!listeners) return null;
 
+        const startedThreads = [];
         for (const listener of listeners) {
-            listener(evt);
+            startedThreads.push(listener(evt));
         }
+        return startedThreads;
     }
 
     public destroy() {

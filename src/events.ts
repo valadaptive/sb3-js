@@ -11,3 +11,9 @@ export class KeyPressedEvent extends TypedEvent<'keypressed'> {
         super('keypressed');
     }
 }
+
+export class SwitchBackdropEvent extends TypedEvent<'switchbackdrop'> {
+    constructor(public readonly backdrop: string) {
+        super('switchbackdrop');
+    }
+}

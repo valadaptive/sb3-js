@@ -14,6 +14,7 @@ export default class Interpreter {
     private threads: Thread[];
     private blockContext: BlockContext;
     private redrawRequested = false;
+    private project: Project | null = null;
 
     constructor(stepTime: number, contextParams: BlockContextParams) {
         this.stepTime = stepTime;
@@ -22,6 +23,8 @@ export default class Interpreter {
     }
 
     public setProject(project: Project | null) {
+        this.project = project;
+
         // This is obviously a lie, but with no project, blocks should not be executing anyway
         this.blockContext.project = project!;
         // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
@@ -37,13 +40,14 @@ export default class Interpreter {
             for (const thread of this.threads) {
                 if (thread.topBlock === script[0]) {
                     thread.restart(event);
-                    return;
+                    return thread;
                 }
             }
         }
 
         const thread = new Thread(script, target, this.blockContext, event);
         this.threads.push(thread);
+        return thread;
     }
 
     public stopAll() {
@@ -53,12 +57,26 @@ export default class Interpreter {
         this.threads.length = 0;
     }
 
-    stopOtherTargetThreads(target: Target, exceptFor: Thread) {
+    public stopOtherTargetThreads(target: Target, exceptFor: Thread) {
         for (const thread of this.threads) {
             if (thread.target === target && thread !== exceptFor) {
                 thread.retire();
             }
         }
+    }
+
+    public startHats<T extends string>(eventName: T, event: TypedEvent<T>): Thread[] | null {
+        const project = this.project;
+        if (!project) return null;
+
+        const startedThreads = [];
+        for (const target of project.targets) {
+            const newThreads = target.fireHatListener(eventName, event);
+            if (newThreads) {
+                startedThreads.push(...newThreads);
+            }
+        }
+        return startedThreads;
     }
 
     public stepThreads() {

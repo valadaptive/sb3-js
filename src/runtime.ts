@@ -94,15 +94,6 @@ export default class Runtime {
         };
     }
 
-    private startHats<T extends string>(eventName: T, event: TypedEvent<T>) {
-        const project = this.project;
-        if (!project) return;
-
-        for (const target of project.targets) {
-            target.fireHatListener(eventName, event);
-        }
-    }
-
     private setupEventListeners(canvas: HTMLCanvasElement) {
         if (!this.renderer) return () => {};
         const abortController = new AbortController();
@@ -141,7 +132,7 @@ export default class Runtime {
 
             event.preventDefault();
             this.io.keysDown.add(key);
-            this.startHats('keypressed', new KeyPressedEvent(key));
+            this.interpreter.startHats('keypressed', new KeyPressedEvent(key));
         }, {signal});
 
         window.addEventListener('keyup', event => {
@@ -196,11 +187,11 @@ export default class Runtime {
         event: TypedEvent | null,
         restartExistingThreads: boolean,
     ) {
-        this.interpreter.launch(script, target, event, restartExistingThreads);
+        return this.interpreter.launch(script, target, event, restartExistingThreads);
     }
 
     public greenFlag() {
-        this.startHats('greenflag', new GreenFlagEvent());
+        this.interpreter.startHats('greenflag', new GreenFlagEvent());
     }
 
     public stopAll() {

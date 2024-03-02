@@ -1,9 +1,11 @@
 import {BlockInput, BooleanInput, NumberInput, ProtoBlock, StackInput, StringField, StringInput} from './block.js';
 import {compare, isInt, isWhiteSpace, toBoolean, toNumber, toString} from './cast.js';
-import {GreenFlagEvent, KeyPressedEvent} from './events.js';
-import BlockContext from './interpreter/block-context.js';
+import {GreenFlagEvent, KeyPressedEvent, SwitchBackdropEvent} from './events.js';
 import IO from './io.js';
 import Target from './target.js';
+
+import BlockContext from './interpreter/block-context.js';
+import Thread from './interpreter/thread.js';
 
 /**
  * Motion
@@ -308,10 +310,11 @@ const setCostume = function(target: Target, costume: string | number | boolean) 
     }
 };
 
-const setBackdrop = function(stage: Target, backdrop: string | number | boolean) {
+const setBackdrop = function(backdrop: string | number | boolean, ctx: BlockContext): Thread[] | null {
+    const stage = ctx.stage;
     if (typeof backdrop === 'number') {
         stage.currentCostume = backdrop - 1;
-        return;
+        return null;
     }
 
     const costumeIndex = stage.sprite.getCostumeIndexByName(toString(backdrop));
@@ -323,7 +326,7 @@ const setBackdrop = function(stage: Target, backdrop: string | number | boolean)
         stage.currentCostume--;
     } else if (backdrop === 'random backdrop') {
         const numBackdrops = stage.sprite.costumes.length;
-        if (numBackdrops <= 1) return;
+        if (numBackdrops <= 1) return null;
         // Always choose a different backdrop. Note that Math.floor(Math.random()) is already exclusive on the upper
         // bound, so by subtracting 1 from numBackdrops we're actually excluding the index of the last backdrop.
         let newBackdrop = Math.floor(Math.random() * (numBackdrops - 1));
@@ -335,6 +338,8 @@ const setBackdrop = function(stage: Target, backdrop: string | number | boolean)
         // TODO: Scratch uses a raw Number cast here. Are there any compat issues from using Cast.toNumber instead?
         stage.currentCostume = Number(backdrop) - 1;
     }
+
+    return ctx.startHats('switchbackdrop', new SwitchBackdropEvent(stage.sprite.costumes[stage.currentCostume].name));
 };
 
 export const looks_costume = new ProtoBlock({
@@ -386,11 +391,24 @@ export const looks_switchbackdropto = new ProtoBlock({
     execute: function* ({BACKDROP}, ctx) {
         // TODO: trigger "when backdrop switches to" hats
         const costume = ctx.evaluateFast(BACKDROP);
-        setBackdrop(ctx.stage, costume);
+        setBackdrop(costume, ctx);
     },
 });
 
-// TODO: "switch backdrop to and wait" (requires thread parking support)
+export const looks_switchbackdroptoandwait = new ProtoBlock({
+    opcode: 'looks_switchbackdroptoandwait',
+    inputs: {
+        BACKDROP: StringInput,
+    },
+    execute: function* ({BACKDROP}, ctx) {
+        // TODO: trigger "when backdrop switches to" hats
+        const costume = ctx.evaluateFast(BACKDROP);
+        const startedThreads = setBackdrop(costume, ctx);
+        if (startedThreads) {
+            yield* ctx.waitOnThreads(startedThreads);
+        }
+    },
+});
 
 export const looks_nextbackdrop = new ProtoBlock({
     opcode: 'looks_nextbackdrop',
@@ -486,7 +504,7 @@ export const event_whenkeypressed = new ProtoBlock({
         KEY_OPTION: StringField,
     },
     execute: function* ({KEY_OPTION}, ctx) {
-        const key = IO.keyArgToScratchKey(ctx.evaluateFast(KEY_OPTION));
+        const key = IO.keyArgToScratchKey(KEY_OPTION);
         if (key === null) return;
         const keyPressed = key === 'any' ?
             ctx.io.isAnyKeyPressed() :
@@ -500,6 +518,23 @@ export const event_whenkeypressed = new ProtoBlock({
         type: 'event',
         restartExistingThreads: false,
         event: KeyPressedEvent,
+    },
+});
+
+export const event_whenbackdropswitchesto = new ProtoBlock({
+    opcode: 'event_whenbackdropswitchesto',
+    inputs: {
+        BACKDROP: StringField,
+    },
+    execute: function* ({BACKDROP}, ctx) {
+        if (BACKDROP.toUpperCase() !== ctx.stage.sprite.costumes[ctx.stage.currentCostume].name.toUpperCase()) {
+            yield* ctx.stopThisScript();
+        }
+    },
+    hat: {
+        type: 'event',
+        restartExistingThreads: false,
+        event: SwitchBackdropEvent,
     },
 });
 

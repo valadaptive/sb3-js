@@ -20,6 +20,8 @@ export type Params = {
  */
 export const STOP_THIS_SCRIPT = Symbol('STOP_THREAD');
 
+export const PARK_THREAD = Symbol('PARK_THREAD');
+
 export default class Thread {
     public status: ThreadStatus;
     public script: Block[];
@@ -45,6 +47,7 @@ export default class Thread {
      * thread generation don't clobber the resolvedValue of the current one.
      */
     private generation: number = 0;
+    private unparkListeners: (() => void)[] = [];
 
     constructor(script: Block[], target: Target, blockContext: BlockContext, startingEvent: TypedEvent | null) {
         this.status = ThreadStatus.RUNNING;
@@ -68,7 +71,7 @@ export default class Thread {
 
     restart(startingEvent: TypedEvent | null) {
         this.startingEvent = startingEvent;
-        this.status = ThreadStatus.RUNNING;
+        this.resume();
         this.generation++;
         this.generator = this.evaluateScript(this.script);
         this.callStack.length = 0;
@@ -76,8 +79,25 @@ export default class Thread {
         this.resolvedValue = undefined;
     }
 
+    private emitUnpark() {
+        for (const listener of this.unparkListeners) {
+            listener();
+        }
+        this.unparkListeners.length = 0;
+    }
+
+    public onUnpark(listener: () => void) {
+        this.unparkListeners.push(listener);
+    }
+
     retire() {
         this.status = ThreadStatus.DONE;
+        this.emitUnpark();
+    }
+
+    resume() {
+        this.status = ThreadStatus.RUNNING;
+        this.emitUnpark();
     }
 
     // The following methods form the core of the interpreter's control flow. They use generators to implement yielding
@@ -129,8 +149,10 @@ export default class Thread {
                 value.then(resolved => {
                     if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
                     this.resolvedValue = resolved;
-                    this.status = ThreadStatus.RUNNING;
+                    this.resume();
                 });
+            } else if (value === PARK_THREAD) {
+                this.status = ThreadStatus.PARKED;
             }
         } catch (e) {
             if (e === STOP_THIS_SCRIPT) {
