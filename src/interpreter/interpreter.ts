@@ -24,7 +24,8 @@ export default class Interpreter {
     public setProject(project: Project | null) {
         // This is obviously a lie, but with no project, blocks should not be executing anyway
         this.blockContext.project = project!;
-        this.blockContext.stage = project!.stage;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+        this.blockContext.stage = project?.stage!;
     }
 
     public requestRedraw() {

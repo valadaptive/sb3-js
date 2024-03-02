@@ -6,6 +6,7 @@ import Sprite from './sprite.js';
 import {Schema, ObjectForSchema, validateJson, validateJsonOrError} from './schema.js';
 import {Block, BlockInputValue, BlockInputValueShapeFor, ProtoBlock} from './block.js';
 import Runtime from './runtime.js';
+import {CustomBlockStub, makeCustomBlockStub} from './custom-blocks.js';
 
 const enum ShadowInfo {
     /**
@@ -193,6 +194,16 @@ const sb3BlockFieldSchema = [
 ] as const satisfies Schema;
 type Sb3BlockField = ObjectForSchema<typeof sb3BlockFieldSchema>;
 
+// There might also be a bunch of other properties that are dynamically set
+const sb3MutationSchema = [
+    {
+        type: 'object',
+        props: {
+            tagName: 'string',
+        },
+    },
+] as const satisfies Schema;
+
 const sb3BlockSchema = {
     type: 'object',
     props: {
@@ -203,9 +214,9 @@ const sb3BlockSchema = {
         fields: {type: 'map', items: sb3BlockFieldSchema},
         shadow: 'boolean',
         topLevel: 'boolean',
-        // TODO: mutation for custom blocks. future note: mutation also exists on "stop []" to control the block shape,
-        // and does *not* have the properties you would expect from a custom block mutation!
+        mutation: sb3MutationSchema,
     },
+    optional: ['mutation'],
 } as const satisfies Schema;
 type Sb3Block = ObjectForSchema<typeof sb3BlockSchema>;
 
@@ -272,6 +283,7 @@ const parseBlockInput = (
     jsonInput: string | null | Sb3InputPrimitive,
     jsonTarget: Sb3Target,
     protoBlock: ProtoBlock,
+    customBlocks: CustomBlocks,
 ): BlockInputValueShapeFor<BlockInputValue> => {
     const protoInput = protoBlock.inputs[inputName];
     if (!protoInput) {
@@ -293,9 +305,16 @@ const parseBlockInput = (
             throw new Error(`Block input ${inputName} points to block ${jsonInput} which does not exist`);
         }
         if (protoInput.type === 'stack') {
-            parsedInput = parseScript(jsonTarget.blocks[jsonInput], jsonInput, jsonTarget);
+            parsedInput = parseScript(jsonTarget.blocks[jsonInput], jsonInput, jsonTarget, customBlocks);
+        } else if (protoInput.type === 'custom_block') {
+            // Only procedures_definition uses this input type
+            const jsonBlockProto = jsonTarget.blocks[jsonInput];
+            if (!jsonBlockProto) {
+                throw new Error(`Custom block prototype ${jsonInput} does not exist`);
+            }
+            parsedInput = parseCustomBlockPrototype(jsonBlockProto, jsonInput);
         } else {
-            parsedInput = parseBlock(jsonTarget.blocks[jsonInput], jsonInput, jsonTarget);
+            parsedInput = parseBlock(jsonTarget.blocks[jsonInput], jsonInput, jsonTarget, customBlocks);
         }
     } else {
         // compressed primitive
@@ -329,8 +348,29 @@ const parseBlockField = (fieldName: string, jsonField: Sb3BlockField, protoBlock
     return fieldValue;
 };
 
-const parseBlock = (jsonBlock: Sb3Block, blockId: string, jsonTarget: Sb3Target): Block => {
-    const protoBlock = getBlockByOpcode(jsonBlock.opcode) as unknown as ProtoBlock;
+const parseBlock = (
+    jsonBlock: Sb3Block,
+    blockId: string,
+    jsonTarget: Sb3Target,
+    customBlocks: CustomBlocks,
+): Block => {
+    let protoBlock;
+    // procedures_call blocks are replaced with Block instances whose proto is the custom block's definition
+    if (jsonBlock.opcode === 'procedures_call') {
+        if (!jsonBlock.mutation) {
+            throw new Error('Custom block is missing mutation');
+        }
+        if (!('proccode' in jsonBlock.mutation) || typeof jsonBlock.mutation.proccode !== 'string') {
+            throw new Error('Custom block mutation is missing proccode');
+        }
+        const customBlockDefinition = customBlocks.get(jsonBlock.mutation.proccode);
+        if (!customBlockDefinition) {
+            throw new Error(`Custom block "${jsonBlock.mutation.proccode}" does not exist`);
+        }
+        protoBlock = customBlockDefinition.proto;
+    } else {
+        protoBlock = getBlockByOpcode(jsonBlock.opcode) as unknown as ProtoBlock;
+    }
 
     const inputValues: Record<string, BlockInputValueShapeFor<BlockInputValue>> = {};
 
@@ -339,12 +379,17 @@ const parseBlock = (jsonBlock: Sb3Block, blockId: string, jsonTarget: Sb3Target)
             continue;
         }
 
+        if (jsonBlock.opcode === 'procedures_call' && !(inputName in protoBlock.inputs)) {
+            // procedures_call blocks can retain deleted inputs, so we should silently ignore them
+            continue;
+        }
+
         const input = jsonBlock.inputs[inputName];
         if (input[0] > ShadowInfo.INPUT_DIFF_BLOCK_SHADOW) {
             throw new Error(`Unknown shadow info: ${input[0]}`);
         }
 
-        inputValues[inputName] = parseBlockInput(inputName, input[1], jsonTarget, protoBlock);
+        inputValues[inputName] = parseBlockInput(inputName, input[1], jsonTarget, protoBlock, customBlocks);
     }
 
     for (const fieldName in jsonBlock.fields) {
@@ -363,12 +408,93 @@ const parseBlock = (jsonBlock: Sb3Block, blockId: string, jsonTarget: Sb3Target)
     return block;
 };
 
-const parseScript = (jsonBlock: Sb3Block, blockId: string, jsonTarget: Sb3Target): Block[] | null => {
+// There might also be a bunch of other properties that are dynamically set
+const sb3CustomBlockMutationSchema = [
+    {
+        type: 'object',
+        props: {
+            proccode: 'string',
+            argumentids: 'string',
+            argumentnames: 'string',
+            argumentdefaults: 'string',
+            warp: 'string',
+        },
+    },
+] as const satisfies Schema;
+
+const arrayStringSchema = {type: 'array', items: 'string'} as const satisfies Schema;
+
+type CustomBlocks = Map<string, CustomBlockStub & {jsonBlock: Sb3Block; blockId: string}>;
+
+const EMPTY_MAP = new Map<never, never>();
+
+// Parse a procedures_prototype into a ProtoBlock stub.
+const parseCustomBlockPrototype = (
+    jsonBlock: Sb3Block,
+    blockId: string,
+): CustomBlockStub => {
+    const mutation = jsonBlock.mutation;
+    if (!mutation) {
+        throw new Error(`Custom block ${blockId} is missing mutation`);
+    }
+    if (!validateJson(sb3CustomBlockMutationSchema, mutation)) {
+        validateJsonOrError(sb3CustomBlockMutationSchema, mutation);
+        throw new Error('Invalid mutation');
+    }
+
+    const argumentids = JSON.parse(mutation.argumentids);
+    const argumentnames = JSON.parse(mutation.argumentnames);
+    const argumentdefaults = JSON.parse(mutation.argumentdefaults);
+
+    if (!validateJson(arrayStringSchema, argumentids)) {
+        throw new Error('Invalid argumentids');
+    }
+    if (!validateJson(arrayStringSchema, argumentnames)) {
+        throw new Error('Invalid argumentnames');
+    }
+    if (!validateJson(arrayStringSchema, argumentdefaults)) {
+        throw new Error('Invalid argumentdefaults');
+    }
+
+    return Object.assign(makeCustomBlockStub(
+        mutation.proccode,
+        argumentids,
+        argumentnames,
+        argumentdefaults,
+        mutation.warp === 'true',
+    ), {jsonBlock, blockId});
+};
+
+const parseCustomBlockDefinition = (
+    jsonBlock: Sb3Block,
+    blockId: string,
+    jsonTarget: Sb3Target,
+): CustomBlockStub & {jsonBlock: Sb3Block; blockId: string} => {
+    if (!('custom_block' in jsonBlock.inputs)) {
+        throw new Error(`Custom block ${blockId} is missing custom_block input`);
+    }
+    // parseBlockInput will parse the custom_block input and call parseCustomBlockPrototype above.
+    const customBlockDefinition = parseBlockInput(
+        'custom_block',
+        jsonBlock.inputs.custom_block[1],
+        jsonTarget,
+        allBlocks.procedures_definition as unknown as ProtoBlock,
+        EMPTY_MAP,
+    );
+    return Object.assign(customBlockDefinition as unknown as CustomBlockStub, {jsonBlock, blockId});
+};
+
+const parseScript = (
+    jsonBlock: Sb3Block,
+    blockId: string,
+    jsonTarget: Sb3Target,
+    customBlocks: CustomBlocks,
+): Block[] => {
     const blocks: Block[] = [];
     let currentBlock: Sb3Block | null = jsonBlock;
 
     while (true) {
-        blocks.push(parseBlock(currentBlock, blockId, jsonTarget));
+        blocks.push(parseBlock(currentBlock, blockId, jsonTarget, customBlocks));
         if (currentBlock.next === null) {
             break;
         }
@@ -395,18 +521,40 @@ const parseTarget = async(
     runtime: Runtime,
 ): Promise<{sprite: Sprite; target: Target; layerOrder: number}> => {
     const scripts: Block[][] = [];
+    const topLevelBlocks: {block: Sb3Block; id: string}[] = [];
     for (const blockId in jsonTarget.blocks) {
         if (!Object.prototype.hasOwnProperty.call(jsonTarget.blocks, blockId)) {
             continue;
         }
-
         const block = jsonTarget.blocks[blockId];
         if (block.topLevel) {
-            const parsedBlock = parseScript(block, blockId, jsonTarget);
-            if (parsedBlock) {
-                scripts.push(parsedBlock);
-            }
+            topLevelBlocks.push({block, id: blockId});
         }
+    }
+
+    // First pass: parse all the custom block definitions so that we can replace all procedures_call blocks with the
+    // coresponding custom block ProtoBlocks. Keep in mind that custom blocks can call other custom blocks, so we can't
+    // just parse all custom blocks first then parse other scripts.
+    const customBlocks: CustomBlocks = new Map();
+    for (const {block, id} of topLevelBlocks) {
+        if (block.opcode === 'procedures_definition') {
+            const customBlock = parseCustomBlockDefinition(block, id, jsonTarget);
+            customBlocks.set(customBlock.proto.opcode, customBlock);
+        }
+    }
+
+    // Second pass: parse all the top-level scripts now that we have all the custom block definitions
+    for (const {block, id} of topLevelBlocks) {
+        if (block.opcode !== 'procedures_definition') {
+            const parsedScript = parseScript(block, id, jsonTarget, customBlocks);
+            scripts.push(parsedScript);
+        }
+    }
+
+    // Third pass: parse the scripts contained within the custom block definitions
+    for (const {init, jsonBlock, blockId} of customBlocks.values()) {
+        const childScript = parseScript(jsonBlock, blockId, jsonTarget, customBlocks);
+        init(childScript);
     }
 
     const variables = new Map<string, string | number | boolean>();

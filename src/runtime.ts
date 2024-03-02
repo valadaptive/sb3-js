@@ -69,6 +69,7 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent> {
         const unregisterProject = project.register();
         this.unregisterPreviousProject = () => {
             this.project = null;
+            this.stop();
             unregisterProject();
             this.interpreter.setProject(null);
         };
@@ -122,7 +123,6 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent> {
     }
 
     public destroy() {
-        this.stop();
         this.setProject(null);
     }
 

@@ -1,4 +1,4 @@
-import {BooleanInput, NumberInput, ProtoBlock, StackInput, StringInput} from './block.js';
+import {BlockInput, BooleanInput, NumberInput, ProtoBlock, StackInput, StringField, StringInput} from './block.js';
 import {compare, isInt, isWhiteSpace, toBoolean, toNumber, toString} from './cast.js';
 import {GreenFlagEvent} from './events.js';
 import BlockContext from './interpreter/block-context.js';
@@ -821,4 +821,34 @@ export const operator_mathop = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+});
+
+// This block doesn't do anything, and is replaced by the parser with the actual custom block prototype. It exists so
+// that the parser can parse a procedures_definition as a normal block.
+export const procedures_definition = new ProtoBlock({
+    opcode: 'procedures_definition',
+    inputs: {
+        custom_block: new BlockInput('custom_block', {type: 'object', values: {}}),
+    },
+    execute: function* () {},
+});
+
+export const argument_reporter_string_number = new ProtoBlock({
+    opcode: 'argument_reporter_string_number',
+    inputs: {
+        VALUE: StringField,
+    },
+    execute: function* ({VALUE}, ctx) {
+        return ctx.getParam(VALUE);
+    },
+});
+
+export const argument_reporter_boolean = new ProtoBlock({
+    opcode: 'argument_reporter_boolean',
+    inputs: {
+        VALUE: StringField,
+    },
+    execute: function* ({VALUE}, ctx) {
+        return ctx.getParam(VALUE);
+    },
 });

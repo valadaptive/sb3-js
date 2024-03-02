@@ -1,4 +1,4 @@
-import {Block, BlockGenerator} from '../block.js';
+import {Block, BlockGenerator, ProtoBlock} from '../block.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
 import BlockContext from './block-context.js';
@@ -9,15 +9,28 @@ export const enum ThreadStatus {
     DONE,
 }
 
+export type Params = {
+    [paramName: string]: string | number | boolean;
+};
+
 export default class Thread {
     public status: ThreadStatus;
     public script: Block[];
     public target: Target;
+
     private startingEvent: TypedEvent | null;
     private blockContext: BlockContext;
     private generator: BlockGenerator;
     /** Increments when we enter a warp-mode procedure; decrements when we exit one. */
     private warpCounter: number = 0;
+    /**
+     * Stack of custom procedure arguments frames. There *is* a way to implement custom procedure arguments with only
+     * generator functions (have the "get procedure argument" block yield, and have the procedures_definition block
+     * drive the generator itself and handle those yields by passing the params back into the generator), but that's
+     * probably a lot slower and won't play nicely once we implement proper promise-throwing support to handle
+     * evaluateFast. We want this class to be the only one that drives the generator function.
+     */
+    private callStack: {params: Params; procedure: ProtoBlock}[] = [];
     /* The resolved value of the last promise we yielded to. */
     private resolvedValue: string | number | boolean | void = undefined;
     /**
@@ -51,6 +64,9 @@ export default class Thread {
         this.status = ThreadStatus.RUNNING;
         this.generation++;
         this.generator = this.evaluateScript(this.script);
+        this.callStack.length = 0;
+        this.warpCounter = 0;
+        this.resolvedValue = undefined;
     }
 
     retire() {
@@ -109,5 +125,32 @@ export default class Thread {
             });
         }
         this.resolvedValue = undefined;
+    }
+
+    getParam(name: string): string | number | boolean {
+        // When the param isn't found in the call stack, the reporters default to returning 0 (even boolean ones!)
+        if (this.callStack.length === 0) return 0;
+        return this.callStack[this.callStack.length - 1]?.params[name] ?? 0;
+    }
+
+    pushFrame(procedure: ProtoBlock, params: Params, warp: boolean) {
+        this.callStack.push({params, procedure});
+        if (warp) this.warpCounter++;
+    }
+
+    popFrame(warp: boolean) {
+        this.callStack.pop();
+        if (warp) this.warpCounter--;
+    }
+
+    /**
+     * Check if a given procedure call is recursive by examining the last 5 stack frames. Why 5? Because that's what
+     * Scratch does.
+     */
+    isRecursiveCall(procedure: ProtoBlock) {
+        for (let i = this.callStack.length - 1, j = 5; i >= 0 && j > 0; i--, j--) {
+            if (this.callStack[i].procedure === procedure) return true;
+        }
+        return false;
     }
 }

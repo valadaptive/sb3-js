@@ -143,6 +143,7 @@ export const NumberInput = new BlockInput('number', unionInput('number', 'string
 export const StringInput = new BlockInput('string', unionInput('number', 'string', 'boolean', 'block'));
 export const BooleanInput = new BlockInput('boolean', unionInput('number', 'string', 'boolean', 'block'));
 export const StackInput = new BlockInput('stack', arrayInput('block'));
+export const StringField = new BlockInput('string', 'string');
 
 export type BlockReturnType = ('string' | 'number' | 'boolean')[];
 
@@ -156,7 +157,8 @@ export type HatInfo = ({
 };
 
 export type BlockGenerator = Generator<
-Promise<string | number | boolean | void> | void,
+//Promise<string | number | boolean | void> | typeof GET_CUSTOM_BLOCK_ARG | void,
+unknown,
 string | number | boolean | void,
 string | number | boolean | void
 >;

@@ -24,6 +24,7 @@ export default class Sprite {
         this.sounds = sounds;
         this.isStage = !!isStage;
         this.scripts = scripts;
+
         this.costumeIndicesByName = new Map(costumes.map((costume, i) => [costume.name, i]));
         this.soundIndicesByName = new Map(sounds.map((sound, i) => [sound.name, i]));
     }

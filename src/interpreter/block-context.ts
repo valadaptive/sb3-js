@@ -1,4 +1,4 @@
-import {Block, BlockGenerator} from '../block.js';
+import {Block, BlockGenerator, ProtoBlock} from '../block.js';
 import IO from '../io.js';
 import Project from '../project.js';
 import Target from '../target.js';
@@ -88,7 +88,27 @@ export default class BlockContext {
         this.thread.status = ThreadStatus.DONE;
     }
 
+    getParam(name: string): string | number | boolean {
+        return this.thread.getParam(name);
+    }
+
+    pushFrame(procedure: ProtoBlock, params: Record<string, string | number | boolean>, warp: boolean) {
+        this.thread.pushFrame(procedure, params, warp);
+    }
+
+    popFrame(warp: boolean) {
+        this.thread.popFrame(warp);
+    }
+
     get currentTime() {
         return this.interpreter.currentMSecs;
+    }
+
+    get warpMode() {
+        return this.thread.warpMode;
+    }
+
+    isRecursiveCall(procedure: ProtoBlock) {
+        return this.thread.isRecursiveCall(procedure);
     }
 }
