@@ -267,7 +267,6 @@ export const motion_xposition = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.x;
     },
-    pure: true,
 });
 
 export const motion_yposition = new ProtoBlock({
@@ -276,7 +275,6 @@ export const motion_yposition = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.y;
     },
-    pure: true,
 });
 
 export const motion_direction = new ProtoBlock({
@@ -285,7 +283,6 @@ export const motion_direction = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.direction;
     },
-    pure: true,
 });
 
 /**
@@ -526,6 +523,85 @@ export const control_forever = new ProtoBlock({
             yield;
         }
     },
+});
+
+export const control_if = new ProtoBlock({
+    opcode: 'control_if',
+    inputs: {
+        CONDITION: BooleanInput,
+        SUBSTACK: StackInput,
+    },
+    execute: function* ({CONDITION, SUBSTACK}, ctx) {
+        if (toBoolean(ctx.evaluateFast(CONDITION))) {
+            yield* ctx.evaluate(SUBSTACK);
+        }
+    },
+});
+
+export const control_if_else = new ProtoBlock({
+    opcode: 'control_if_else',
+    inputs: {
+        CONDITION: BooleanInput,
+        SUBSTACK: StackInput,
+        SUBSTACK2: StackInput,
+    },
+    execute: function* ({CONDITION, SUBSTACK, SUBSTACK2}, ctx) {
+        if (toBoolean(ctx.evaluateFast(CONDITION))) {
+            yield* ctx.evaluate(SUBSTACK);
+        } else {
+            yield* ctx.evaluate(SUBSTACK2);
+        }
+    },
+});
+
+export const control_wait_until = new ProtoBlock({
+    opcode: 'control_wait_until',
+    inputs: {
+        CONDITION: BooleanInput,
+    },
+    execute: function* ({CONDITION}, ctx) {
+        // TODO: not sure if evaluateFast will be correct here
+        while (!toBoolean(yield* ctx.evaluate(CONDITION))) {
+            yield;
+        }
+    },
+});
+
+export const control_repeat_until = new ProtoBlock({
+    opcode: 'control_repeat_until',
+    inputs: {
+        CONDITION: BooleanInput,
+        SUBSTACK: StackInput,
+    },
+    execute: function* ({CONDITION, SUBSTACK}, ctx) {
+        // Note that we can't use evaluateFast here because it's not re-entrant!
+        while (!toBoolean(yield* ctx.evaluate(CONDITION))) {
+            yield* ctx.evaluate(SUBSTACK);
+            yield;
+        }
+    },
+});
+
+/**
+ * Sensing
+ */
+
+export const sensing_mousex = new ProtoBlock({
+    opcode: 'sensing_mousex',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return ctx.io.mousePosition.x;
+    },
+    returnType: ['boolean'],
+});
+
+export const sensing_mousey = new ProtoBlock({
+    opcode: 'sensing_mousey',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return ctx.io.mousePosition.y;
+    },
+    returnType: ['boolean'],
 });
 
 /**
