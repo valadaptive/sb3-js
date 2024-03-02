@@ -29,6 +29,7 @@ export default class Target {
 
     private scriptListenerCleanup: (() => void);
     public drawable: Drawable | null = null;
+    private hatListeners: Map<string, ((evt: TypedEvent) => void)[]> = new Map();
 
     constructor(options: {
         runtime: Runtime;
@@ -90,15 +91,42 @@ export default class Target {
                 const onEvent = (evt: TypedEvent) => {
                     this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
                 };
-                // Register event handler on the runtime to execute this script when its hat block event is fired
-                // TODO: this doesn't result in the correct execution order!
-                this.runtime.addEventListener(eventName, onEvent, {signal});
+                this.addHatListener(eventName, onEvent, signal);
             }
         }
 
         return () => {
             abortController.abort();
         };
+    }
+
+    /**
+     * Add an event listener for a hat block event. Unlike EventTarget, these listeners will always be fired in the
+     * targets' current execution order.
+     */
+    private addHatListener<T extends string>(
+        eventName: T, listener: (evt: TypedEvent<T>) => void, signal: AbortSignal) {
+        let hatListeners = this.hatListeners.get(eventName);
+        if (!hatListeners) {
+            hatListeners = [];
+            this.hatListeners.set(eventName, hatListeners);
+        }
+        hatListeners.push(listener as (evt: TypedEvent) => void);
+        signal.addEventListener('abort', () => {
+            const index = hatListeners!.indexOf(listener as (evt: TypedEvent) => void);
+            if (index !== -1) {
+                hatListeners!.splice(index, 1);
+            }
+        }, {once: true});
+    }
+
+    public fireHatListener<T extends string>(eventName: T, evt: TypedEvent<T>) {
+        const listeners = this.hatListeners.get(eventName);
+        if (!listeners) return;
+
+        for (const listener of listeners) {
+            listener(evt);
+        }
     }
 
     public destroy() {

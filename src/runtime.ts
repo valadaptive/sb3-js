@@ -10,12 +10,12 @@ import Project from './project.js';
 import Renderer from './renderer/renderer.js';
 import Sound from './sound.js';
 import Target from './target.js';
-import {TypedEvent, TypedEventTarget} from './typed-events.js';
+import {TypedEvent} from './typed-events.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
 
-export default class Runtime extends TypedEventTarget<GreenFlagEvent | KeyPressedEvent> {
+export default class Runtime {
     public stepTime: number = STEP_TIME;
     public stageSize = STAGE_SIZE;
 
@@ -31,7 +31,6 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent | KeyPresse
     private unsetPreviousCanvas: (() => void) | null = null;
 
     constructor() {
-        super();
         this.audioContext = new AudioContext();
         this.io = new IO();
         this.interpreter = new Interpreter(this.stepTime, {
@@ -95,6 +94,15 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent | KeyPresse
         };
     }
 
+    private startHats<T extends string>(eventName: T, event: TypedEvent<T>) {
+        const project = this.project;
+        if (!project) return;
+
+        for (const target of project.targets) {
+            target.fireHatListener(eventName, event);
+        }
+    }
+
     private setupEventListeners(canvas: HTMLCanvasElement) {
         if (!this.renderer) return () => {};
         const abortController = new AbortController();
@@ -133,7 +141,7 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent | KeyPresse
 
             event.preventDefault();
             this.io.keysDown.add(key);
-            this.dispatchEvent(new KeyPressedEvent(key));
+            this.startHats('keypressed', new KeyPressedEvent(key));
         }, {signal});
 
         window.addEventListener('keyup', event => {
@@ -192,7 +200,7 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent | KeyPresse
     }
 
     public greenFlag() {
-        this.dispatchEvent(new GreenFlagEvent());
+        this.startHats('greenflag', new GreenFlagEvent());
     }
 
     public stopAll() {
