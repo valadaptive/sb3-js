@@ -104,6 +104,11 @@ export default class Target {
     }
 
     private createClone(): Target {
+        // Deep-clone lists
+        const newLists = new Map<string, (string | number | boolean)[]>();
+        for (const [name, list] of this.lists) {
+            newLists.set(name, list.slice(0));
+        }
         const original = this.original;
         const clone = new Target({
             isOriginal: false,
@@ -124,7 +129,7 @@ export default class Target {
             videoTransparency: original.videoTransparency,
             videoState: original.videoState,
             variables: new Map(original.variables),
-            lists: new Map(original.lists),
+            lists: newLists,
         });
         return clone;
     }
