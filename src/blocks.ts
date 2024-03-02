@@ -716,6 +716,47 @@ export const control_stop = new ProtoBlock({
     },
 });
 
+export const control_start_as_clone = new ProtoBlock({
+    opcode: 'control_start_as_clone',
+    inputs: {},
+    execute: function* () {},
+});
+
+export const control_create_clone_of_menu = new ProtoBlock({
+    opcode: 'control_create_clone_of_menu',
+    inputs: {
+        CLONE_OPTION: StringField,
+    },
+    execute: function* ({CLONE_OPTION}) {
+        return CLONE_OPTION;
+    },
+    pure: true,
+});
+
+export const control_create_clone_of = new ProtoBlock({
+    opcode: 'control_create_clone_of',
+    inputs: {
+        CLONE_OPTION: StringInput,
+    },
+    execute: function* ({CLONE_OPTION}, ctx) {
+        const cloneOption = toString(ctx.evaluateFast(CLONE_OPTION));
+        if (cloneOption === '_myself_') {
+            ctx.target.clone();
+        } else {
+            const other = ctx.project.getTargetByName(cloneOption);
+            if (other) other.clone();
+        }
+    },
+});
+
+export const control_delete_this_clone = new ProtoBlock({
+    opcode: 'control_delete_this_clone',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.target.remove();
+    },
+});
+
 /**
  * Sensing
  */

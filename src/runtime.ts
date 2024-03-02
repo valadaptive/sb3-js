@@ -11,6 +11,7 @@ import Renderer from './renderer/renderer.js';
 import Sound from './sound.js';
 import Target from './target.js';
 import {TypedEvent} from './typed-events.js';
+import Thread from './interpreter/thread.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
@@ -191,11 +192,17 @@ export default class Runtime {
     }
 
     public greenFlag() {
+        this.stopAll();
         this.interpreter.startHats('greenflag', new GreenFlagEvent());
     }
 
     public stopAll() {
         this.interpreter.stopAll();
+        this.project?.removeAllClones();
+    }
+
+    public stopTargetThreads(target: Target, exceptFor?: Thread) {
+        this.interpreter.stopTargetThreads(target, exceptFor);
     }
 
     private step() {

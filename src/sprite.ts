@@ -8,6 +8,7 @@ export default class Sprite {
     public readonly sounds: Sound[];
     public readonly isStage: boolean;
     public readonly scripts: Block[][];
+    public readonly clones: Sprite[] = [];
 
     private costumeIndicesByName: Map<string, number>;
     private soundIndicesByName: Map<string, number>;

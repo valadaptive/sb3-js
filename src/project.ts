@@ -2,19 +2,10 @@ import Target from './target.js';
 import Sprite from './sprite.js';
 
 export default class Project {
-    public readonly targets: Target[];
-    public readonly sprites: Sprite[];
-    public readonly stage: Target;
-
-    constructor(sprites: Sprite[], targets: Target[]) {
-        this.targets = targets;
-        this.sprites = sprites;
-        const stage = targets.find(target => target.sprite.isStage);
-        if (!stage) {
-            throw new Error('No stage found');
-        }
-        this.stage = stage;
-    }
+    public readonly targets: Target[] = [];
+    public readonly sprites: Sprite[] = [];
+    public stage: Target | null = null;
+    public cloneCount = 0;
 
     register(): () => void {
         const unregisterCallbacks: (() => void)[] = [];
@@ -28,6 +19,15 @@ export default class Project {
                 unregister();
             }
         };
+    }
+
+    public addTargetWithSprite(sprite: Sprite, target: Target) {
+        if (sprite.isStage) {
+            if (this.stage) throw new Error('Cannot have multiple stage targets');
+            this.stage = target;
+        }
+        this.targets.push(target);
+        this.sprites.push(sprite);
     }
 
     public getTargetByName(name: string): Target | null {
@@ -64,5 +64,33 @@ export default class Project {
         // splice properly handles clamping the upper bound, but we need to clamp the lower bound ourselves because
         // index 0 is reserved for the stage
         this.targets.splice(Math.max(newIndex, 1), 0, target);
+    }
+
+    public addTargetBehindTarget(target: Target, otherTarget: Target) {
+        const currentIndex = this.targets.indexOf(otherTarget);
+
+        this.targets.splice(currentIndex, 0, target);
+    }
+
+    public removeAllClones() {
+        let nextOriginalTargetIndex = 0;
+        for (let i = 0; i < this.targets.length; i++) {
+            const target = this.targets[i];
+            if (target.isOriginal) {
+                this.targets[nextOriginalTargetIndex] = target;
+                nextOriginalTargetIndex++;
+            } else {
+                target.destroy();
+            }
+        }
+        this.targets.length = nextOriginalTargetIndex;
+    }
+
+    public removeTarget(target: Target) {
+        const index = this.targets.indexOf(target);
+        if (index === -1) return;
+
+        this.targets.splice(index, 1);
+        target.destroy();
     }
 }

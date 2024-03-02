@@ -86,7 +86,7 @@ export default class BlockContext {
     }
 
     stopOtherTargetThreads() {
-        this.interpreter.stopOtherTargetThreads(this.target, this.thread);
+        this.interpreter.stopTargetThreads(this.target, this.thread);
     }
 
     *stopThisScript() {

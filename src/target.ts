@@ -1,5 +1,7 @@
 import {SomeProtoBlock} from './block.js';
+import {control_start_as_clone} from './blocks.js';
 import Thread from './interpreter/thread.js';
+import Project from './project.js';
 import Drawable from './renderer/drawable.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
@@ -7,23 +9,28 @@ import {TypedEvent} from './typed-events.js';
 
 export type RotationStyle = 'all around' | 'left-right' | 'don\'t rotate';
 
+const MAX_CLONES = 300;
+
 export default class Target {
     public readonly runtime: Runtime;
+    public readonly project: Project;
     public readonly sprite: Sprite;
 
-    public x: number = 0;
-    public y: number = 0;
-    private _direction: number = 90;
-    private _size: number = 100;
-    private _visible: boolean = true;
-    private _rotationStyle: RotationStyle = 'all around';
-    public draggable: boolean = false;
-    private _currentCostume: number = 0;
+    public isOriginal: boolean;
+    public original: Target;
+    public x: number;
+    public y: number;
+    private _direction: number;
+    private _size: number;
+    private _visible: boolean;
+    private _rotationStyle: RotationStyle;
+    public draggable: boolean;
+    private _currentCostume: number;
 
-    public volume: number = 100;
-    public tempo: number = 60;
-    public videoTransparency: number = 50;
-    public videoState: string = 'off';
+    public volume: number;
+    public tempo: number;
+    public videoTransparency: number;
+    public videoState: string;
 
     public variables: Map<string, string | number | boolean>;
     public lists: Map<string, (string | number | boolean)[]>;
@@ -34,7 +41,10 @@ export default class Target {
 
     constructor(options: {
         runtime: Runtime;
+        project: Project;
         sprite: Sprite;
+        isOriginal: boolean;
+        original?: Target;
         x: number;
         y: number;
         direction: number;
@@ -51,15 +61,21 @@ export default class Target {
         lists: Map<string, (string | number | boolean)[]>;
     }) {
         this.runtime = options.runtime;
+        this.project = options.project;
         this.sprite = options.sprite;
+        this.isOriginal = options.isOriginal;
+        if (!this.isOriginal && !options.original) {
+            throw new Error('Clones must reference an original target');
+        }
+        this.original = options.original ?? this;
         this.x = options.x;
         this.y = options.y;
-        this.direction = options.direction;
-        this.size = options.size;
-        this.visible = options.visible;
-        this.rotationStyle = options.rotationStyle;
+        this._direction = options.direction;
+        this._size = options.size;
+        this._visible = options.visible;
+        this._rotationStyle = options.rotationStyle;
         this.draggable = options.draggable;
-        this.currentCostume = options.currentCostume;
+        this._currentCostume = options.currentCostume;
         this.volume = options.volume;
         this.tempo = options.tempo;
         this.videoTransparency = options.videoTransparency;
@@ -68,6 +84,53 @@ export default class Target {
         this.lists = options.lists;
 
         this.scriptListenerCleanup = this.setUpScriptListeners();
+    }
+
+    public clone() {
+        if (this.project.cloneCount >= MAX_CLONES) return;
+        const clone = this.createClone();
+        this.project.cloneCount++;
+        this.project.addTargetBehindTarget(clone, this);
+        for (const script of clone.sprite.scripts) {
+            const topBlock = script[0];
+            if (!topBlock) continue;
+
+            const proto = topBlock.proto as SomeProtoBlock;
+
+            if (proto === control_start_as_clone) {
+                this.runtime.launchScript(script, clone, null, false);
+            }
+        }
+    }
+
+    private createClone(): Target {
+        const original = this.original;
+        const clone = new Target({
+            isOriginal: false,
+            original,
+            runtime: original.runtime,
+            project: original.project,
+            sprite: original.sprite,
+            x: original.x,
+            y: original.y,
+            direction: original.direction,
+            size: original.size,
+            visible: original.visible,
+            rotationStyle: original.rotationStyle,
+            draggable: original.draggable,
+            currentCostume: original.currentCostume,
+            volume: original.volume,
+            tempo: original.tempo,
+            videoTransparency: original.videoTransparency,
+            videoState: original.videoState,
+            variables: new Map(original.variables),
+            lists: new Map(original.lists),
+        });
+        return clone;
+    }
+
+    public remove() {
+        this.project.removeTarget(this);
     }
 
     private setUpScriptListeners(): () => void {
@@ -129,6 +192,7 @@ export default class Target {
 
     public destroy() {
         this.scriptListenerCleanup();
+        this.runtime.stopTargetThreads(this);
     }
 
     public moveTo(x: number, y: number): void {

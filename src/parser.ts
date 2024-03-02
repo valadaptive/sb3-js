@@ -537,6 +537,7 @@ const parseTarget = async(
     jsonTarget: Sb3Target | Sb3SpriteTarget,
     loader: Loader,
     runtime: Runtime,
+    project: Project,
 ): Promise<{sprite: Sprite; target: Target; layerOrder: number}> => {
     const scripts: Block[][] = [];
     const topLevelBlocks: {block: Sb3Block; id: string}[] = [];
@@ -613,7 +614,9 @@ const parseTarget = async(
 
     const target = new Target({
         runtime,
+        project,
         sprite,
+        isOriginal: true,
         x: 'x' in jsonTarget ? jsonTarget.x : 0,
         y: 'y' in jsonTarget ? jsonTarget.y : 0,
         direction: 'direction' in jsonTarget ? jsonTarget.direction : 90,
@@ -641,13 +644,12 @@ const parseProject = async(projectJsonString: string, loader: Loader, runtime: R
     }
     const jsonTargets = projectJson.targets;
 
-    const targets: Target[] = [];
-    const sprites: Sprite[] = [];
+    const project = new Project();
 
     const parsedTargetPromises: Promise<{sprite: Sprite; target: Target; layerOrder: number}>[] = [];
 
     for (const jsonTarget of jsonTargets) {
-        parsedTargetPromises.push(parseTarget(jsonTarget, loader, runtime));
+        parsedTargetPromises.push(parseTarget(jsonTarget, loader, runtime, project));
     }
 
     const parsedTargets = await Promise.all(parsedTargetPromises);
@@ -656,11 +658,14 @@ const parseProject = async(projectJsonString: string, loader: Loader, runtime: R
 
     for (const parsedTarget of parsedTargets) {
         const {sprite, target} = parsedTarget;
-        targets.push(target);
-        sprites.push(sprite);
+        project.addTargetWithSprite(sprite, target);
     }
 
-    return new Project(sprites, targets);
+    if (!project.stage) {
+        throw new Error('No stage target found in project');
+    }
+
+    return project;
 };
 
 export default parseProject;

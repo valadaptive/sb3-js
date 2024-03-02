@@ -2,9 +2,10 @@
 - Basic renderer (done)
 - Custom block support (done)
 - Warp mode
-- Clones
+- Clones (done)
 - Promise-throwing stuff for async reporters
 - Graphic effects
+- Sprite click / color / graphic sensing
 - Fencing
 - Monitors
 - Speech bubbles

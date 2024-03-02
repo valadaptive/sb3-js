@@ -57,7 +57,7 @@ export default class Interpreter {
         this.threads.length = 0;
     }
 
-    public stopOtherTargetThreads(target: Target, exceptFor: Thread) {
+    public stopTargetThreads(target: Target, exceptFor?: Thread) {
         for (const thread of this.threads) {
             if (thread.target === target && thread !== exceptFor) {
                 thread.retire();
