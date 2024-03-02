@@ -1,5 +1,5 @@
 import BlockContext from './interpreter/block-context.js';
-import {TypedEvent} from './typed-events.js';
+import {TypedEventConstructor} from './typed-events.js';
 
 // The type of a block input's value. An array represents a union of types, and an object represents an object whose
 // values are of the given types.
@@ -34,10 +34,6 @@ export const unionInput = <T extends BlockInputValue[]>(...values: T): {type: 'u
 
 type Decrement<I extends number> = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9][I] & number;
 
-// If T is {[x: string]: never}, evaluates to never. Otherwise, evaluates to T.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FlattenNeverInObject<T> = {[x: string]: any} extends T ? T : never;
-
 /**
  * The part of BlockInputValueShapeFor that does the actual work. Only works up to 4 levels deep to avoid infinite type
  * instantiation errors.
@@ -64,12 +60,12 @@ type BlockInputValueShapeForInner<T extends BlockInputValue, Iterations extends 
                                     BlockInputValueShapeForInner<ArrayItem, Decrement<Iterations>>[]
                                     : never
                                 : T extends {type: 'object'; values: {[x: string]: BlockInputValue}}
-                                    ? FlattenNeverInObject<{
+                                    ? {
                                         [K in keyof T['values']]: BlockInputValueShapeForInner<
                                         T['values'][K],
                                         Decrement<Iterations>
                                         >
-                                    }>
+                                    }
                                     : T extends {type: 'literal'; value: infer LiteralValue extends string}
                                         ? LiteralValue
                                         :
@@ -122,7 +118,7 @@ export class BlockInput<Type extends string = string, Value extends BlockInputVa
             }
             return Object.keys(valueType.values).every(key => {
                 return (
-                    Object.prototype.hasOwnProperty.call(valueType, key) &&
+                    Object.prototype.hasOwnProperty.call(value, key) &&
                     BlockInput.validateInput(valueType.values[key], value[key as keyof typeof value])
                 );
             });
@@ -144,12 +140,13 @@ export const StringInput = new BlockInput('string', unionInput('number', 'string
 export const BooleanInput = new BlockInput('boolean', unionInput('number', 'string', 'boolean', 'block'));
 export const StackInput = new BlockInput('stack', arrayInput('block'));
 export const StringField = new BlockInput('string', 'string');
+export const BroadcastField = new BlockInput('broadcast', objectInput({value: 'string', id: 'string'}));
 
 export type BlockReturnType = ('string' | 'number' | 'boolean')[];
 
 export type HatInfo = ({
     type: 'event';
-    event: new (...args: any[]) => TypedEvent;
+    event: TypedEventConstructor;
 } | {
     type: 'edgeActivated';
 }) & {
@@ -163,6 +160,7 @@ string | number | boolean | void,
 string | number | boolean | void
 >;
 
+// TODO: concrete ProtoBlock instances are not currently a subtype of ProtoBlock due to variance.
 export class ProtoBlock<
     MyOpCode extends string = string,
     MyInputs extends {[key: string]: BlockInput} = {[key: string]: BlockInput},
@@ -217,13 +215,11 @@ BlockReturnType | null,
 HatInfo | undefined
 >;
 
-export class Block<P extends ProtoBlock = ProtoBlock> {
-    public proto: P;
+export class Block<P = unknown> {
+    public proto: ProtoBlock;
     public id: string;
 
-    public inputValues: P extends ProtoBlock<string, infer MyInputs>
-        ? {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>}
-        : never;
+    public inputValues;
 
     constructor({proto, id, inputValues}: {
         proto: P;
@@ -232,7 +228,7 @@ export class Block<P extends ProtoBlock = ProtoBlock> {
             ? {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>}
             : never;
     }) {
-        this.proto = proto;
+        this.proto = proto as ProtoBlock;
         this.id = id;
         this.inputValues = inputValues;
     }

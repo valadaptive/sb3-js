@@ -1,6 +1,15 @@
-import {BlockInput, BooleanInput, NumberInput, ProtoBlock, StackInput, StringField, StringInput} from './block.js';
+import {
+    BlockInput,
+    BooleanInput,
+    BroadcastField,
+    NumberInput,
+    ProtoBlock,
+    StackInput,
+    StringField,
+    StringInput,
+} from './block.js';
 import {compare, isInt, isWhiteSpace, toBoolean, toNumber, toString} from './cast.js';
-import {GreenFlagEvent, KeyPressedEvent, SwitchBackdropEvent} from './events.js';
+import {BroadcastEvent, GreenFlagEvent, KeyPressedEvent, SwitchBackdropEvent} from './events.js';
 import IO from './io.js';
 import Target from './target.js';
 
@@ -503,12 +512,12 @@ export const event_whenkeypressed = new ProtoBlock({
     inputs: {
         KEY_OPTION: StringField,
     },
-    execute: function* ({KEY_OPTION}, ctx) {
+    execute: function* ({KEY_OPTION}, ctx, event) {
         const key = IO.keyArgToScratchKey(KEY_OPTION);
         if (key === null) return;
         const keyPressed = key === 'any' ?
-            ctx.io.isAnyKeyPressed() :
-            ctx.io.isKeyPressed(key);
+            true :
+            event.key === key;
 
         if (!keyPressed) {
             yield* ctx.stopThisScript();
@@ -526,15 +535,68 @@ export const event_whenbackdropswitchesto = new ProtoBlock({
     inputs: {
         BACKDROP: StringField,
     },
-    execute: function* ({BACKDROP}, ctx) {
-        if (BACKDROP.toUpperCase() !== ctx.stage.sprite.costumes[ctx.stage.currentCostume].name.toUpperCase()) {
+    execute: function* ({BACKDROP}, ctx, event) {
+        if (BACKDROP.toUpperCase() !== event.backdrop) {
+            yield* ctx.stopThisScript();
+        }
+    },
+    hat: {
+        type: 'event',
+        restartExistingThreads: true,
+        event: SwitchBackdropEvent,
+    },
+});
+
+export const event_whenbroadcastreceived = new ProtoBlock({
+    opcode: 'event_whenbroadcastreceived',
+    inputs: {
+        BROADCAST_OPTION: BroadcastField,
+    },
+    execute: function* ({BROADCAST_OPTION}, ctx, event) {
+        if (event.broadcast !== BROADCAST_OPTION.value.toUpperCase()) {
             yield* ctx.stopThisScript();
         }
     },
     hat: {
         type: 'event',
         restartExistingThreads: false,
-        event: SwitchBackdropEvent,
+        event: BroadcastEvent,
+    },
+});
+
+export const event_broadcast_menu = new ProtoBlock({
+    opcode: 'event_broadcast_menu',
+    inputs: {
+        BROADCAST_OPTION: BroadcastField,
+    },
+    execute: function* ({BROADCAST_OPTION}) {
+        return BROADCAST_OPTION.value;
+    },
+    pure: true,
+});
+
+export const event_broadcast = new ProtoBlock({
+    opcode: 'event_broadcast',
+    inputs: {
+        BROADCAST_INPUT: StringInput,
+    },
+    execute: function* ({BROADCAST_INPUT}, ctx) {
+        const broadcast = toString(ctx.evaluateFast(BROADCAST_INPUT));
+        ctx.startHats('broadcast', new BroadcastEvent(broadcast));
+    },
+});
+
+export const event_broadcastandwait = new ProtoBlock({
+    opcode: 'event_broadcastandwait',
+    inputs: {
+        BROADCAST_INPUT: StringInput,
+    },
+    execute: function* ({BROADCAST_INPUT}, ctx) {
+        const broadcast = toString(ctx.evaluateFast(BROADCAST_INPUT));
+        const startedThreads = ctx.startHats('broadcast', new BroadcastEvent(broadcast));
+        if (startedThreads) {
+            yield* ctx.waitOnThreads(startedThreads);
+        }
     },
 });
 

@@ -3,7 +3,7 @@ import Thread from './interpreter/thread.js';
 import Drawable from './renderer/drawable.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
-import {TypedEvent, TypedEventTarget} from './typed-events.js';
+import {TypedEvent} from './typed-events.js';
 
 export type RotationStyle = 'all around' | 'left-right' | 'don\'t rotate';
 
@@ -82,12 +82,7 @@ export default class Target {
 
             if (proto.hat && proto.hat.type === 'event') {
                 const hat = proto.hat;
-                const eventName = new hat.event().type as
-                    (Runtime extends TypedEventTarget<infer Evt>
-                        ? Evt extends TypedEvent<infer Name>
-                            ? Name
-                            : never
-                        : never);
+                const eventName = hat.event.EVENT_NAME;
 
                 const onEvent = (evt: TypedEvent) => {
                     return this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);

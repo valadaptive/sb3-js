@@ -318,10 +318,28 @@ const parseBlockInput = (
         }
     } else {
         // compressed primitive
-        const [, value] = jsonInput;
+        const [primType, value, id] = jsonInput;
 
-        // TODO: does any further validation need to be done here?
-        return value;
+        switch (primType) {
+            case CompressedPrimitiveType.MATH_NUM_PRIMITIVE:
+            case CompressedPrimitiveType.POSITIVE_NUM_PRIMITIVE:
+            case CompressedPrimitiveType.WHOLE_NUM_PRIMITIVE:
+            case CompressedPrimitiveType.INTEGER_NUM_PRIMITIVE:
+            case CompressedPrimitiveType.ANGLE_NUM_PRIMITIVE:
+            case CompressedPrimitiveType.COLOR_PICKER_PRIMITIVE:
+            case CompressedPrimitiveType.TEXT_PRIMITIVE:
+            case CompressedPrimitiveType.VAR_PRIMITIVE:
+            case CompressedPrimitiveType.LIST_PRIMITIVE:
+                parsedInput = value;
+                break;
+            case CompressedPrimitiveType.BROADCAST_PRIMITIVE: {
+                parsedInput = new Block({
+                    proto: allBlocks.event_broadcast_menu,
+                    id,
+                    inputValues: {BROADCAST_OPTION: {value, id}},
+                });
+            }
+        }
     }
 
     if (!protoInput.validate(parsedInput)) {
