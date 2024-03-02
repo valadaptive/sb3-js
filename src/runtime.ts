@@ -1,7 +1,7 @@
 import {Block} from './block.js';
 import {STAGE_SIZE} from './constants.js';
 import Costume, {CostumeParams} from './costume.js';
-import {GreenFlagEvent} from './events.js';
+import {GreenFlagEvent, KeyPressedEvent} from './events.js';
 import IO from './io.js';
 import Interpreter from './interpreter/interpreter.js';
 import {Loader, WebLoader, ZipLoader, ZipSrc} from './loader.js';
@@ -15,7 +15,7 @@ import {TypedEvent, TypedEventTarget} from './typed-events.js';
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
 
-export default class Runtime extends TypedEventTarget<GreenFlagEvent> {
+export default class Runtime extends TypedEventTarget<GreenFlagEvent | KeyPressedEvent> {
     public stepTime: number = STEP_TIME;
     public stageSize = STAGE_SIZE;
 
@@ -84,6 +84,8 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent> {
         if (!canvas) return;
 
         const renderer = this.renderer = new Renderer(canvas, this.stageSize);
+        // Allow canvas to receive keyboard events
+        canvas.tabIndex = 0;
         const teardownEventListeners = this.setupEventListeners(canvas);
 
         this.unsetPreviousCanvas = () => {
@@ -115,6 +117,30 @@ export default class Runtime extends TypedEventTarget<GreenFlagEvent> {
 
             this.io.mousePosition.x = x;
             this.io.mousePosition.y = -y;
+        }, {signal});
+
+        canvas.addEventListener('pointerdown', () => {
+            this.io.mouseDown = true;
+        }, {signal});
+
+        window.addEventListener('pointerup', () => {
+            this.io.mouseDown = false;
+        }, {signal});
+
+        canvas.addEventListener('keydown', event => {
+            const key = IO.domToScratchKey(event.key);
+            if (key === null) return;
+
+            event.preventDefault();
+            this.io.keysDown.add(key);
+            this.dispatchEvent(new KeyPressedEvent(key));
+        }, {signal});
+
+        window.addEventListener('keyup', event => {
+            const key = IO.domToScratchKey(event.key);
+            if (key === null) return;
+
+            this.io.keysDown.delete(key);
         }, {signal});
 
         return () => {

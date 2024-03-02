@@ -1,7 +1,8 @@
 import {BlockInput, BooleanInput, NumberInput, ProtoBlock, StackInput, StringField, StringInput} from './block.js';
 import {compare, isInt, isWhiteSpace, toBoolean, toNumber, toString} from './cast.js';
-import {GreenFlagEvent} from './events.js';
+import {GreenFlagEvent, KeyPressedEvent} from './events.js';
 import BlockContext from './interpreter/block-context.js';
+import IO from './io.js';
 import Target from './target.js';
 
 /**
@@ -479,6 +480,29 @@ export const event_whenflagclicked = new ProtoBlock({
     },
 });
 
+export const event_whenkeypressed = new ProtoBlock({
+    opcode: 'event_whenkeypressed',
+    inputs: {
+        KEY_OPTION: StringField,
+    },
+    execute: function* ({KEY_OPTION}, ctx) {
+        const key = IO.keyArgToScratchKey(ctx.evaluateFast(KEY_OPTION));
+        if (key === null) return;
+        const keyPressed = key === 'any' ?
+            ctx.io.isAnyKeyPressed() :
+            ctx.io.isKeyPressed(key);
+
+        if (!keyPressed) {
+            yield* ctx.stopThisScript();
+        }
+    },
+    hat: {
+        type: 'event',
+        restartExistingThreads: false,
+        event: KeyPressedEvent,
+    },
+});
+
 /**
  * Control
  */
@@ -598,6 +622,39 @@ export const control_stop = new ProtoBlock({
 /**
  * Sensing
  */
+
+export const sensing_keyoptions = new ProtoBlock({
+    opcode: 'sensing_keyoptions',
+    inputs: {
+        KEY_OPTION: StringField,
+    },
+    execute: function* ({KEY_OPTION}) {
+        return KEY_OPTION;
+    },
+    pure: true,
+});
+
+export const sensing_keypressed = new ProtoBlock({
+    opcode: 'sensing_keypressed',
+    inputs: {
+        KEY_OPTION: StringInput,
+    },
+    execute: function* ({KEY_OPTION}, ctx) {
+        const key = IO.keyArgToScratchKey(ctx.evaluateFast(KEY_OPTION));
+        if (key === null) return false;
+        return key === 'any' ? ctx.io.isAnyKeyPressed() : ctx.io.isKeyPressed(key);
+    },
+    returnType: ['boolean'],
+});
+
+export const sensing_mousedown = new ProtoBlock({
+    opcode: 'sensing_mousedown',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return ctx.io.mouseDown;
+    },
+    returnType: ['boolean'],
+});
 
 export const sensing_mousex = new ProtoBlock({
     opcode: 'sensing_mousex',

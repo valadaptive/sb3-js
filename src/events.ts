@@ -5,3 +5,9 @@ export class GreenFlagEvent extends TypedEvent<'greenflag'> {
         super('greenflag');
     }
 }
+
+export class KeyPressedEvent extends TypedEvent<'keypressed'> {
+    constructor(public readonly key: string) {
+        super('keypressed');
+    }
+}

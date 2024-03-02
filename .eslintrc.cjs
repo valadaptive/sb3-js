@@ -35,6 +35,7 @@ module.exports = {
                 '{}': false
             }
         }],
+        '@typescript-eslint/no-explicit-any': ['error', {'ignoreRestArgs': true}],
         'no-constant-condition': ['error', {'checkLoops': false}],
 
         '@stylistic/array-bracket-spacing': ['error', 'never'],

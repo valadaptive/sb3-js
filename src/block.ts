@@ -149,7 +149,7 @@ export type BlockReturnType = ('string' | 'number' | 'boolean')[];
 
 export type HatInfo = ({
     type: 'event';
-    event: new () => TypedEvent;
+    event: new (...args: any[]) => TypedEvent;
 } | {
     type: 'edgeActivated';
 }) & {
@@ -187,7 +187,7 @@ export class ProtoBlock<
     constructor({opcode, inputs, execute, returnType, pure, hat}: {
         opcode: MyOpCode;
         inputs: MyInputs;
-        execute: MyHatInfo extends {type: 'event'; event: new () => infer Evt}
+        execute: MyHatInfo extends {type: 'event'; event: new (...args: any[]) => infer Evt}
             ? (
                 inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
                 ctx: BlockContext,
