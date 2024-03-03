@@ -12,12 +12,21 @@ import Silhouette from './silhouette.js';
 const __localPosition = vec2.create();
 const __intersectionBoundsSelf = new Rectangle();
 const __intersectionBoundsOther = new Rectangle();
+const __rightHull: vec2[] = [];
 
 export default class Drawable {
     private transform: mat3 = mat3.create();
-    private inverseTransform: mat3 = mat3.create();
     private transformDirty = true;
+
+    private inverseTransform: mat3 = mat3.create();
     private inverseTransformDirty = true;
+
+    private convexHull: vec2[] = [];
+    private convexHullDirty = true;
+
+    private transformedHull: vec2[] = [];
+    private transformedHullDirty = true;
+
     public target: Target;
     private costume: Costume;
 
@@ -32,10 +41,12 @@ export default class Drawable {
     setTransformDirty() {
         this.transformDirty = true;
         this.inverseTransformDirty = true;
+        this.transformedHullDirty = true;
     }
 
     setCostume(costume: Costume) {
         this.costume = costume;
+        this.convexHullDirty = true;
         this.setTransformDirty();
     }
 
@@ -119,6 +130,56 @@ export default class Drawable {
         return Rectangle.fromMatrix(this.transform, result);
     }
 
+    getTightBounds(result = new Rectangle()) {
+        if (this.transformedHullDirty) {
+            this.updateTransformedHull();
+        }
+
+        let left = Infinity;
+        let right = -Infinity;
+        let top = -Infinity;
+        let bottom = Infinity;
+
+        for (const point of this.transformedHull) {
+            left = Math.min(left, point[0]);
+            right = Math.max(right, point[0]);
+            top = Math.max(top, point[1]);
+            bottom = Math.min(bottom, point[1]);
+        }
+
+        // Each convex hull point is the center of a pixel. However, said pixels each have area. We must take into
+        // account the size of the pixels when calculating the bounds. The pixel dimensions depend on the scale and
+        // rotation (as we're treating pixels as squares, which change dimensions when rotated). Note that Scratch
+        // doesn't do this (even though it really should). I do so here because I'm pedantic.
+        const xa = this.transform[0] / 2;
+        const xb = this.transform[3] / 2;
+        const halfPixelX =
+            (Math.abs(xa) + Math.abs(xb)) / this.costume.dimensions.width;
+        const ya = this.transform[1] / 2;
+        const yb = this.transform[4] / 2;
+        const halfPixelY =
+            (Math.abs(ya) + Math.abs(yb)) / this.costume.dimensions.height;
+        left -= halfPixelX;
+        right += halfPixelX;
+        bottom -= halfPixelY;
+        top += halfPixelY;
+
+        return Rectangle.fromBounds(left, right, bottom, top, result);
+    }
+
+    /**
+     * Return the best pixel-snapped bounds currently available, used to estimate the area needed for touching queries.
+     * Uses the convex hull if available, otherwise uses the tight bounds.
+     */
+    getFastPixelBounds(result = new Rectangle()) {
+        // Note that this isn't transformedHullDirty, but convexHullDirty. Transforming the hull isn't expensive
+        // compared to calculating it in the first place, and saves a lot of pixel checks.
+        if (this.convexHullDirty) {
+            return this.getAABB(result).expandToInt();
+        }
+        return this.getTightBounds(result).expandToInt();
+    }
+
     /**
      * Check whether a given point collides with this drawable. Requires the inverse transform to be up-to-date. Faster
      * than `isTouchingPoint` when called in a loop.
@@ -148,8 +209,8 @@ export default class Drawable {
     }
 
     isTouchingDrawable(other: Drawable) {
-        const myBounds = this.getAABB(__intersectionBoundsSelf).expandToInt();
-        const otherBounds = other.getAABB(__intersectionBoundsOther).expandToInt();
+        const myBounds = this.getFastPixelBounds(__intersectionBoundsSelf);
+        const otherBounds = other.getFastPixelBounds(__intersectionBoundsOther);
         if (!myBounds.intersects(otherBounds)) {
             return false;
         }
@@ -175,5 +236,131 @@ export default class Drawable {
         }
 
         return false;
+    }
+
+    private updateConvexHull() {
+        const silhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+        if (!silhouette) {
+            this.convexHull.length = 0;
+            return;
+        }
+        const width = silhouette.width;
+        const height = silhouette.height;
+        const effects = this.target.effects;
+        const costumeDimensions = this.costume.dimensions;
+
+        /**
+         * Return the determinant of two vectors, the vector from A to B and the vector from A to C.
+         *
+         * The determinant is useful in this case to know if AC is counter-clockwise from AB.
+         * A positive value means that AC is counter-clockwise from AB. A negative value means AC is clockwise from AB.
+         */
+        const determinant = (A: vec2, B: vec2, C: vec2) => {
+            // AB = B - A
+            // AC = C - A
+            // det (AB BC) = AB0 * AC1 - AB1 * AC0
+            return (((B[0] - A[0]) * (C[1] - A[1])) - ((B[1] - A[1]) * (C[0] - A[0])));
+        };
+
+        const leftHull = this.convexHull;
+        leftHull.length = 0;
+        const rightHull = __rightHull;
+        rightHull.length = 0;
+        const pixelPos = vec2.create();
+        const effectPos = vec2.create();
+        let currentPoint: vec2 | undefined;
+        const useEffects = effects.bitmask !== 0;
+
+        // Not Scratch-space: y increases as we go downwards.
+        for (let y = 0; y < height; y++) {
+            pixelPos[1] = ((height - y - 1) + 0.5) / height;
+
+            let x;
+            // Move rightwards until we hit an opaque pixel.
+            for (x = 0; x < width; x++) {
+                pixelPos[0] = (x + 0.5) / width;
+                let pixelX = x;
+                let pixelY = y;
+                if (useEffects) {
+                    effectTransformPoint(effects, costumeDimensions, pixelPos, pixelPos);
+                    pixelX = Math.floor(pixelPos[0] * width);
+                    pixelY = height - Math.floor(pixelPos[1] * height) - 1;
+                }
+
+                if (silhouette.sampleTexelAlpha(pixelX, pixelY) > 0) {
+                    currentPoint = vec2.copy(vec2.create(), pixelPos);
+                    break;
+                }
+            }
+
+            // No opaque pixels. Try again on the next line.
+            if (x >= width) {
+                continue;
+            }
+
+            // If appending the current point to the left hull makes a counterclockwise turn, we want to append the
+            // current point to it. Otherwise, we remove hull points until the current point makes a counterclockwise
+            // turn with the last two points.
+            while (leftHull.length >= 2) {
+                if (determinant(leftHull[leftHull.length - 1], leftHull[leftHull.length - 2], currentPoint!) < 0) {
+                    break;
+                }
+                leftHull.pop();
+            }
+            leftHull.push(currentPoint!);
+
+            // Now we repeat the process for the right side: move leftwards from the right.
+            for (x = width - 1; x >= 0; x--) {
+                pixelPos[0] = (x + 0.5) / width;
+                let pixelX = x;
+                let pixelY = y;
+                if (useEffects) {
+                    effectTransformPoint(effects, costumeDimensions, pixelPos, effectPos);
+                    pixelX = Math.floor(pixelPos[0] * width);
+                    pixelY = height - Math.floor(pixelPos[1] * height) - 1;
+                }
+
+                if (silhouette.sampleTexelAlpha(pixelX, pixelY) > 0) {
+                    currentPoint = vec2.copy(vec2.create(), pixelPos);
+                    break;
+                }
+            }
+
+            // Now we remove hull points until the current point makes a *clockwise* turn with the last two points--
+            // note the > 0 insteaf of < 0.
+            while (rightHull.length >= 2) {
+                if (determinant(rightHull[rightHull.length - 1], rightHull[rightHull.length - 2], currentPoint!) > 0) {
+                    break;
+                }
+                rightHull.pop();
+            }
+            rightHull.push(currentPoint!);
+        }
+
+        // Concatenate the two hulls, adding the points from the right in reverse so all the points are clockwise.
+        for (let i = rightHull.length - 1; i >= 0; i--) {
+            leftHull.push(rightHull[i]);
+        }
+    }
+
+    private updateTransformedHull() {
+        if (this.transformDirty) {
+            this.updateTransform();
+        }
+
+        if (this.convexHullDirty) {
+            this.updateConvexHull();
+        }
+
+        const hull = this.convexHull;
+        const transformedHull = this.transformedHull;
+        // Reuse existing hull points instead of allocating new ones.
+        if (transformedHull.length > hull.length) transformedHull.length = hull.length;
+        for (let i = 0; i < hull.length; i++) {
+            let point = hull[i];
+            if (!point) point = vec2.create();
+            const transformedPoint = vec2.transformMat3(point, point, this.transform);
+            transformedHull[i] = transformedPoint;
+        }
     }
 }

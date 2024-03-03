@@ -18,10 +18,9 @@ const MAX_CLONES = 300;
 const FENCE_SIZE = 15;
 
 /**
- * Reused memory location for storing the calculated AABB of a target; used for fencing to avoid allocating a new
- * Rectangle every time a target moves.
+ * Reused memory location for storing targets' bounds temporarily.
  */
-const __aabbRect = new Rectangle();
+const __boundsRect = new Rectangle();
 
 export default class Target {
     public readonly runtime: Runtime;
@@ -224,7 +223,7 @@ export default class Target {
         // Fencing: keep the sprite visible on the stage by preventing it from moving completely off the edge.
         const dx = x - this._position.x;
         const dy = y - this._position.y;
-        const fenceBounds = this.drawable.getAABB(__aabbRect);
+        const fenceBounds = this.drawable.getAABB(__boundsRect);
         const inset = Math.min(FENCE_SIZE, Math.floor(Math.min(fenceBounds.width, fenceBounds.height) / 2));
 
         const stageRight = this.runtime.stageBounds.right - inset;
@@ -328,5 +327,13 @@ export default class Target {
         if (this.sprite.isStage) return;
         this._visible = visible;
         this.runtime.requestRedraw();
+    }
+
+    public isTouchingEdge(): boolean {
+        const bounds = this.drawable.getTightBounds(__boundsRect);
+        return bounds.left < this.runtime.stageBounds.left ||
+            bounds.right > this.runtime.stageBounds.right ||
+            bounds.top > this.runtime.stageBounds.top ||
+            bounds.bottom < this.runtime.stageBounds.bottom;
     }
 }

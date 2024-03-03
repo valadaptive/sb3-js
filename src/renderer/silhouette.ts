@@ -5,8 +5,8 @@ const intMax = (i: number, j: number) => i ^ ((i ^ j) & ((i - j) >> 31));
 
 export default class Silhouette {
     private data!: Uint8ClampedArray;
-    private width!: number;
-    private height!: number;
+    public width!: number;
+    public height!: number;
 
     constructor(image: HTMLImageElement | ImageData) {
         this.update(image);
@@ -41,11 +41,11 @@ export default class Silhouette {
      * @param y Normalized y-coordinate (0 to 1).
      * @param dst The destination array to write the result (RGBA) to.
      */
-    sample(x: number, y: number, dst: Uint8ClampedArray): void {
+    public sample(x: number, y: number, dst: Uint8ClampedArray): void {
         this.sampleTexel(Math.floor(x * this.width), Math.floor(y * this.height), dst);
     }
 
-    private sampleTexel(x: number, y: number, dst: Uint8ClampedArray) {
+    public sampleTexel(x: number, y: number, dst: Uint8ClampedArray) {
         x = intMin(intMax(x, 0), this.width - 1);
         y = intMin(intMax(y, 0), this.height - 1);
         const index = ((y * this.width) + x) * 4;
@@ -63,11 +63,11 @@ export default class Silhouette {
      * @param y Normalized y-coordinate (0 to 1).
      * @returns True if the alpha value at the given point is greater than 0.
      */
-    isTouching(x: number, y: number): boolean {
+    public isTouching(x: number, y: number): boolean {
         return this.sampleTexelAlpha(Math.floor(x * this.width), Math.floor(y * this.height)) > 0;
     }
 
-    private sampleTexelAlpha(x: number, y: number) {
+    public sampleTexelAlpha(x: number, y: number) {
         x = intMin(intMax(x, 0), this.width - 1);
         y = intMin(intMax(y, 0), this.height - 1);
         const index = ((y * this.width) + x) * 4;

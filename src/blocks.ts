@@ -264,7 +264,78 @@ export const motion_sety = new ProtoBlock({
     },
 });
 
-// TODO: motion_ifonedgebounce (requires sprite fencing)
+export const motion_ifonedgebounce = new ProtoBlock({
+    opcode: 'motion_ifonedgebounce',
+    inputs: {},
+    execute: function* (_, ctx) {
+        const stageBounds = ctx.stageBounds;
+        let targetBounds = ctx.target.drawable.getTightBounds();
+
+        // Distance from the edge of the stage to the edge of the target
+        const distLeft = Math.max(0, -stageBounds.left + targetBounds.left);
+        const distRight = Math.max(0, stageBounds.right - targetBounds.right);
+        const distBottom = Math.max(0, -stageBounds.bottom + targetBounds.bottom);
+        const distTop = Math.max(0, stageBounds.top - targetBounds.top);
+        let nearestEdge;
+        let nearestDist = Infinity;
+        if (distLeft < nearestDist) {
+            nearestEdge = 'left';
+            nearestDist = distLeft;
+        }
+        if (distRight < nearestDist) {
+            nearestEdge = 'right';
+            nearestDist = distRight;
+        }
+        if (distBottom < nearestDist) {
+            nearestEdge = 'bottom';
+            nearestDist = distBottom;
+        }
+        if (distTop < nearestDist) {
+            nearestEdge = 'top';
+            nearestDist = distTop;
+        }
+        if (nearestDist > 0) return; // Not touching any edge
+
+        // Point away from the nearest edge
+        const radians = (90 - ctx.target.direction) * Math.PI / 180;
+        let dirx = Math.cos(radians);
+        let diry = Math.sin(radians);
+        switch (nearestEdge) {
+            case 'left':
+                dirx = Math.max(0.2, Math.abs(dirx));
+                break;
+            case 'right':
+                dirx = -Math.max(0.2, Math.abs(dirx));
+                break;
+            case 'bottom':
+                diry = Math.max(0.2, Math.abs(diry));
+                break;
+            case 'top':
+                diry = -Math.max(0.2, Math.abs(diry));
+                break;
+        }
+        const newDirection = (-Math.atan2(diry, dirx) * 180 / Math.PI) + 90;
+        ctx.target.direction = newDirection;
+        // Recalculate bounds after changing direction
+        targetBounds = ctx.target.drawable.getTightBounds();
+        // Move away from the edge
+        let dx = 0;
+        let dy = 0;
+        if (targetBounds.left < stageBounds.left) {
+            dx += stageBounds.left - targetBounds.left;
+        }
+        if (targetBounds.right > stageBounds.right) {
+            dx += stageBounds.right - targetBounds.right;
+        }
+        if (targetBounds.bottom < stageBounds.bottom) {
+            dy += stageBounds.bottom - targetBounds.bottom;
+        }
+        if (targetBounds.top > stageBounds.top) {
+            dy += stageBounds.top - targetBounds.top;
+        }
+        ctx.target.moveTo(ctx.target.position.x + dx, ctx.target.position.y + dy);
+    },
+});
 
 export const motion_setrotationstyle = new ProtoBlock({
     opcode: 'motion_setrotationstyle',
@@ -876,8 +947,7 @@ export const sensing_touchingobject = new ProtoBlock({
             const isTouching = ctx.target.drawable.isTouchingPoint(x, y);
             return isTouching;
         } else if (target === '_edge_') {
-            // TODO
-            return false;
+            return ctx.target.isTouchingEdge();
         } else {
             const other = ctx.project.getTargetByName(target);
             if (other) {
