@@ -875,9 +875,15 @@ export const sensing_touchingobject = new ProtoBlock({
             const {x, y} = ctx.io.mousePosition;
             const isTouching = ctx.target.drawable.isTouchingPoint(x, y);
             return isTouching;
-        } else {
+        } else if (target === '_edge_') {
             // TODO
             return false;
+        } else {
+            const other = ctx.project.getTargetByName(target);
+            if (other) {
+                const isTouching = ctx.target.drawable.isTouchingDrawable(other.drawable);
+                return isTouching;
+            }
         }
     },
     returnType: ['boolean'],

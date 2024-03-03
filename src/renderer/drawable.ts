@@ -7,8 +7,11 @@ import Shader from './shader.js';
 import Rectangle from './rectangle.js';
 import {effectTransformPoint} from './effect-transform.js';
 import {GraphicEffects} from '../effects.js';
+import Silhouette from './silhouette.js';
 
 const __localPosition = vec2.create();
+const __intersectionBoundsSelf = new Rectangle();
+const __intersectionBoundsOther = new Rectangle();
 
 export default class Drawable {
     private transform: mat3 = mat3.create();
@@ -116,10 +119,11 @@ export default class Drawable {
         return Rectangle.fromMatrix(this.transform, result);
     }
 
-    isTouchingPoint(x: number, y: number) {
-        if (this.inverseTransformDirty) {
-            this.updateInverseTransform();
-        }
+    /**
+     * Check whether a given point collides with this drawable. Requires the inverse transform to be up-to-date. Faster
+     * than `isTouchingPoint` when called in a loop.
+     */
+    private checkPointCollision(x: number, y: number, silhouette: Silhouette) {
         vec2.set(__localPosition, x, y);
         vec2.transformMat3(__localPosition, __localPosition, this.inverseTransform);
         if (__localPosition[0] < 0 || __localPosition[0] > 1 || __localPosition[1] < 0 || __localPosition[1] > 1) {
@@ -131,8 +135,45 @@ export default class Drawable {
         if ((effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0) {
             effectTransformPoint(effects, this.costume.dimensions, __localPosition, __localPosition);
         }
-        return this.costume.skin
-            ?.getSilhouette(this.target.size * 0.01)
-            ?.isTouching(__localPosition[0], __localPosition[1]);
+        return silhouette.isTouching(__localPosition[0], __localPosition[1]);
+    }
+
+    public isTouchingPoint(x: number, y: number) {
+        const silhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+        if (!silhouette) return false;
+        if (this.inverseTransformDirty) {
+            this.updateInverseTransform();
+        }
+        return this.checkPointCollision(x, y, silhouette);
+    }
+
+    isTouchingDrawable(other: Drawable) {
+        const myBounds = this.getAABB(__intersectionBoundsSelf).expandToInt();
+        const otherBounds = other.getAABB(__intersectionBoundsOther).expandToInt();
+        if (!myBounds.intersects(otherBounds)) {
+            return false;
+        }
+
+        const bounds = Rectangle.intersection(myBounds, otherBounds, __intersectionBoundsSelf);
+        const mySilhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+        if (!mySilhouette) return false;
+        const otherSilhouette = other.costume.skin?.getSilhouette(other.target.size * 0.01);
+        if (!otherSilhouette) return false;
+        if (this.inverseTransformDirty) {
+            this.updateInverseTransform();
+        }
+        if (other.inverseTransformDirty) {
+            other.updateInverseTransform();
+        }
+
+        for (let x = bounds.left; x <= bounds.right; x++) {
+            for (let y = bounds.bottom; y <= bounds.top; y++) {
+                if (this.checkPointCollision(x, y, mySilhouette) && other.checkPointCollision(x, y, otherSilhouette)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

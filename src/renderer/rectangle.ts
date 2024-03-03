@@ -42,6 +42,34 @@ export default class Rectangle {
         return result;
     }
 
+    public intersects(other: Rectangle) {
+        return (
+            this.left <= other.right &&
+            this.right >= other.left &&
+            this.bottom <= other.top &&
+            this.top >= other.bottom
+        );
+    }
+
+    /**
+     * Get the intersection of two rectangles. Either rectangle is allowed to alias `result`.
+     */
+    public static intersection(a: Rectangle, b: Rectangle, result = new Rectangle()) {
+        result.left = Math.max(a.left, b.left);
+        result.right = Math.min(a.right, b.right);
+        result.bottom = Math.max(a.bottom, b.bottom);
+        result.top = Math.min(a.top, b.top);
+        return result;
+    }
+
+    public expandToInt() {
+        this.left = Math.floor(this.left);
+        this.right = Math.ceil(this.right);
+        this.bottom = Math.floor(this.bottom);
+        this.top = Math.ceil(this.top);
+        return this;
+    }
+
     get width() {
         return this.right - this.left;
     }
