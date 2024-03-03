@@ -137,8 +137,19 @@ export type BlockInputShape<T extends BlockInput> = T extends BlockInput<string,
 
 export const NumberInput = new BlockInput('number', unionInput('number', 'string', 'boolean', 'block'));
 export const StringInput = new BlockInput('string', unionInput('number', 'string', 'boolean', 'block'));
-export const BooleanInput = new BlockInput('boolean', unionInput('number', 'string', 'boolean', 'block'));
-export const StackInput = new BlockInput('stack', arrayInput('block'));
+export const BooleanInput = new BlockInput(
+    'boolean',
+    unionInput('number', 'string', 'boolean', 'block'),
+    {unpluggedValue: false},
+);
+// Used for custom block inputs. We could narrow these to number/string or boolean inputs but that would require parsing
+// the proccode.
+export const AnyInput = new BlockInput(
+    'any',
+    unionInput('number', 'string', 'boolean', 'block'),
+    {unpluggedValue: false},
+);
+export const StackInput = new BlockInput('stack', arrayInput('block'), {unpluggedValue: []});
 export const StringField = new BlockInput('string', 'string');
 export const VariableField = new BlockInput('variable', objectInput({value: 'string', id: 'string'}));
 

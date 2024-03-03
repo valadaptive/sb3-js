@@ -1,7 +1,7 @@
 - Basic interpreter (done)
 - Basic renderer (done)
 - Custom block support (done)
-- Warp mode
+- Warp mode (done)
 - Clones (done)
 - Promise-throwing stuff for async reporters
 - Graphic effects

@@ -22,6 +22,11 @@ export const STOP_THIS_SCRIPT = Symbol('STOP_THREAD');
 
 export const PARK_THREAD = Symbol('PARK_THREAD');
 
+/**
+ * Amount of time we can spend in warp mode before yielding (in milliseconds).
+ */
+const WARP_TIME = 500;
+
 export default class Thread {
     public status: ThreadStatus;
     public script: Block[];
@@ -32,6 +37,8 @@ export default class Thread {
     private generator: BlockGenerator;
     /** Increments when we enter a warp-mode procedure; decrements when we exit one. */
     private warpCounter: number = 0;
+    /** The time at which warp-mode was entered (warpCounter transitioned from 0 to a non-zero value). */
+    private warpTimer: number = 0;
     /**
      * Stack of custom procedure arguments frames. There *is* a way to implement custom procedure arguments with only
      * generator functions (have the "get procedure argument" block yield, and have the procedures_definition block
@@ -95,6 +102,10 @@ export default class Thread {
         this.emitUnpark();
     }
 
+    park() {
+        this.status = ThreadStatus.PARKED;
+    }
+
     resume() {
         this.status = ThreadStatus.RUNNING;
         this.emitUnpark();
@@ -136,32 +147,49 @@ export default class Thread {
         this.blockContext.target = this.target;
         this.blockContext.thread = this;
 
-        try {
-            const {done, value} = this.generator.next(this.resolvedValue);
-            if (done) {
-                this.retire();
-            }
-            if (typeof value === 'object' && value instanceof Promise) {
-                // TODO: proper thread park/unpark support will require a way to notify other threads that are parked on
-                // this thread that they can unpark themselves too.
-                this.status = ThreadStatus.PARKED;
-                const generation = this.generation;
-                value.then(resolved => {
-                    if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
-                    this.resolvedValue = resolved;
-                    this.resume();
-                });
-            } else if (value === PARK_THREAD) {
-                this.status = ThreadStatus.PARKED;
-            }
-        } catch (e) {
-            if (e === STOP_THIS_SCRIPT) {
-                this.retire();
-            } else {
-                throw e;
-            }
+        if (this.warpCounter > 0) {
+            // Reset the warp timer every tick / frame.
+            this.warpTimer = Date.now();
         }
-        this.resolvedValue = undefined;
+
+        while (true) {
+            // The thread was parked (or stopped), either last iteration or in a previous tick.
+            if (this.status !== ThreadStatus.RUNNING) break;
+
+            try {
+                const {done, value} = this.generator.next(this.resolvedValue);
+                if (done) {
+                    this.retire();
+                }
+                if (typeof value === 'object' && value instanceof Promise) {
+                    this.park();
+                    const generation = this.generation;
+
+                    // We handle promises by parking the thread and resuming it when the promise resolves. We then pass
+                    // the resolved value of the promise back into the generator function.
+                    value.then(resolved => {
+                        // If the thread has been stopped or restarted, we're working with stale state and shouldn't do
+                        // anything.
+                        if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
+                        // On the next iteration of step(), this.resolvedValue will be passed back into the generator.
+                        this.resolvedValue = resolved;
+                        this.resume();
+                    });
+                } else if (value === PARK_THREAD) {
+                    this.park();
+                }
+            } catch (e) {
+                if (e === STOP_THIS_SCRIPT) {
+                    this.retire();
+                } else {
+                    throw e;
+                }
+            }
+            this.resolvedValue = undefined;
+
+            // We've yielded out of the thread. If we're in warp mode and haven't run out of time, keep going.
+            if (this.warpCounter === 0 || (Date.now() - this.warpTimer) > WARP_TIME) break;
+        }
     }
 
     getParam(name: string): string | number | boolean {
@@ -172,7 +200,14 @@ export default class Thread {
 
     pushFrame(procedure: ProtoBlock, params: Params, warp: boolean) {
         this.callStack.push({params, procedure});
-        if (warp) this.warpCounter++;
+        const wasNotInWarpMode = !this.warpMode;
+        // Fun fact: Phosphorus does something different here. It increments the warp counter if the procedure is
+        // warp-mode, *or if the thread is already in warp mode*. This means that popFrame could decrement the warp
+        // counter without having to know if the procedure was warp-mode or not.
+        if (warp) {
+            this.warpCounter++;
+            if (wasNotInWarpMode) this.warpTimer = Date.now();
+        }
     }
 
     popFrame(warp: boolean) {
