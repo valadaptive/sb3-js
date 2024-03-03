@@ -401,30 +401,27 @@ const parseBlock = (
 
     const inputValues: Record<string, BlockInputValueShapeFor<BlockInputValue>> = {};
 
-    for (const inputName in jsonBlock.inputs) {
-        if (!Object.prototype.hasOwnProperty.call(jsonBlock.inputs, inputName)) {
+    for (const inputName in protoBlock.inputs) {
+        if (!Object.prototype.hasOwnProperty.call(protoBlock.inputs, inputName)) {
             continue;
         }
 
-        if (jsonBlock.opcode === 'procedures_call' && !(inputName in protoBlock.inputs)) {
-            // procedures_call blocks can retain deleted inputs, so we should silently ignore them
-            continue;
+        if (Object.prototype.hasOwnProperty.call(jsonBlock.inputs, inputName)) {
+            const input = jsonBlock.inputs[inputName];
+            if (input[0] > ShadowInfo.INPUT_DIFF_BLOCK_SHADOW) {
+                throw new Error(`Unknown shadow info: ${input[0]}`);
+            }
+
+            inputValues[inputName] = parseBlockInput(inputName, input[1], jsonTarget, protoBlock, customBlocks);
+        } else if (Object.prototype.hasOwnProperty.call(jsonBlock.fields, inputName)) {
+            inputValues[inputName] = parseBlockField(inputName, jsonBlock.fields[inputName], protoBlock);
+        } else if (typeof protoBlock.inputs[inputName].unpluggedValue !== 'undefined') {
+            // Note that we specifically check if the type !== undefined, not the truthiness value of it, because the
+            // most important "unplugged value" we care about is `false`, for unplugged Boolean inputs.
+            inputValues[inputName] = protoBlock.inputs[inputName].unpluggedValue!;
+        } else {
+            throw new Error(`Block input ${inputName} is missing`);
         }
-
-        const input = jsonBlock.inputs[inputName];
-        if (input[0] > ShadowInfo.INPUT_DIFF_BLOCK_SHADOW) {
-            throw new Error(`Unknown shadow info: ${input[0]}`);
-        }
-
-        inputValues[inputName] = parseBlockInput(inputName, input[1], jsonTarget, protoBlock, customBlocks);
-    }
-
-    for (const fieldName in jsonBlock.fields) {
-        if (!Object.prototype.hasOwnProperty.call(jsonBlock.fields, fieldName)) {
-            continue;
-        }
-
-        inputValues[fieldName] = parseBlockField(fieldName, jsonBlock.fields[fieldName], protoBlock);
     }
 
     const block = new Block({

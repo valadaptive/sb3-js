@@ -1,4 +1,4 @@
-import {Block, BlockInput, ProtoBlock, StringInput} from './block.js';
+import {Block, BlockInput, ProtoBlock, AnyInput} from './block.js';
 import {STOP_THIS_SCRIPT} from './interpreter/thread.js';
 
 const STUB = function*() {};
@@ -29,7 +29,9 @@ export const makeCustomBlockStub = (
         const argumentName = argumentnames[i];
         const argumentDefault = argumentdefaults[i];
 
-        inputs[argumentId] = StringInput;
+        // Input type that can take any value and defaults to `false` like unplugged Boolean inputs. This lets us handle
+        // unplugged inputs without having to parse the proccode.
+        inputs[argumentId] = AnyInput;
         argIdsToNames[argumentId] = argumentName;
         argDefaults[argumentId] = argumentDefault;
     }
