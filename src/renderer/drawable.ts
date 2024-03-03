@@ -54,5 +54,29 @@ export default class Drawable {
         }
 
         this.gl.uniformMatrix3fv(shader.uniformLocations.u_transform, false, this.transform);
+
+        const effects = this.target.effects;
+        if (effects.bitmask !== 0) {
+            this.gl.uniform1i(shader.uniformLocations.u_effects_bitmask, effects.bitmask);
+            this.gl.uniform2f(
+                shader.uniformLocations.u_dimensions,
+                this.target.sprite.costumes[this.target.currentCostume].dimensions.width,
+                this.target.sprite.costumes[this.target.currentCostume].dimensions.height,
+            );
+            this.gl.uniform4f(
+                shader.uniformLocations.u_effects_color_fisheye_whirl_pixelate,
+                effects.u_color,
+                effects.u_fisheye,
+                effects.u_whirl,
+                effects.u_pixelate,
+            );
+            this.gl.uniform4f(
+                shader.uniformLocations.u_effects_mosaic_brightness_ghost,
+                effects.u_mosaic,
+                effects.u_brightness,
+                effects.u_ghost,
+                0,
+            );
+        }
     }
 }

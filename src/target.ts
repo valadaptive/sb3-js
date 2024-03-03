@@ -1,5 +1,6 @@
 import {SomeProtoBlock} from './block.js';
 import {control_start_as_clone} from './blocks.js';
+import {GraphicEffects} from './effects.js';
 import Thread from './interpreter/thread.js';
 import Project from './project.js';
 import Drawable from './renderer/drawable.js';
@@ -31,6 +32,7 @@ export default class Target {
     public tempo: number;
     public videoTransparency: number;
     public videoState: string;
+    public effects: GraphicEffects;
 
     public variables: Map<string, string | number | boolean>;
     public lists: Map<string, (string | number | boolean)[]>;
@@ -57,6 +59,7 @@ export default class Target {
         tempo: number;
         videoTransparency: number;
         videoState: string;
+        effects?: GraphicEffects;
         variables: Map<string, string | number | boolean>;
         lists: Map<string, (string | number | boolean)[]>;
     }) {
@@ -80,6 +83,7 @@ export default class Target {
         this.tempo = options.tempo;
         this.videoTransparency = options.videoTransparency;
         this.videoState = options.videoState;
+        this.effects = options.effects ?? new GraphicEffects();
         this.variables = options.variables;
         this.lists = options.lists;
 
@@ -109,26 +113,26 @@ export default class Target {
         for (const [name, list] of this.lists) {
             newLists.set(name, list.slice(0));
         }
-        const original = this.original;
         const clone = new Target({
             isOriginal: false,
-            original,
-            runtime: original.runtime,
-            project: original.project,
-            sprite: original.sprite,
-            x: original.x,
-            y: original.y,
-            direction: original.direction,
-            size: original.size,
-            visible: original.visible,
-            rotationStyle: original.rotationStyle,
-            draggable: original.draggable,
-            currentCostume: original.currentCostume,
-            volume: original.volume,
-            tempo: original.tempo,
-            videoTransparency: original.videoTransparency,
-            videoState: original.videoState,
-            variables: new Map(original.variables),
+            original: this.original,
+            runtime: this.runtime,
+            project: this.project,
+            sprite: this.sprite,
+            x: this.x,
+            y: this.y,
+            direction: this.direction,
+            size: this.size,
+            visible: this.visible,
+            rotationStyle: this.rotationStyle,
+            draggable: this.draggable,
+            currentCostume: this.currentCostume,
+            volume: this.volume,
+            tempo: this.tempo,
+            videoTransparency: this.videoTransparency,
+            videoState: this.videoState,
+            effects: this.effects.clone(),
+            variables: new Map(this.variables),
             lists: newLists,
         });
         return clone;

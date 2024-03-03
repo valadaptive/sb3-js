@@ -31,7 +31,7 @@ export default class Project {
     }
 
     public getTargetByName(name: string): Target | null {
-        return this.targets.find(target => target.sprite.name === name) ?? null;
+        return this.targets.find(target => target.sprite.name === name && target.isOriginal) ?? null;
     }
 
     public moveTargetToFront(target: Target) {

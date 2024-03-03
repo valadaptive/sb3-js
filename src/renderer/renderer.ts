@@ -10,6 +10,7 @@ export default class Renderer {
     private readonly gl;
     private readonly stageSize: {width: number; height: number};
     private readonly spriteShader: Shader;
+    private readonly spriteEffectsShader: Shader;
 
     private currentShader!: Shader;
 
@@ -56,6 +57,7 @@ export default class Renderer {
         gl.activeTexture(gl.TEXTURE0);
 
         this.spriteShader = new Shader(gl, vertexShader, fragmentShader);
+        this.spriteEffectsShader = new Shader(gl, vertexShader, fragmentShader, ['GRAPHIC_EFFECTS']);
         this.setShader(this.spriteShader);
     }
 
@@ -124,6 +126,8 @@ export default class Renderer {
             }
             const texture = skin.getTexture(target.size * screenSpaceScalingFactor * 0.01);
             if (!texture) continue;
+
+            this.setShader(target.effects.bitmask ? this.spriteEffectsShader : this.spriteShader);
 
             let drawable = target.drawable;
             if (!drawable) {

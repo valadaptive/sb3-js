@@ -6,9 +6,10 @@ export default class Shader {
     attribLocations: Record<string, number>;
     uniformLocations: Record<string, WebGLUniformLocation>;
 
-    constructor(gl: WebGL2RenderingContext, vertSource: string, fragSource: string) {
-        const vertShader = this.createShader(gl, VERSION + PRECISION + vertSource, gl.VERTEX_SHADER);
-        const fragShader = this.createShader(gl, VERSION + PRECISION + fragSource, gl.FRAGMENT_SHADER);
+    constructor(gl: WebGL2RenderingContext, vertSource: string, fragSource: string, defines: string[] = []) {
+        const definesString = defines.map(define => `#define ${define};`).join('\n');
+        const vertShader = this.createShader(gl, VERSION + PRECISION + definesString + vertSource, gl.VERTEX_SHADER);
+        const fragShader = this.createShader(gl, VERSION + PRECISION + definesString + fragSource, gl.FRAGMENT_SHADER);
 
         const program = gl.createProgram();
         if (!program) {
@@ -55,7 +56,7 @@ export default class Shader {
 
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
             const info = gl.getShaderInfoLog(shader);
-            throw new Error('Could not compile WebGL program. \n' + info);
+            throw new Error(`Could not compile ${type === gl.VERTEX_SHADER ? 'vertex' : 'fragment'} shader. \n` + info);
         }
 
         return shader;

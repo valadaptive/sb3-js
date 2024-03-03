@@ -3,8 +3,7 @@
 - Custom block support (done)
 - Warp mode (done)
 - Clones (done)
-- Promise-throwing stuff for async reporters
-- Graphic effects
+- Graphic effects (done)
 - Sprite click / color / graphic sensing
 - Fencing
 - Monitors
@@ -12,3 +11,4 @@
 - Pen
 - Audio engine
 - Audio effects
+- Promise-throwing stuff for async reporters

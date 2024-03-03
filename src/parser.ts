@@ -516,9 +516,10 @@ const parseScript = (
 ): Block[] => {
     const blocks: Block[] = [];
     let currentBlock: Sb3Block | null = jsonBlock;
+    let currentBlockId: string | null = blockId;
 
     while (true) {
-        blocks.push(parseBlock(currentBlock, blockId, jsonTarget, customBlocks));
+        blocks.push(parseBlock(currentBlock, currentBlockId!, jsonTarget, customBlocks));
         if (currentBlock.next === null) {
             break;
         }
@@ -526,6 +527,7 @@ const parseScript = (
             throw new Error(`Block ${currentBlock.opcode} has next block ${currentBlock.next} which does not exist`);
         }
         currentBlock = jsonTarget.blocks[currentBlock.next];
+        currentBlockId = currentBlock.next;
     }
 
     return blocks;
