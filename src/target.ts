@@ -4,13 +4,24 @@ import {GraphicEffects} from './effects.js';
 import Thread from './interpreter/thread.js';
 import Project from './project.js';
 import Drawable from './renderer/drawable.js';
+import Rectangle from './renderer/rectangle.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
 import {TypedEvent} from './typed-events.js';
 
 export type RotationStyle = 'all around' | 'left-right' | 'don\'t rotate';
 
+/** The maximum number of clones that can exist in a single project (this limit is global, *not* per-sprite). */
 const MAX_CLONES = 300;
+
+/** The number of pixels a sprite is required to leave remaining onscreen around the edge of the stage. */
+const FENCE_SIZE = 15;
+
+/**
+ * Reused memory location for storing the calculated AABB of a target; used for fencing to avoid allocating a new
+ * Rectangle every time a target moves.
+ */
+const __aabbRect = new Rectangle();
 
 export default class Target {
     public readonly runtime: Runtime;
@@ -19,8 +30,7 @@ export default class Target {
 
     public isOriginal: boolean;
     public original: Target;
-    public x: number;
-    public y: number;
+    private _position: {x: number; y: number};
     private _direction: number;
     private _size: number;
     private _visible: boolean;
@@ -38,7 +48,7 @@ export default class Target {
     public lists: Map<string, (string | number | boolean)[]>;
 
     private scriptListenerCleanup: (() => void);
-    public drawable: Drawable | null = null;
+    public drawable = new Drawable(this);
     private hatListeners: Map<string, ((evt: TypedEvent) => Thread)[]> = new Map();
 
     constructor(options: {
@@ -71,8 +81,7 @@ export default class Target {
             throw new Error('Clones must reference an original target');
         }
         this.original = options.original ?? this;
-        this.x = options.x;
-        this.y = options.y;
+        this._position = {x: options.x, y: options.y};
         this._direction = options.direction;
         this._size = options.size;
         this._visible = options.visible;
@@ -116,11 +125,11 @@ export default class Target {
         const clone = new Target({
             isOriginal: false,
             original: this.original,
+            x: this._position.x,
+            y: this._position.y,
             runtime: this.runtime,
             project: this.project,
             sprite: this.sprite,
-            x: this.x,
-            y: this.y,
             direction: this.direction,
             size: this.size,
             visible: this.visible,
@@ -206,12 +215,44 @@ export default class Target {
 
     public moveTo(x: number, y: number): void {
         if (this.sprite.isStage) return;
-        this.x = x;
-        this.y = y;
+
+        // Fencing: keep the sprite visible on the stage by preventing it from moving completely off the edge.
+        const dx = x - this._position.x;
+        const dy = y - this._position.y;
+        const fenceBounds = this.drawable.getAABB(__aabbRect);
+        const inset = Math.min(FENCE_SIZE, Math.floor(Math.min(fenceBounds.width, fenceBounds.height) / 2));
+
+        const stageRight = this.runtime.stageBounds.right - inset;
+        const stageLeft = this.runtime.stageBounds.left + inset;
+        const stageTop = this.runtime.stageBounds.top - inset;
+        const stageBottom = this.runtime.stageBounds.bottom + inset;
+
+        if (fenceBounds.right + dx < stageLeft) {
+            x = Math.ceil(this._position.x - (stageRight + fenceBounds.right));
+        } else if (fenceBounds.left + dx > stageRight) {
+            x = Math.floor(this._position.x + (stageRight - fenceBounds.left));
+        }
+
+        if (fenceBounds.top + dy < stageBottom) {
+            y = Math.ceil(this._position.y - (stageTop + fenceBounds.top));
+        } else if (fenceBounds.bottom + dy > stageTop) {
+            y = Math.floor(this._position.y + (stageTop - fenceBounds.bottom));
+        }
+
+        this._position.x = x;
+        this._position.y = y;
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
         this.runtime.requestRedraw();
+    }
+
+    get position(): {readonly x: number; readonly y: number} {
+        return this._position;
+    }
+
+    set position({x, y}) {
+        this.moveTo(x, y);
     }
 
     get direction(): number {

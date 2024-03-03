@@ -1,6 +1,7 @@
 import {Block, BlockGenerator, ProtoBlock} from '../block.js';
 import IO from '../io.js';
 import Project from '../project.js';
+import Rectangle from '../renderer/rectangle.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
 
@@ -9,13 +10,13 @@ import Thread, {PARK_THREAD, ThreadStatus} from './thread.js';
 
 export type BlockContextParams = {
     io: IO;
-    stageSize: {width: number; height: number};
+    stageBounds: Rectangle;
 };
 
 export default class BlockContext {
     private interpreter: Interpreter;
     public io: IO;
-    public stageSize: {width: number; height: number};
+    public stageBounds: Rectangle;
     public project!: Project;
     public target!: Target;
     public stage!: Target;
@@ -24,7 +25,7 @@ export default class BlockContext {
     constructor(interpreter: Interpreter, params: BlockContextParams) {
         this.interpreter = interpreter;
         this.io = params.io;
-        this.stageSize = params.stageSize;
+        this.stageBounds = params.stageBounds;
     }
 
     *evaluate(input: Block | Block[] | string | number | boolean): BlockGenerator {

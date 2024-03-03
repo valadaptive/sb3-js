@@ -1,15 +1,14 @@
 import {mat3} from 'gl-matrix';
 import Target from '../target.js';
 import Shader from './shader.js';
+import Rectangle from './rectangle.js';
 
 export default class Drawable {
-    private gl: WebGL2RenderingContext;
     private transform: mat3 = mat3.create();
     private transformDirty = true;
     private target: Target;
 
-    constructor(gl: WebGL2RenderingContext, target: Target) {
-        this.gl = gl;
+    constructor(target: Target) {
         this.target = target;
     }
 
@@ -20,7 +19,8 @@ export default class Drawable {
     private updateTransform() {
         mat3.identity(this.transform);
         const currentCostume = this.target.sprite.costumes[this.target.currentCostume];
-        mat3.translate(this.transform, this.transform, [this.target.x, this.target.y]);
+        const targetPosition = this.target.position;
+        mat3.translate(this.transform, this.transform, [targetPosition.x, targetPosition.y]);
         switch (this.target.rotationStyle) {
             case 'all around':
                 mat3.rotate(this.transform, this.transform, -(this.target.direction - 90) * Math.PI / 180);
@@ -48,29 +48,29 @@ export default class Drawable {
         this.transformDirty = false;
     }
 
-    setUniforms(shader: Shader) {
+    setUniforms(gl: WebGL2RenderingContext, shader: Shader) {
         if (this.transformDirty) {
             this.updateTransform();
         }
 
-        this.gl.uniformMatrix3fv(shader.uniformLocations.u_transform, false, this.transform);
+        gl.uniformMatrix3fv(shader.uniformLocations.u_transform, false, this.transform);
 
         const effects = this.target.effects;
         if (effects.bitmask !== 0) {
-            this.gl.uniform1i(shader.uniformLocations.u_effects_bitmask, effects.bitmask);
-            this.gl.uniform2f(
+            gl.uniform1i(shader.uniformLocations.u_effects_bitmask, effects.bitmask);
+            gl.uniform2f(
                 shader.uniformLocations.u_dimensions,
                 this.target.sprite.costumes[this.target.currentCostume].dimensions.width,
                 this.target.sprite.costumes[this.target.currentCostume].dimensions.height,
             );
-            this.gl.uniform4f(
+            gl.uniform4f(
                 shader.uniformLocations.u_effects_color_fisheye_whirl_pixelate,
                 effects.u_color,
                 effects.u_fisheye,
                 effects.u_whirl,
                 effects.u_pixelate,
             );
-            this.gl.uniform4f(
+            gl.uniform4f(
                 shader.uniformLocations.u_effects_mosaic_brightness_ghost,
                 effects.u_mosaic,
                 effects.u_brightness,
@@ -78,5 +78,13 @@ export default class Drawable {
                 0,
             );
         }
+    }
+
+    getAABB(result = new Rectangle()) {
+        if (this.transformDirty) {
+            this.updateTransform();
+        }
+
+        return Rectangle.fromMatrix(this.transform, result);
     }
 }

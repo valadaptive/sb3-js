@@ -5,7 +5,7 @@
 - Clones (done)
 - Graphic effects (done)
 - Sprite click / color / graphic sensing
-- Fencing
+- Fencing (done)
 - Monitors
 - Speech bubbles
 - Pen

@@ -4,35 +4,34 @@ import Target from '../target.js';
 import Drawable from './drawable.js';
 import BitmapSkin from './bitmap-skin.js';
 import SVGSkin from './svg-skin.js';
+import Rectangle from './rectangle.js';
 
 export default class Renderer {
     public readonly canvas;
     private readonly gl;
-    private readonly stageSize: {width: number; height: number};
+    private readonly stageBounds: Rectangle;
     private readonly spriteShader: Shader;
     private readonly spriteEffectsShader: Shader;
 
     private currentShader!: Shader;
 
-    constructor(canvas: HTMLCanvasElement, stageSize: {width: number; height: number}) {
+    constructor(canvas: HTMLCanvasElement, stageBounds: Rectangle) {
         this.canvas = canvas;
         // If the container width is a non-integer size, don't blur the canvas.
         this.canvas.style.imageRendering = 'pixelated';
 
         // Set the CSS-space width/height to the stage size.
-        this.canvas.style.width = stageSize.width + 'px';
-        this.canvas.style.height = stageSize.height + 'px';
+        this.canvas.style.width = stageBounds.width + 'px';
+        this.canvas.style.height = stageBounds.height + 'px';
 
         const gl = canvas.getContext('webgl2', {antialias: false});
         if (!gl) {
             throw new Error('WebGL2 is not supported');
         }
         this.gl = gl;
-        this.stageSize = stageSize;
+        this.stageBounds = stageBounds;
 
-        this.canvas.width = stageSize.width;
-        this.canvas.height = stageSize.height;
-        gl.viewport(0, 0, stageSize.width, stageSize.height);
+        this.resize(true);
 
         // Initialize a bunch of WebGL state
 
@@ -80,18 +79,18 @@ export default class Renderer {
             0, // offset (index of the first attribute to start from)
         );
 
-        gl.uniform2f(shader.uniformLocations.u_stageSize, this.stageSize.width, this.stageSize.height);
+        gl.uniform2f(shader.uniformLocations.u_stageSize, this.stageBounds.width, this.stageBounds.height);
 
         this.currentShader = shader;
     }
 
     /** Update the screen-space canvas resolution. */
-    private resize() {
+    private resize(force = false) {
         const stageRect = this.canvas.getBoundingClientRect();
         const ratio = window.devicePixelRatio;
         const screenSpaceWidth = Math.round(stageRect.width * ratio);
         const screenSpaceHeight = Math.round(stageRect.height * ratio);
-        if (this.canvas.width !== screenSpaceWidth || this.canvas.height !== screenSpaceHeight) {
+        if (this.canvas.width !== screenSpaceWidth || this.canvas.height !== screenSpaceHeight || force) {
             this.canvas.width = screenSpaceWidth;
             this.canvas.height = screenSpaceHeight;
             this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
@@ -105,7 +104,7 @@ export default class Renderer {
         gl.clearColor(1, 1, 1, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        const screenSpaceScalingFactor = this.canvas.width / this.stageSize.width;
+        const screenSpaceScalingFactor = this.canvas.width / this.stageBounds.width;
 
         for (const target of targets) {
             if (!target.visible) continue;
@@ -131,10 +130,10 @@ export default class Renderer {
 
             let drawable = target.drawable;
             if (!drawable) {
-                drawable = target.drawable = new Drawable(gl, target);
+                drawable = target.drawable = new Drawable(target);
             }
 
-            drawable.setUniforms(this.currentShader);
+            drawable.setUniforms(gl, this.currentShader);
 
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.uniform1i(this.currentShader.uniformLocations.u_texture, 0);

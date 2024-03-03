@@ -30,7 +30,8 @@ export const motion_movesteps = new ProtoBlock({
         const radians = (90 - ctx.target.direction) * Math.PI / 180;
         const dx = steps * Math.cos(radians);
         const dy = steps * Math.sin(radians);
-        ctx.target.moveTo(ctx.target.x + dx, ctx.target.y + dy);
+        const position = ctx.target.position;
+        ctx.target.moveTo(position.x + dx, position.y + dy);
     },
 });
 
@@ -75,13 +76,13 @@ const getPositionByName = (name: string, ctx: BlockContext): {x: number; y: numb
     }
 
     if (name === '_random_') {
-        const x = (Math.random() * ctx.stageSize.width) - (ctx.stageSize.width / 2);
-        const y = (Math.random() * ctx.stageSize.height) - (ctx.stageSize.height / 2);
+        const x = (Math.random() * ctx.stageBounds.width) + ctx.stageBounds.left;
+        const y = (Math.random() * ctx.stageBounds.height) + ctx.stageBounds.bottom;
         return {x, y};
     }
 
     const other = ctx.project.getTargetByName(name);
-    if (other) return {x: other.x, y: other.y};
+    if (other) return other.position;
 
     return null;
 };
@@ -141,7 +142,8 @@ export const motion_glideto = new ProtoBlock({
         const target = toString(ctx.evaluateFast(TO));
         const position = getPositionByName(target, ctx);
         if (position) {
-            yield* glideTo(ctx.target.x, ctx.target.y, position.x, position.y, duration, ctx);
+            const position = ctx.target.position;
+            yield* glideTo(position.x, position.y, position.x, position.y, duration, ctx);
         }
     },
 });
@@ -169,7 +171,8 @@ export const motion_glidesecstoxy = new ProtoBlock({
         const endX = toNumber(ctx.evaluateFast(X));
         const endY = toNumber(ctx.evaluateFast(Y));
 
-        yield* glideTo(ctx.target.x, ctx.target.y, endX, endY, duration, ctx);
+        const position = ctx.target.position;
+        yield* glideTo(position.x, position.y, endX, endY, duration, ctx);
     },
 });
 
@@ -207,8 +210,9 @@ export const motion_pointtowards = new ProtoBlock({
         }
         const position = getPositionByName(target, ctx);
         if (position) {
-            const dx = position.x - ctx.target.x;
-            const dy = position.y - ctx.target.y;
+            const targetPosition = ctx.target.position;
+            const dx = position.x - targetPosition.x;
+            const dy = position.y - targetPosition.y;
             ctx.target.direction = (-Math.atan2(dy, dx) * 180 / Math.PI) + 90;
         }
     },
@@ -221,7 +225,8 @@ export const motion_changexby = new ProtoBlock({
     },
     execute: function* ({DX}, ctx) {
         const dx = toNumber(ctx.evaluateFast(DX));
-        ctx.target.moveTo(ctx.target.x + dx, ctx.target.y);
+        const position = ctx.target.position;
+        ctx.target.moveTo(position.x + dx, position.y);
     },
 });
 
@@ -232,7 +237,7 @@ export const motion_setx = new ProtoBlock({
     },
     execute: function* ({X}, ctx) {
         const x = toNumber(ctx.evaluateFast(X));
-        ctx.target.moveTo(x, ctx.target.y);
+        ctx.target.moveTo(x, ctx.target.position.y);
     },
 });
 
@@ -243,7 +248,8 @@ export const motion_changeyby = new ProtoBlock({
     },
     execute: function* ({DY}, ctx) {
         const dy = toNumber(ctx.evaluateFast(DY));
-        ctx.target.moveTo(ctx.target.x, ctx.target.y + dy);
+        const position = ctx.target.position;
+        ctx.target.moveTo(position.x, position.y + dy);
     },
 });
 
@@ -254,7 +260,7 @@ export const motion_sety = new ProtoBlock({
     },
     execute: function* ({Y}, ctx) {
         const y = toNumber(ctx.evaluateFast(Y));
-        ctx.target.moveTo(ctx.target.x, y);
+        ctx.target.moveTo(ctx.target.position.x, y);
     },
 });
 
@@ -276,7 +282,7 @@ export const motion_xposition = new ProtoBlock({
     opcode: 'motion_xposition',
     inputs: {},
     execute: function* (_, ctx) {
-        return ctx.target.x;
+        return ctx.target.position.x;
     },
 });
 
@@ -284,7 +290,7 @@ export const motion_yposition = new ProtoBlock({
     opcode: 'motion_yposition',
     inputs: {},
     execute: function* (_, ctx) {
-        return ctx.target.y;
+        return ctx.target.position.y;
     },
 });
 

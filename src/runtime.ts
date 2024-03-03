@@ -1,5 +1,4 @@
 import {Block} from './block.js';
-import {STAGE_SIZE} from './constants.js';
 import Costume, {CostumeParams} from './costume.js';
 import {GreenFlagEvent, KeyPressedEvent} from './events.js';
 import IO from './io.js';
@@ -12,13 +11,14 @@ import Sound from './sound.js';
 import Target from './target.js';
 import {TypedEvent} from './typed-events.js';
 import Thread from './interpreter/thread.js';
+import Rectangle from './renderer/rectangle.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
 
 export default class Runtime {
     public stepTime: number = STEP_TIME;
-    public stageSize = STAGE_SIZE;
+    public stageBounds = Rectangle.fromBounds(-240, 240, -180, 180);
 
     private audioContext: AudioContext;
     private project: Project | null = null;
@@ -36,7 +36,7 @@ export default class Runtime {
         this.io = new IO();
         this.interpreter = new Interpreter(this.stepTime, {
             io: this.io,
-            stageSize: this.stageSize,
+            stageBounds: this.stageBounds,
         });
     }
 
@@ -83,7 +83,7 @@ export default class Runtime {
 
         if (!canvas) return;
 
-        const renderer = this.renderer = new Renderer(canvas, this.stageSize);
+        const renderer = this.renderer = new Renderer(canvas, this.stageBounds);
         // Allow canvas to receive keyboard events
         canvas.tabIndex = 0;
         const teardownEventListeners = this.setupEventListeners(canvas);
@@ -102,18 +102,18 @@ export default class Runtime {
 
         window.addEventListener('pointermove', event => {
             const rect = canvas.getBoundingClientRect();
-            let x = (event.clientX - rect.left) * (this.stageSize.width / rect.width);
-            let y = (event.clientY - rect.top) * (this.stageSize.height / rect.height);
+            let x = (event.clientX - rect.left) * (this.stageBounds.width / rect.width);
+            let y = (event.clientY - rect.top) * (this.stageBounds.height / rect.height);
             x = Math.max(
-                -this.stageSize.width / 2,
+                this.stageBounds.left,
                 Math.min(
-                    this.stageSize.width / 2,
-                    Math.round(x - (this.stageSize.width / 2))));
+                    this.stageBounds.right,
+                    Math.round(x + this.stageBounds.left)));
             y = Math.max(
-                -this.stageSize.height / 2,
+                this.stageBounds.bottom,
                 Math.min(
-                    this.stageSize.height / 2,
-                    Math.round(y - (this.stageSize.height / 2))));
+                    this.stageBounds.top,
+                    Math.round(y + this.stageBounds.bottom)));
 
             this.io.mousePosition.x = x;
             this.io.mousePosition.y = -y;
