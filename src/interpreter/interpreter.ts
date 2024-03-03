@@ -23,6 +23,7 @@ export default class Interpreter {
     }
 
     public setProject(project: Project | null) {
+        this.stopAll();
         this.project = project;
 
         // This is obviously a lie, but with no project, blocks should not be executing anyway

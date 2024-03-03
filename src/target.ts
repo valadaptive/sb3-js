@@ -48,7 +48,7 @@ export default class Target {
     public lists: Map<string, (string | number | boolean)[]>;
 
     private scriptListenerCleanup: (() => void);
-    public drawable = new Drawable(this);
+    public drawable;
     private hatListeners: Map<string, ((evt: TypedEvent) => Thread)[]> = new Map();
 
     constructor(options: {
@@ -76,6 +76,7 @@ export default class Target {
         this.runtime = options.runtime;
         this.project = options.project;
         this.sprite = options.sprite;
+        this.drawable = new Drawable(this, this.sprite.costumes[options.currentCostume]);
         this.isOriginal = options.isOriginal;
         if (!this.isOriginal && !options.original) {
             throw new Error('Clones must reference an original target');
@@ -149,6 +150,10 @@ export default class Target {
 
     public remove() {
         this.project.removeTarget(this);
+    }
+
+    public reset() {
+        this.effects.clear();
     }
 
     private setUpScriptListeners(): () => void {
@@ -310,7 +315,7 @@ export default class Target {
 
         this._currentCostume = index;
         if (this.drawable) {
-            this.drawable.setTransformDirty();
+            this.drawable.setCostume(this.sprite.costumes[index]);
         }
         this.runtime.requestRedraw();
     }

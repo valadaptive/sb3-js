@@ -481,6 +481,7 @@ export const looks_changeeffectby = new ProtoBlock({
             effect === 'mosaic' ||
             effect === 'ghost'
         ) ctx.target.effects[effect] += change;
+        if (ctx.target.visible) ctx.target.runtime.requestRedraw();
     },
 });
 
@@ -502,6 +503,7 @@ export const looks_seteffectto = new ProtoBlock({
             effect === 'mosaic' ||
             effect === 'ghost'
         ) ctx.target.effects[effect] = value;
+        if (ctx.target.visible) ctx.target.runtime.requestRedraw();
     },
 });
 
@@ -510,6 +512,7 @@ export const looks_cleargraphiceffects = new ProtoBlock({
     inputs: {},
     execute: function* (_, ctx) {
         ctx.target.effects.clear();
+        if (ctx.target.visible) ctx.target.runtime.requestRedraw();
     },
 });
 
@@ -849,6 +852,36 @@ export const control_delete_this_clone = new ProtoBlock({
 /**
  * Sensing
  */
+
+export const sensing_touchingobjectmenu = new ProtoBlock({
+    opcode: 'sensing_touchingobjectmenu',
+    inputs: {
+        TOUCHINGOBJECTMENU: StringField,
+    },
+    execute: function* ({TOUCHINGOBJECTMENU}) {
+        return TOUCHINGOBJECTMENU;
+    },
+    pure: true,
+});
+
+export const sensing_touchingobject = new ProtoBlock({
+    opcode: 'sensing_touchingobject',
+    inputs: {
+        TOUCHINGOBJECTMENU: StringInput,
+    },
+    execute: function* ({TOUCHINGOBJECTMENU}, ctx) {
+        const target = toString(ctx.evaluateFast(TOUCHINGOBJECTMENU));
+        if (target === '_mouse_') {
+            const {x, y} = ctx.io.mousePosition;
+            const isTouching = ctx.target.drawable.isTouchingPoint(x, y);
+            return isTouching;
+        } else {
+            // TODO
+            return false;
+        }
+    },
+    returnType: ['boolean'],
+});
 
 export const sensing_keyoptions = new ProtoBlock({
     opcode: 'sensing_keyoptions',

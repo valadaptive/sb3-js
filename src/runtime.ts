@@ -198,7 +198,7 @@ export default class Runtime {
 
     public stopAll() {
         this.interpreter.stopAll();
-        this.project?.removeAllClones();
+        this.project?.stopAll();
     }
 
     public stopTargetThreads(target: Target, exceptFor?: Thread) {

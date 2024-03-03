@@ -1,12 +1,13 @@
 import Costume from '../costume.js';
+import Silhouette from './silhouette.js';
 
 import Skin from './skin.js';
 
 export default class BitmapSkin implements Skin {
-    private gl;
     private texture: WebGLTexture;
+    private silhouette: Silhouette;
     constructor(gl: WebGL2RenderingContext, costume: Costume) {
-        this.gl = gl;
+        this.silhouette = new Silhouette(costume.image);
         const texture = gl.createTexture();
         if (!texture) {
             throw new Error('Failed to create texture');
@@ -22,5 +23,9 @@ export default class BitmapSkin implements Skin {
 
     getTexture(): WebGLTexture | null {
         return this.texture;
+    }
+
+    getSilhouette(): Silhouette {
+        return this.silhouette;
     }
 }

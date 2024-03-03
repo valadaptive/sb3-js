@@ -72,12 +72,14 @@ export default class Project {
         this.targets.splice(currentIndex, 0, target);
     }
 
-    public removeAllClones() {
+    public stopAll() {
+        // Remove all clones and reset targets' state
         let nextOriginalTargetIndex = 0;
         for (let i = 0; i < this.targets.length; i++) {
             const target = this.targets[i];
             if (target.isOriginal) {
                 this.targets[nextOriginalTargetIndex] = target;
+                target.reset();
                 nextOriginalTargetIndex++;
             } else {
                 target.destroy();

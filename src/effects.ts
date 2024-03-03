@@ -17,6 +17,12 @@ export class GraphicEffects {
     public static EFFECT_BRIGHTNESS = 1 << 5;
     public static EFFECT_GHOST = 1 << 6;
 
+    public static DISTORTION_EFFECTS =
+        GraphicEffects.EFFECT_FISHEYE |
+        GraphicEffects.EFFECT_WHIRL |
+        GraphicEffects.EFFECT_PIXELATE |
+        GraphicEffects.EFFECT_MOSAIC;
+
     private effectValues = {
         color: 0,
         fisheye: 0,

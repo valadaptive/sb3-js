@@ -1,7 +1,6 @@
 import {vertexShader, fragmentShader} from './shaders.js';
 import Shader from './shader.js';
 import Target from '../target.js';
-import Drawable from './drawable.js';
 import BitmapSkin from './bitmap-skin.js';
 import SVGSkin from './svg-skin.js';
 import Rectangle from './rectangle.js';
@@ -128,12 +127,7 @@ export default class Renderer {
 
             this.setShader(target.effects.bitmask ? this.spriteEffectsShader : this.spriteShader);
 
-            let drawable = target.drawable;
-            if (!drawable) {
-                drawable = target.drawable = new Drawable(target);
-            }
-
-            drawable.setUniforms(gl, this.currentShader);
+            target.drawable.setUniforms(gl, this.currentShader);
 
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.uniform1i(this.currentShader.uniformLocations.u_texture, 0);

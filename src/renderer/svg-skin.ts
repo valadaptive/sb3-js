@@ -1,4 +1,5 @@
 import Costume from '../costume.js';
+import Silhouette from './silhouette.js';
 
 import Skin from './skin.js';
 
@@ -9,6 +10,7 @@ export default class SVGSkin implements Skin {
     private gl;
     private costume: Costume;
     private mipmaps: (WebGLTexture | null)[] = [];
+    private silhouettes: (Silhouette | null)[] = [];
     private maxTextureSize: number;
     private canvas = document.createElement('canvas');
     private ctx;
@@ -16,6 +18,8 @@ export default class SVGSkin implements Skin {
     constructor(gl: WebGL2RenderingContext, costume: Costume) {
         this.gl = gl;
         this.costume = costume;
+        // Make sure drawToCanvas always draws something the first time it's called
+        this.canvas.width = this.canvas.height = 0;
         this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
         const texture = gl.createTexture();
         if (!texture) {
@@ -32,7 +36,22 @@ export default class SVGSkin implements Skin {
         return Math.max(Math.ceil(Math.log2(scale)) + MIPMAP_OFFSET, 0);
     }
 
+    private drawToCanvas(width: number, height: number) {
+        if (width === this.canvas.width && height === this.canvas.height) {
+            return;
+        }
+        this.canvas.width = width;
+        this.canvas.height = height;
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.drawImage(this.costume.image, 0, 0, this.canvas.width, this.canvas.height);
+    }
+
     private makeMipmap(level: number): WebGLTexture | null {
+        // in case we backed off to a level that's already been created
+        if (this.mipmaps[level] !== undefined) {
+            return this.mipmaps[level];
+        }
         const scale = 2 ** (level - MIPMAP_OFFSET);
         const width = this.costume.dimensions.width * scale;
         const height = this.costume.dimensions.height * scale;
@@ -43,12 +62,7 @@ export default class SVGSkin implements Skin {
         if (width > this.maxTextureSize || height > this.maxTextureSize) {
             return this.makeMipmap(level - 1);
         }
-        this.canvas.width = width;
-        this.canvas.height = height;
-        const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        ctx.drawImage(this.costume.image, 0, 0, this.canvas.width, this.canvas.height);
-
+        this.drawToCanvas(width, height);
         const gl = this.gl;
         const texture = gl.createTexture();
         if (!texture) {
@@ -64,6 +78,17 @@ export default class SVGSkin implements Skin {
         return texture;
     }
 
+    private makeSilhouetteMipmap(level: number): Silhouette | null {
+        const scale = 2 ** (level - MIPMAP_OFFSET);
+        const width = this.costume.dimensions.width * scale;
+        const height = this.costume.dimensions.height * scale;
+        if (width < 1 || height < 1) {
+            return null;
+        }
+        this.drawToCanvas(width, height);
+        return new Silhouette(this.ctx.getImageData(0, 0, width, height));
+    }
+
     getTexture(scale: number): WebGLTexture | null {
         const mipLevel = SVGSkin.mipLevelForScale(scale);
         let texture = this.mipmaps[mipLevel];
@@ -72,5 +97,15 @@ export default class SVGSkin implements Skin {
             this.mipmaps[mipLevel] = texture;
         }
         return texture;
+    }
+
+    getSilhouette(scale: number): Silhouette | null {
+        const mipLevel = SVGSkin.mipLevelForScale(scale);
+        let silhouette = this.silhouettes[mipLevel];
+        if (typeof silhouette === 'undefined') {
+            silhouette = this.makeSilhouetteMipmap(mipLevel);
+            this.silhouettes[mipLevel] = silhouette;
+        }
+        return silhouette;
     }
 }
