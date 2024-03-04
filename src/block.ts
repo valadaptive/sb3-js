@@ -159,7 +159,7 @@ export type HatInfo = ({
     type: 'event';
     event: TypedEventConstructor;
 } | {
-    type: 'edgeActivated';
+    type: 'edgeActivated' | 'noop';
 }) & {
     restartExistingThreads: boolean;
 };

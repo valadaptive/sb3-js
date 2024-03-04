@@ -1,5 +1,5 @@
 import {SomeProtoBlock} from './block.js';
-import {control_start_as_clone} from './blocks.js';
+import {control_start_as_clone, event_whenstageclicked, event_whenthisspriteclicked} from './blocks.js';
 import {GraphicEffects} from './effects.js';
 import Thread from './interpreter/thread.js';
 import Project from './project.js';
@@ -49,6 +49,7 @@ export default class Target {
     private scriptListenerCleanup: (() => void);
     public drawable;
     private hatListeners: Map<string, ((evt: TypedEvent) => Thread)[]> = new Map();
+    public click!: () => void;
 
     constructor(options: {
         runtime: Runtime;
@@ -158,14 +159,16 @@ export default class Target {
     private setUpScriptListeners(): () => void {
         const abortController = new AbortController();
         const signal = abortController.signal;
+        const clickHandlers: (() => void)[] = [];
 
         for (const script of this.sprite.scripts) {
             const topBlock = script[0];
             if (!topBlock) continue;
 
             const proto = topBlock.proto as SomeProtoBlock;
+            if (!proto.hat) continue;
 
-            if (proto.hat && proto.hat.type === 'event') {
+            if (proto.hat.type === 'event') {
                 const hat = proto.hat;
                 const eventName = hat.event.EVENT_NAME;
 
@@ -174,7 +177,18 @@ export default class Target {
                 };
                 this.addHatListener(eventName, onEvent, signal);
             }
+
+            if (proto === event_whenthisspriteclicked || proto === event_whenstageclicked) {
+                clickHandlers.push(() =>
+                    this.runtime.launchScript(script, this, null, proto.hat!.restartExistingThreads));
+            }
         }
+
+        this.click = () => {
+            for (const handler of clickHandlers) {
+                handler();
+            }
+        };
 
         return () => {
             abortController.abort();

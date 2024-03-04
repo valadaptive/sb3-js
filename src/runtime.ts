@@ -100,7 +100,7 @@ export default class Runtime {
         const abortController = new AbortController();
         const signal = abortController.signal;
 
-        window.addEventListener('pointermove', event => {
+        const stageCoordsFromPointerEvent = (event: PointerEvent): {x: number; y: number} => {
             const rect = canvas.getBoundingClientRect();
             let x = (event.clientX - rect.left) * (this.stageBounds.width / rect.width);
             let y = (event.clientY - rect.top) * (this.stageBounds.height / rect.height);
@@ -115,12 +115,24 @@ export default class Runtime {
                     this.stageBounds.top,
                     Math.round(y + this.stageBounds.bottom)));
 
+            return {x, y: -y};
+        };
+
+        window.addEventListener('pointermove', event => {
+            const {x, y} = stageCoordsFromPointerEvent(event);
             this.io.mousePosition.x = x;
-            this.io.mousePosition.y = -y;
+            this.io.mousePosition.y = y;
         }, {signal});
 
         canvas.addEventListener('pointerdown', () => {
             this.io.mouseDown = true;
+            if (!this.project || !this.renderer) return;
+            const {x, y} = this.io.mousePosition;
+            // "when this sprite / stage clicked" hats fire when the mouse is pressed, not when it's released.
+            // If no target is clicked, always count the stage as being clicked even if it's transparent where the
+            // cursor is.
+            const clickedTarget = this.renderer.pick(this.project.targets, x, y) ?? this.project.stage;
+            clickedTarget?.click();
         }, {signal});
 
         window.addEventListener('pointerup', () => {

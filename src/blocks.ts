@@ -693,6 +693,27 @@ export const event_whenkeypressed = new ProtoBlock({
     },
 });
 
+// The "when clicked" blocks don't do any event filtering--they're dispatched directly on the proper targets.
+export const event_whenthisspriteclicked = new ProtoBlock({
+    opcode: 'event_whenthisspriteclicked',
+    inputs: {},
+    execute: function* () {},
+    hat: {
+        type: 'noop',
+        restartExistingThreads: true,
+    },
+});
+
+export const event_whenstageclicked = new ProtoBlock({
+    opcode: 'event_whenstageclicked',
+    inputs: {},
+    execute: function* () {},
+    hat: {
+        type: 'noop',
+        restartExistingThreads: true,
+    },
+});
+
 export const event_whenbackdropswitchesto = new ProtoBlock({
     opcode: 'event_whenbackdropswitchesto',
     inputs: {

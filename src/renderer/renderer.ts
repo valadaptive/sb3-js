@@ -136,6 +136,22 @@ export default class Renderer {
         }
     }
 
+    /**
+     * Pick the topmost visible target at a given point. Targets which are fully transparent due to the ghost effect
+     * will not be picked.
+     */
+    public pick(targets: Target[], x: number, y: number): Target | null {
+        // Iterate in top-to-bottom order to pick the topmost target
+        for (let i = targets.length - 1; i >= 0; i--) {
+            const target = targets[i];
+            if (!target.visible || target.effects.ghost >= 100) continue;
+            if (target.drawable.isTouchingPoint(x, y)) {
+                return target;
+            }
+        }
+        return null;
+    }
+
     public destroy() {
         this.gl.getExtension('WEBGL_lose_context')?.loseContext();
     }
