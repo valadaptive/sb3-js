@@ -5,7 +5,7 @@ import Costume from '../costume.js';
 
 import Shader from './shader.js';
 import Rectangle from './rectangle.js';
-import {effectTransformPoint} from './effect-transform.js';
+import {effectTransformColor, effectTransformPoint} from './effect-transform.js';
 import {GraphicEffects} from '../effects.js';
 import Silhouette from './silhouette.js';
 
@@ -13,6 +13,9 @@ const __localPosition = vec2.create();
 const __intersectionBoundsSelf = new Rectangle();
 const __intersectionBoundsOther = new Rectangle();
 const __rightHull: vec2[] = [];
+const __blendColor = new Uint8ClampedArray(4);
+const __sampleColor = new Uint8ClampedArray(4);
+const BACKGROUND_COLOR = new Uint8ClampedArray([255, 255, 255]);
 
 export default class Drawable {
     private transform: mat3 = mat3.create();
@@ -44,11 +47,16 @@ export default class Drawable {
         this.transformedHullDirty = true;
     }
 
+    setConvexHullDirty() {
+        this.convexHullDirty = true;
+    }
+
     setCostume(costume: Costume) {
         this.costume = costume;
-        this.convexHullDirty = true;
+        this.setConvexHullDirty();
         this.setTransformDirty();
     }
+
 
     private updateTransform() {
         mat3.identity(this.transform);
@@ -181,22 +189,56 @@ export default class Drawable {
     }
 
     /**
+     * Get the texture-space position within this drawable of a given Scratch-space point. Requires the inverse
+     * transform to be up-to-date.
+     */
+    private getLocalPosition(x: number, y: number, dst: vec2) {
+        vec2.set(dst, x + 0.5, y + 0.5);
+        vec2.transformMat3(dst, dst, this.inverseTransform);
+        // Our texture's Y-axis is flipped
+        __localPosition[1] = 1 - __localPosition[1];
+        return __localPosition;
+    }
+
+    /**
      * Check whether a given point collides with this drawable. Requires the inverse transform to be up-to-date. Faster
      * than `isTouchingPoint` when called in a loop.
      */
     private checkPointCollision(x: number, y: number, silhouette: Silhouette) {
-        vec2.set(__localPosition, x, y);
-        vec2.transformMat3(__localPosition, __localPosition, this.inverseTransform);
-        if (__localPosition[0] < 0 || __localPosition[0] > 1 || __localPosition[1] < 0 || __localPosition[1] > 1) {
+        const localPosition = this.getLocalPosition(x, y, __localPosition);
+        if (localPosition[0] < 0 || localPosition[0] > 1 || localPosition[1] < 0 || localPosition[1] > 1) {
             return false;
         }
         // The texture's Y-axis is flipped
-        __localPosition[1] = 1 - __localPosition[1];
+        localPosition[1] = 1 - localPosition[1];
         const effects = this.target.effects;
         if ((effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0) {
-            effectTransformPoint(effects, this.costume.dimensions, __localPosition, __localPosition);
+            effectTransformPoint(effects, this.costume.dimensions, localPosition, localPosition);
         }
-        return silhouette.isTouching(__localPosition[0], __localPosition[1]);
+        return silhouette.isTouching(localPosition[0], localPosition[1]);
+    }
+
+    /**
+     * Sample this drawable's color at a given (Scratch-space) point. Requires the inverse transform to be up-to-date.
+     * Faster than `isTouchingPoint` when called in a loop.
+     */
+    private sampleColorAtPoint(
+        x: number,
+        y: number,
+        silhouette: Silhouette,
+        dst: Uint8ClampedArray,
+        effectMask: number,
+    ) {
+        const localPosition = this.getLocalPosition(x, y, __localPosition);
+        const effects = this.target.effects;
+        if ((effects.bitmask & effectMask & GraphicEffects.DISTORTION_EFFECTS) !== 0) {
+            effectTransformPoint(effects, this.costume.dimensions, localPosition, localPosition);
+        }
+        const textureColor = silhouette.sample(localPosition[0], localPosition[1], dst);
+        if (effects.bitmask & effectMask & GraphicEffects.COLOR_EFFECTS) {
+            effectTransformColor(effects, textureColor, effectMask);
+        }
+        return textureColor;
     }
 
     public isTouchingPoint(x: number, y: number) {
@@ -238,6 +280,171 @@ export default class Drawable {
         return false;
     }
 
+    /**
+     * Checks if two colors are "close enough" to match for the purposes of "touching color", checking only the high
+     * bits.
+     * @param a First color to check.
+     * @param b Second color to check.
+     * @returns whether the colors match.
+     */
+    static colorMatches(a: Uint8ClampedArray, b: Uint8ClampedArray) {
+        return (
+            (a[0] & 0b11111000) === (b[0] & 0b11111000) &&
+            (a[1] & 0b11111000) === (b[1] & 0b11111000) &&
+            (a[2] & 0b11110000) === (b[2] & 0b11110000)
+        );
+    }
+
+    /**
+     * Checks if two colors are "close enough" to match for the purposes of "color is touching color", meant for the
+     * color of the drawable we're checking on.
+     * @param a First color to check.
+     * @param b Second color to check.
+     * @returns whether the colors match.
+     */
+    static maskMatches(a: Uint8ClampedArray, b: Uint8ClampedArray) {
+        return (
+            a[3] > 0 &&
+            (a[0] & 0b11111100) === (b[0] & 0b11111100) &&
+            (a[1] & 0b11111100) === (b[1] & 0b11111100) &&
+            (a[2] & 0b11111100) === (b[2] & 0b11111100)
+        );
+    }
+
+    /**
+     * Sample every target in the given list at a given Scratch-space point. Expects all the targets' drawables to have
+     * up-to-date inverse transforms.
+     * @param targets The targets to sample, in lowest-first order.
+     * @param x X position of the point to sample.
+     * @param y Y position of the point to sample.
+     * @param dst Destination to write the color to.
+     * @returns The sampled color.
+     */
+    static sampleStageAtPointUnchecked(
+        targets: {drawable: Drawable; silhouette: Silhouette}[],
+        x: number,
+        y: number,
+        dst: Uint8ClampedArray,
+    ) {
+        dst[0] = dst[1] = dst[2] = 0;
+        let blendAlpha = 1;
+        for (let i = targets.length - 1; i >= 0 && blendAlpha !== 0; i--) {
+            const {drawable, silhouette} = targets[i];
+            // Ignore ghost effect
+            drawable.sampleColorAtPoint(x, y, silhouette, __blendColor, ~0);
+            // Apply alpha blending for premultiplied alpha
+            dst[0] += __blendColor[0] * blendAlpha;
+            dst[1] += __blendColor[1] * blendAlpha;
+            dst[2] += __blendColor[2] * blendAlpha;
+            blendAlpha *= (1 - (__blendColor[3] / 255));
+        }
+        // Finally, there's the white background
+        dst[0] += blendAlpha * 255;
+        dst[1] += blendAlpha * 255;
+        dst[2] += blendAlpha * 255;
+
+        return dst;
+    }
+
+    /**
+     * Enumerate every target from the given list that could potentially be touching this drawable. Also updates their
+     * silhouettes and inverse transforms. Returns targets in lowest-first order.
+     * @param targets The targets to check.
+     * @param stageBounds Stage bounds--targets outside this will not be matched.
+     * @returns Every target that could be touching this drawable, along with their silhouettes.
+     */
+    private candidatesTouching(
+        targets: Target[],
+        stageBounds: Rectangle,
+    ): {drawable: Drawable; silhouette: Silhouette}[] {
+        let myBounds = this.getFastPixelBounds(__intersectionBoundsSelf);
+        myBounds = Rectangle.intersection(stageBounds, myBounds, __intersectionBoundsSelf);
+        const candidates: {drawable: Drawable; silhouette: Silhouette}[] = [];
+        for (let i = 0; i < targets.length; i++) {
+            const target = targets[i];
+            if (target === this.target) continue;
+            const drawable = target.drawable;
+            let otherBounds = drawable.getFastPixelBounds(__intersectionBoundsOther);
+            otherBounds = Rectangle.intersection(stageBounds, otherBounds, __intersectionBoundsOther);
+            if (otherBounds.intersects(myBounds)) {
+                const silhouette = drawable.costume.skin?.getSilhouette(target.size * 0.01);
+                if (!silhouette) continue;
+                if (drawable.inverseTransformDirty) {
+                    drawable.updateInverseTransform();
+                }
+                candidates.push({drawable, silhouette});
+            }
+        }
+        return candidates;
+    }
+
+    /**
+     * Check whether this drawable is touching a given color, sampling from all given targets.
+     * @param targets The targets to check.
+     * @param color The color to check if we're touching.
+     * @param stageBounds Stage bounds--pixels outside this will not be checked.
+     * @param colorMask Optionally, mask the check to places where the drawable's color matches this one.
+     * @returns whether this drawable is touching the given color.
+     */
+    isTouchingColor(
+        targets: Target[],
+        color: Uint8ClampedArray,
+        stageBounds: Rectangle,
+        colorMask: Uint8ClampedArray | null = null,
+    ) {
+        const mySilhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+        if (!mySilhouette) return false;
+        let myBounds = this.getFastPixelBounds(__intersectionBoundsSelf);
+        myBounds = Rectangle.intersection(stageBounds, myBounds, __intersectionBoundsSelf);
+        if (this.inverseTransformDirty) {
+            this.updateInverseTransform();
+        }
+        const hasMask = !!colorMask;
+
+        const candidates = this.candidatesTouching(targets, stageBounds);
+        let candidatesBounds = new Rectangle();
+        if (Drawable.colorMatches(color, BACKGROUND_COLOR)) {
+            // If we are checking for the background color, we can't limit the check to other sprites' bounds. The
+            // background color spans the entire stage.
+            candidatesBounds = Rectangle.fromOther(myBounds, candidatesBounds);
+        } else {
+            if (candidates.length === 0) return false;
+            // Set these to infinity and -infinity so that the first candidate's bounds will overwrite them.
+            candidatesBounds.left = Infinity;
+            candidatesBounds.right = -Infinity;
+            candidatesBounds.bottom = Infinity;
+            candidatesBounds.top = -Infinity;
+
+            for (const candidate of candidates) {
+                let bounds = candidate.drawable.getFastPixelBounds(__intersectionBoundsOther);
+                bounds = Rectangle.intersection(stageBounds, bounds, __intersectionBoundsOther);
+                bounds = Rectangle.intersection(myBounds, bounds, __intersectionBoundsOther);
+                Rectangle.union(bounds, candidatesBounds, candidatesBounds);
+            }
+        }
+
+        for (let x = candidatesBounds.left; x < candidatesBounds.right; x++) {
+            for (let y = candidatesBounds.bottom; y < candidatesBounds.top; y++) {
+                const thisMatches = hasMask ?
+                    Drawable.maskMatches(
+                        this.sampleColorAtPoint(x, y, mySilhouette, __sampleColor, ~GraphicEffects.EFFECT_GHOST),
+                        colorMask,
+                    ) :
+                    this.checkPointCollision(x, y, mySilhouette);
+                if (!thisMatches) continue;
+                const sampledColor = Drawable.sampleStageAtPointUnchecked(candidates, x, y, __sampleColor);
+                if (Drawable.colorMatches(color, sampledColor)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Recalculate this drawable's convex hull (used for the tight bounding box) after a change to the costume or
+     * distortion effects.
+     */
     private updateConvexHull() {
         const silhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
         if (!silhouette) {
@@ -269,7 +476,7 @@ export default class Drawable {
         const pixelPos = vec2.create();
         const effectPos = vec2.create();
         let currentPoint: vec2 | undefined;
-        const useEffects = effects.bitmask !== 0;
+        const useEffects = (effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0;
 
         // Not Scratch-space: y increases as we go downwards.
         for (let y = 0; y < height; y++) {

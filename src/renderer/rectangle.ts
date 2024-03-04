@@ -42,6 +42,14 @@ export default class Rectangle {
         return result;
     }
 
+    public static fromOther(other: Rectangle, result = new Rectangle()) {
+        result.left = other.left;
+        result.right = other.right;
+        result.bottom = other.bottom;
+        result.top = other.top;
+        return result;
+    }
+
     public intersects(other: Rectangle) {
         return (
             this.left <= other.right &&
@@ -59,6 +67,17 @@ export default class Rectangle {
         result.right = Math.min(a.right, b.right);
         result.bottom = Math.max(a.bottom, b.bottom);
         result.top = Math.min(a.top, b.top);
+        return result;
+    }
+
+    /**
+     * Get the union of two rectangles. Either rectangle is allowed to alias `result`.
+     */
+    public static union(a: Rectangle, b: Rectangle, result = new Rectangle()) {
+        result.left = Math.min(a.left, b.left);
+        result.right = Math.max(a.right, b.right);
+        result.bottom = Math.min(a.bottom, b.bottom);
+        result.top = Math.max(a.top, b.top);
         return result;
     }
 

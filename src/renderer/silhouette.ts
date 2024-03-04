@@ -41,8 +41,8 @@ export default class Silhouette {
      * @param y Normalized y-coordinate (0 to 1).
      * @param dst The destination array to write the result (RGBA) to.
      */
-    public sample(x: number, y: number, dst: Uint8ClampedArray): void {
-        this.sampleTexel(Math.floor(x * this.width), Math.floor(y * this.height), dst);
+    public sample(x: number, y: number, dst: Uint8ClampedArray) {
+        return this.sampleTexel(Math.floor(x * this.width), Math.floor(y * this.height), dst);
     }
 
     public sampleTexel(x: number, y: number, dst: Uint8ClampedArray) {
@@ -55,6 +55,7 @@ export default class Silhouette {
         dst[1] = this.data[index + 1] * alpha;
         dst[2] = this.data[index + 2] * alpha;
         dst[3] = this.data[index + 3];
+        return dst;
     }
 
     /**

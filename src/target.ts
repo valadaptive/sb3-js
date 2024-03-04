@@ -93,7 +93,7 @@ export default class Target {
         this.tempo = options.tempo;
         this.videoTransparency = options.videoTransparency;
         this.videoState = options.videoState;
-        this.effects = options.effects ?? new GraphicEffects();
+        this.effects = options.effects ? GraphicEffects.fromExisting(options.effects, this) : new GraphicEffects(this);
         this.variables = options.variables;
         this.lists = options.lists;
 
@@ -141,7 +141,7 @@ export default class Target {
             tempo: this.tempo,
             videoTransparency: this.videoTransparency,
             videoState: this.videoState,
-            effects: this.effects.clone(),
+            effects: this.effects,
             variables: new Map(this.variables),
             lists: newLists,
         });

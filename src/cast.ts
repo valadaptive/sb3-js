@@ -66,6 +66,40 @@ export const toListIndex = (value: string | number | boolean | void, length: num
     return value;
 };
 
+/**
+ * Cast a value to a color. Supports raw numbers and hex strings (both shorthand like #fff and standard like #ffffff).
+ * @param value The value to cast to a string.
+ * @param dst Optionally, the destination array to write the result to. If not provided, a new array is created.
+ * @returns The color as an array of 3 bytes (RGB).
+ */
+export const toColor = (
+    value: string | number | boolean | void,
+    dst = new Uint8ClampedArray(3),
+): Uint8ClampedArray => {
+    let color;
+    if (typeof value === 'string' && value[0] === '#') {
+        if (/^#[\da-fA-F]{6}$/.test(value)) {
+            // Standard hex color
+            color = parseInt(value.slice(1), 16);
+        } else if (/^#[\da-fA-F]{3}$/.test(value)) {
+            // Shorthand hex color
+            color = parseInt(`${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`, 16);
+        } else {
+            // Invalid hex color. Treat as black.
+            color = 0;
+        }
+    } else if (typeof value === 'boolean') {
+        color = value ? 1 : 0;
+    } else {
+        color = toNumber(value) & 0xffffff;
+    }
+
+    dst[0] = (color >> 16) & 0xff;
+    dst[1] = (color >> 8) & 0xff;
+    dst[2] = color & 0xff;
+    return dst;
+};
+
 export const isWhiteSpace = (value: string | number | boolean): boolean =>
     typeof value === 'string' && value.trim().length === 0;
 

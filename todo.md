@@ -4,7 +4,7 @@
 - Warp mode (done)
 - Clones (done)
 - Graphic effects (done)
-- Sprite click / color / graphic sensing
+- Sprite click / color / graphic sensing (done)
 - Fencing (done)
 - Monitors
 - Speech bubbles

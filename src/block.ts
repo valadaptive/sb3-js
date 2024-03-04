@@ -149,6 +149,10 @@ export const AnyInput = new BlockInput(
     unionInput('number', 'string', 'boolean', 'block'),
     {unpluggedValue: false},
 );
+export const ColorInput = new BlockInput(
+    'color',
+    unionInput('number', 'string', 'boolean', 'block', objectInput({r: 'number', g: 'number', b: 'number'})),
+);
 export const StackInput = new BlockInput('stack', arrayInput('block'), {unpluggedValue: []});
 export const StringField = new BlockInput('string', 'string');
 export const VariableField = new BlockInput('variable', objectInput({value: 'string', id: 'string'}));

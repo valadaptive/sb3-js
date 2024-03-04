@@ -7,8 +7,10 @@ import {
     StackInput,
     StringField,
     StringInput,
+    ColorInput,
+    Block,
 } from './block.js';
-import {compare, equals, isInt, isWhiteSpace, toBoolean, toListIndex, toNumber, toString} from './cast.js';
+import {compare, equals, isInt, isWhiteSpace, toBoolean, toColor, toListIndex, toNumber, toString} from './cast.js';
 import {BroadcastEvent, GreenFlagEvent, KeyPressedEvent, SwitchBackdropEvent} from './events.js';
 import IO from './io.js';
 import Target from './target.js';
@@ -978,6 +980,48 @@ export const sensing_touchingobject = new ProtoBlock({
         }
     },
     returnType: ['boolean'],
+});
+
+const evaluateColorInput = (
+    color: string | number | boolean | Block | {r: number; g: number; b: number},
+    ctx: BlockContext,
+    dst: Uint8ClampedArray,
+) => {
+    if (typeof color === 'object' && !(color instanceof Block)) {
+        return new Uint8ClampedArray([color.r, color.g, color.b, 255]);
+    } else {
+        return toColor(ctx.evaluateFast(color), dst);
+    }
+};
+
+const __color = new Uint8ClampedArray(3);
+export const sensing_touchingcolor = new ProtoBlock({
+    opcode: 'sensing_touchingcolor',
+    inputs: {
+        COLOR: ColorInput,
+    },
+    execute: function* ({COLOR}, ctx) {
+        const color = evaluateColorInput(COLOR, ctx, __color);
+        const isTouching = ctx.target.drawable.isTouchingColor(ctx.project.targets, color, ctx.stageBounds);
+        return isTouching;
+    },
+});
+
+const __color2 = new Uint8ClampedArray(3);
+export const sensing_coloristouchingcolor = new ProtoBlock({
+    opcode: 'sensing_coloristouchingcolor',
+    inputs: {
+        COLOR: ColorInput,
+        COLOR2: ColorInput,
+    },
+    execute: function* ({COLOR, COLOR2}, ctx) {
+        const color = evaluateColorInput(COLOR, ctx, __color);
+        const color2 = evaluateColorInput(COLOR2, ctx, __color2);
+        // COLOR is the mask and COLOR2 is the target color, as opposed to "touching color" where COLOR is the target
+        // color. Why? Ask Scratch.
+        const isTouching = ctx.target.drawable.isTouchingColor(ctx.project.targets, color2, ctx.stageBounds, color);
+        return isTouching;
+    },
 });
 
 export const sensing_keyoptions = new ProtoBlock({

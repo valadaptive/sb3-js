@@ -105,7 +105,7 @@ void main() {
             hsv.y = max(hsv.y, minSaturation);
 
             float color_effect = u_effects_color_fisheye_whirl_pixelate.x;
-            hsv.x = mod(hsv.x + color_effect, 1.0);
+            hsv.x = fract(hsv.x + color_effect);
             unmultiplied = hsv2rgb(hsv);
         }
 

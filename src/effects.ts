@@ -1,3 +1,5 @@
+import Target from './target.js';
+
 export class GraphicEffects {
     public bitmask: number;
 
@@ -17,6 +19,11 @@ export class GraphicEffects {
     public static EFFECT_BRIGHTNESS = 1 << 5;
     public static EFFECT_GHOST = 1 << 6;
 
+    public static COLOR_EFFECTS =
+        GraphicEffects.EFFECT_COLOR |
+        GraphicEffects.EFFECT_BRIGHTNESS |
+        GraphicEffects.EFFECT_GHOST;
+
     public static DISTORTION_EFFECTS =
         GraphicEffects.EFFECT_FISHEYE |
         GraphicEffects.EFFECT_WHIRL |
@@ -32,9 +39,11 @@ export class GraphicEffects {
         brightness: 0,
         ghost: 0,
     };
+    private target;
 
-    public constructor() {
+    public constructor(target: Target) {
         this.bitmask = 0;
+        this.target = target;
 
         const effectNames = Object.keys(this.effectValues) as (keyof typeof GraphicEffects.prototype.effectValues)[];
         for (let i = 0; i < effectNames.length; i++) {
@@ -59,6 +68,9 @@ export class GraphicEffects {
                     setter = (value: number) => {
                         this.effectValues[effectName] = value;
                         this.bitmask = value === 0 ? this.bitmask & ~(1 << i) : this.bitmask | (1 << i);
+                        if (i & GraphicEffects.DISTORTION_EFFECTS) {
+                            this.target.drawable.setConvexHullDirty();
+                        }
                     };
             }
             Object.defineProperty(this, effectName, {
@@ -70,11 +82,11 @@ export class GraphicEffects {
         }
     }
 
-    public clone() {
-        const clone = new GraphicEffects();
-        clone.bitmask = this.bitmask;
-        clone.effectValues = {...this.effectValues};
-        return clone;
+    public static fromExisting(existing: GraphicEffects, newTarget: Target) {
+        const effects = new GraphicEffects(newTarget);
+        effects.bitmask = existing.bitmask;
+        effects.effectValues = {...existing.effectValues};
+        return effects;
     }
 
     public clear() {
