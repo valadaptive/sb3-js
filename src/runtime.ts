@@ -12,6 +12,7 @@ import Target from './target.js';
 import {TypedEvent} from './typed-events.js';
 import Thread from './interpreter/thread.js';
 import Rectangle from './renderer/rectangle.js';
+import {InternalStageElement} from './html/stage.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
@@ -29,7 +30,7 @@ export default class Runtime {
     private steppingInterval: NodeJS.Timeout | null = null;
 
     private unregisterPreviousProject: (() => void) | null = null;
-    private unsetPreviousCanvas: (() => void) | null = null;
+    private unsetPreviousStage: (() => void) | null = null;
 
     constructor() {
         this.audioContext = new AudioContext();
@@ -75,33 +76,33 @@ export default class Runtime {
         };
     }
 
-    public setCanvas(canvas: HTMLCanvasElement | null) {
-        if (this.unsetPreviousCanvas) {
-            this.unsetPreviousCanvas();
-            this.unsetPreviousCanvas = null;
+    public attachStage(stage: InternalStageElement | null) {
+        if (this.unsetPreviousStage) {
+            this.unsetPreviousStage();
+            this.unsetPreviousStage = null;
         }
 
-        if (!canvas) return;
+        if (!stage) return;
 
-        const renderer = this.renderer = new Renderer(canvas, this.stageBounds);
-        // Allow canvas to receive keyboard events
-        canvas.tabIndex = 0;
-        const teardownEventListeners = this.setupEventListeners(canvas);
+        const renderer = this.renderer = new Renderer(stage.canvas, this.stageBounds);
+        // Allow stage to receive keyboard events
+        stage.tabIndex = 0;
+        const teardownEventListeners = this.setupEventListeners(stage);
 
-        this.unsetPreviousCanvas = () => {
+        this.unsetPreviousStage = () => {
             this.renderer = null;
             renderer.destroy();
             teardownEventListeners();
         };
     }
 
-    private setupEventListeners(canvas: HTMLCanvasElement) {
+    private setupEventListeners(stage: InternalStageElement) {
         if (!this.renderer) return () => {};
         const abortController = new AbortController();
         const signal = abortController.signal;
 
         const stageCoordsFromPointerEvent = (event: PointerEvent): {x: number; y: number} => {
-            const rect = canvas.getBoundingClientRect();
+            const rect = stage.getBoundingClientRect();
             let x = (event.clientX - rect.left) * (this.stageBounds.width / rect.width);
             let y = (event.clientY - rect.top) * (this.stageBounds.height / rect.height);
             x = Math.max(
@@ -124,7 +125,7 @@ export default class Runtime {
             this.io.mousePosition.y = y;
         }, {signal});
 
-        canvas.addEventListener('pointerdown', () => {
+        stage.addEventListener('pointerdown', () => {
             this.io.mouseDown = true;
             if (!this.project || !this.renderer) return;
             const {x, y} = this.io.mousePosition;
@@ -139,7 +140,7 @@ export default class Runtime {
             this.io.mouseDown = false;
         }, {signal});
 
-        canvas.addEventListener('keydown', event => {
+        stage.addEventListener('keydown', event => {
             const key = IO.domToScratchKey(event.key);
             if (key === null) return;
 

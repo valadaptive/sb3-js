@@ -1,4 +1,4 @@
-import ProjectElement from './component.js';
+import ProjectElement from './html/component.js';
 import * as Loader from './loader.js';
 import Project from './project.js';
 
