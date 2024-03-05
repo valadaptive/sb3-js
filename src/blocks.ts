@@ -357,6 +357,8 @@ export const motion_xposition = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.position.x;
     },
+    monitorLabel: () => 'x position',
+    colorCategory: 'motion',
 });
 
 export const motion_yposition = new ProtoBlock({
@@ -365,6 +367,8 @@ export const motion_yposition = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.position.y;
     },
+    monitorLabel: () => 'y position',
+    colorCategory: 'motion',
 });
 
 export const motion_direction = new ProtoBlock({
@@ -373,6 +377,8 @@ export const motion_direction = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.direction;
     },
+    monitorLabel: () => 'y position',
+    colorCategory: 'motion',
 });
 
 /**
@@ -633,7 +639,10 @@ export const looks_costumenumbername = new ProtoBlock({
         if (NUMBER_NAME === 'number') return ctx.target.currentCostume + 1;
         return ctx.target.sprite.costumes[ctx.target.currentCostume].name;
     },
-    pure: true,
+    monitorLabel({NUMBER_NAME}) {
+        return `costume ${NUMBER_NAME}`;
+    },
+    colorCategory: 'looks',
 });
 
 export const looks_backdropnumbername = new ProtoBlock({
@@ -645,7 +654,10 @@ export const looks_backdropnumbername = new ProtoBlock({
         if (NUMBER_NAME === 'number') return ctx.stage.currentCostume + 1;
         return ctx.stage.sprite.costumes[ctx.stage.currentCostume].name;
     },
-    pure: true,
+    monitorLabel({NUMBER_NAME}) {
+        return `backdrop ${NUMBER_NAME}`;
+    },
+    colorCategory: 'looks',
 });
 
 export const looks_size = new ProtoBlock({
@@ -654,7 +666,8 @@ export const looks_size = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.size;
     },
-    pure: true,
+    monitorLabel: () => 'size',
+    colorCategory: 'looks',
 });
 
 /**
@@ -1373,34 +1386,21 @@ export const operator_mathop = new ProtoBlock({
  * Data
  */
 
-const lookupOrCreateVariable = (name: string, ctx: BlockContext): number | string | boolean => {
-    let value = ctx.target.variables.get(name);
-    // Check local variables first, then global variables
-    if (value === undefined) value = ctx.stage.variables.get(name);
-    if (value !== undefined) return value;
-    // Create the variable locally if it doesn't exist
-    ctx.target.variables.set(name, 0);
-    return 0;
-};
-
-const lookupOrCreateList = (name: string, ctx: BlockContext): (number | string | boolean)[] => {
-    let value = ctx.target.lists.get(name);
-    // Check local lists first, then global lists
-    if (value === undefined) value = ctx.stage.lists.get(name);
-    if (value !== undefined) return value;
-    const list: (number | string | boolean)[] = [];
-    ctx.target.lists.set(name, list);
-    return list;
-};
-
 export const data_variable = new ProtoBlock({
     opcode: 'data_variable',
     inputs: {
         VARIABLE: VariableField,
     },
     execute: function* ({VARIABLE}, ctx) {
-        return lookupOrCreateVariable(VARIABLE.id, ctx);
+        return ctx.lookupOrCreateVariable(VARIABLE.value);
     },
+    monitorLabel({VARIABLE}) {
+        return VARIABLE.value;
+    },
+    monitorSliderHandler({VARIABLE}, target, value) {
+        target.variables.set(VARIABLE.value, value);
+    },
+    colorCategory: 'data',
 });
 
 export const data_setvariableto = new ProtoBlock({
@@ -1411,7 +1411,11 @@ export const data_setvariableto = new ProtoBlock({
     },
     execute: function* ({VARIABLE, VALUE}, ctx) {
         const value = ctx.evaluateFast(VALUE);
-        ctx.target.variables.set(VARIABLE.id, value);
+        if (ctx.target.variables.has(VARIABLE.value)) {
+            ctx.target.variables.set(VARIABLE.value, value);
+        } else {
+            ctx.stage.variables.set(VARIABLE.value, value);
+        }
     },
 });
 
@@ -1423,8 +1427,44 @@ export const data_changevariableby = new ProtoBlock({
     },
     execute: function* ({VARIABLE, VALUE}, ctx) {
         const increment = toNumber(ctx.evaluateFast(VALUE));
-        const value = toNumber(lookupOrCreateVariable(VARIABLE.id, ctx));
-        ctx.target.variables.set(VARIABLE.id, value + increment);
+        const value = toNumber(ctx.lookupOrCreateVariable(VARIABLE.value));
+        if (ctx.target.variables.has(VARIABLE.value)) {
+            ctx.target.variables.set(VARIABLE.value, value + increment);
+        } else {
+            ctx.stage.variables.set(VARIABLE.value, value + increment);
+        }
+    },
+});
+
+export const data_showvariable = new ProtoBlock({
+    opcode: 'data_showvariable',
+    inputs: {
+        VARIABLE: VariableField,
+    },
+    execute: function* ({VARIABLE}, ctx) {
+        const varTarget = ctx.stage.variables.has(VARIABLE.value) ? null : ctx.target;
+        const monitor = ctx.project.getOrCreateMonitorFor(
+            data_variable,
+            {VARIABLE: {id: VARIABLE.id, value: VARIABLE.value}},
+            varTarget,
+        );
+        monitor.update({visible: true});
+    },
+});
+
+export const data_hidevariable = new ProtoBlock({
+    opcode: 'data_hidevariable',
+    inputs: {
+        VARIABLE: VariableField,
+    },
+    execute: function* ({VARIABLE}, ctx) {
+        const varTarget = ctx.stage.variables.has(VARIABLE.value) ? null : ctx.target;
+        const monitor = ctx.project.getOrCreateMonitorFor(
+            data_variable,
+            {VARIABLE: {id: VARIABLE.id, value: VARIABLE.value}},
+            varTarget,
+        );
+        monitor.update({visible: false});
     },
 });
 
@@ -1434,7 +1474,7 @@ export const data_listcontents = new ProtoBlock({
         LIST: VariableField,
     },
     execute: function* ({LIST}, ctx) {
-        const list = lookupOrCreateList(LIST.id, ctx);
+        const list = ctx.lookupOrCreateList(LIST.value);
 
         // If the list is all single letters, join them together. Otherwise, join with spaces.
         let allSingleLetters = true;
@@ -1461,7 +1501,7 @@ export const data_addtolist = new ProtoBlock({
     execute: function* ({ITEM, LIST}, ctx) {
         const item = ctx.evaluateFast(ITEM);
         // TODO: Scratch limits lists to 200000 items. Not sure if that behavior is worth replicating
-        lookupOrCreateList(LIST.id, ctx).push(item);
+        ctx.lookupOrCreateList(LIST.value).push(item);
     },
 });
 
@@ -1473,7 +1513,7 @@ export const data_deleteoflist = new ProtoBlock({
     },
     execute: function* ({INDEX, LIST}, ctx) {
         const index = ctx.evaluateFast(INDEX);
-        const list = lookupOrCreateList(LIST.id, ctx);
+        const list = ctx.lookupOrCreateList(LIST.value);
         if (index === 'all') {
             list.length = 0;
             return;
@@ -1489,7 +1529,7 @@ export const data_deletealloflist = new ProtoBlock({
         LIST: VariableField,
     },
     execute: function* ({LIST}, ctx) {
-        lookupOrCreateList(LIST.id, ctx).length = 0;
+        ctx.lookupOrCreateList(LIST.value).length = 0;
     },
 });
 
@@ -1503,7 +1543,7 @@ export const data_insertatlist = new ProtoBlock({
     execute: function* ({ITEM, INDEX, LIST}, ctx) {
         const item = ctx.evaluateFast(ITEM);
         const index = ctx.evaluateFast(INDEX);
-        const list = lookupOrCreateList(LIST.id, ctx);
+        const list = ctx.lookupOrCreateList(LIST.value);
         const numIndex = toListIndex(index, list.length);
         if (numIndex !== 0) list.splice(numIndex - 1, 0, item);
     },
@@ -1519,7 +1559,7 @@ export const data_replaceitemoflist = new ProtoBlock({
     execute: function* ({ITEM, INDEX, LIST}, ctx) {
         const item = ctx.evaluateFast(ITEM);
         const index = ctx.evaluateFast(INDEX);
-        const list = lookupOrCreateList(LIST.id, ctx);
+        const list = ctx.lookupOrCreateList(LIST.value);
         const numIndex = toListIndex(index, list.length);
         if (numIndex !== 0) list[numIndex - 1] = item;
     },
@@ -1533,7 +1573,7 @@ export const data_itemoflist = new ProtoBlock({
     },
     execute: function* ({INDEX, LIST}, ctx) {
         const index = ctx.evaluateFast(INDEX);
-        const list = lookupOrCreateList(LIST.id, ctx);
+        const list = ctx.lookupOrCreateList(LIST.value);
         const numIndex = toListIndex(index, list.length);
         if (numIndex !== 0) return list[numIndex - 1];
         return '';
@@ -1548,7 +1588,7 @@ export const data_itemnumoflist = new ProtoBlock({
     },
     execute: function* ({ITEM, LIST}, ctx) {
         const item = ctx.evaluateFast(ITEM);
-        const list = lookupOrCreateList(LIST.id, ctx);
+        const list = ctx.lookupOrCreateList(LIST.value);
 
         // Use Scratch-style equality test.
         for (let i = 0; i < list.length; i++) {
@@ -1566,7 +1606,7 @@ export const data_lengthoflist = new ProtoBlock({
         LIST: VariableField,
     },
     execute: function* ({LIST}, ctx) {
-        return lookupOrCreateList(LIST.id, ctx).length;
+        return ctx.lookupOrCreateList(LIST.value).length;
     },
     returnType: ['number'],
 });
@@ -1579,7 +1619,7 @@ export const data_listcontainsitem = new ProtoBlock({
     },
     execute: function* ({ITEM, LIST}, ctx) {
         const item = ctx.evaluateFast(ITEM);
-        const list = lookupOrCreateList(LIST.id, ctx);
+        const list = ctx.lookupOrCreateList(LIST.value);
         for (const listItem of list) {
             if (equals(listItem, item)) return true;
         }

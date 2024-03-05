@@ -6,7 +6,8 @@
 - Graphic effects (done)
 - Sprite click / color / graphic sensing (done)
 - Fencing (done)
-- Monitors
+- Monitors (done)
+- Edge-activated hats
 - Speech bubbles
 - Pen
 - Audio engine

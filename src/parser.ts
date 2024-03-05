@@ -7,6 +7,7 @@ import {Schema, ObjectForSchema, validateJson, validateJsonOrError} from './sche
 import {Block, BlockInputValue, BlockInputValueShapeFor, ProtoBlock} from './block.js';
 import Runtime from './runtime.js';
 import {CustomBlockStub, makeCustomBlockStub} from './custom-blocks.js';
+import {MonitorMode, listMonitorContents} from './monitor.js';
 
 const enum ShadowInfo {
     /**
@@ -254,6 +255,48 @@ const sb3SpriteTargetSchema = {
 } as const satisfies Schema;
 type Sb3SpriteTarget = ObjectForSchema<typeof sb3SpriteTargetSchema>;
 
+const sb3ScalarMonitorSchema = {
+    type: 'object',
+    props: {
+        id: 'string',
+        mode: [
+            {type: 'literal', value: 'default'},
+            {type: 'literal', value: 'slider'},
+            {type: 'literal', value: 'large'},
+        ],
+        opcode: 'string',
+        params: {type: 'map', items: 'string'},
+        spriteName: ['string', 'null'],
+        visible: 'boolean',
+        x: 'number',
+        y: 'number',
+        sliderMin: 'number',
+        sliderMax: 'number',
+        isDiscrete: 'boolean',
+    },
+    optional: ['x', 'y'],
+} as const satisfies Schema;
+
+const sb3ListMonitorSchema = {
+    type: 'object',
+    props: {
+        id: 'string',
+        mode: {type: 'literal', value: 'list'},
+        opcode: 'string',
+        params: {type: 'map', items: 'string'},
+        spriteName: ['string', 'null'],
+        visible: 'boolean',
+        x: 'number',
+        y: 'number',
+        width: 'number',
+        height: 'number',
+    },
+    optional: ['x', 'y'],
+} as const satisfies Schema;
+
+const sb3MonitorSchema = [sb3ScalarMonitorSchema, sb3ListMonitorSchema] as const satisfies Schema;
+type Sb3Monitor = ObjectForSchema<typeof sb3MonitorSchema>;
+
 const sb3ProjectSchema = {
     type: 'object',
     props: {
@@ -261,7 +304,12 @@ const sb3ProjectSchema = {
             type: 'array',
             items: sb3TargetSchema,
         },
+        monitors: {
+            type: 'array',
+            items: sb3MonitorSchema,
+        },
     },
+    optional: ['monitors'],
 } as const satisfies Schema;
 
 const getBlockByOpcode = (opcode: string) => {
@@ -585,13 +633,13 @@ const parseTarget = async(
     }
 
     const variables = new Map<string, string | number | boolean>();
-    for (const [id, value] of Object.entries(jsonTarget.variables)) {
-        variables.set(id, value[1]);
+    for (const [name, value] of Object.values(jsonTarget.variables)) {
+        variables.set(name, value);
     }
 
     const lists = new Map<string, (string | number | boolean)[]>();
-    for (const [id, value] of Object.entries(jsonTarget.lists)) {
-        lists.set(id, value[1]);
+    for (const [name, value] of Object.values(jsonTarget.lists)) {
+        lists.set(name, value);
     }
 
     const costumePromises = jsonTarget.costumes.map(costume => loader.loadAsset(
@@ -644,6 +692,77 @@ const parseTarget = async(
     return {sprite, target, layerOrder: jsonTarget.layerOrder};
 };
 
+const parseMonitor = (
+    jsonMonitor: Sb3Monitor,
+    runtime: Runtime,
+    project: Project,
+) => {
+    const target = jsonMonitor.spriteName === null ? null : project.getTargetByName(jsonMonitor.spriteName);
+    const monitorProtoBlock = jsonMonitor.opcode === 'data_listcontents' ?
+        listMonitorContents :
+        getBlockByOpcode(jsonMonitor.opcode) as ProtoBlock;
+    if (!monitorProtoBlock) {
+        throw new Error(`Unknown monitor block: ${jsonMonitor.opcode}`);
+    }
+    const inputValues: Record<string, BlockInputValueShapeFor<BlockInputValue>> = {};
+    for (const inputName in monitorProtoBlock.inputs) {
+        if (!Object.prototype.hasOwnProperty.call(monitorProtoBlock.inputs, inputName)) {
+            continue;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(jsonMonitor.params, inputName)) {
+            throw new Error(`Monitor input ${inputName} is missing`);
+        }
+
+        const input = monitorProtoBlock.inputs[inputName as keyof typeof monitorProtoBlock.inputs];
+        let param;
+        if ((jsonMonitor.opcode === 'data_variable' && inputName === 'VARIABLE') ||
+            (jsonMonitor.opcode === 'data_listcontents' && inputName === 'LIST')) {
+            param = {value: jsonMonitor.params[inputName], id: jsonMonitor.params[inputName]};
+        } else {
+            param = jsonMonitor.params[inputName];
+        }
+        if (!input.validate(param)) {
+            throw new Error(`Monitor input ${inputName} has invalid value ${param}`);
+        }
+        inputValues[inputName] = param;
+    }
+    let mode: MonitorMode;
+    switch (jsonMonitor.mode) {
+        case 'default':
+            mode = {mode: 'default'};
+            break;
+        case 'slider':
+            mode = {
+                mode: 'slider',
+                min: jsonMonitor.sliderMin,
+                max: jsonMonitor.sliderMax,
+                isDiscrete: jsonMonitor.isDiscrete,
+            };
+            break;
+        case 'large':
+            mode = {mode: 'large'};
+            break;
+        case 'list':
+            mode = {mode: 'list', size: {width: jsonMonitor.width, height: jsonMonitor.height}};
+            break;
+    }
+
+    project.getOrCreateMonitorFor(
+        monitorProtoBlock,
+        inputValues,
+        target,
+        {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            mode: mode as any,
+            visible: jsonMonitor.visible,
+            position: jsonMonitor.x !== undefined && jsonMonitor.y !== undefined ?
+                {x: jsonMonitor.x, y: jsonMonitor.y} :
+                null,
+        },
+    );
+};
+
 const parseProject = async(projectJsonString: string, loader: Loader, runtime: Runtime): Promise<Project> => {
     const projectJson = JSON.parse(projectJsonString) as unknown;
     if (!validateJson(sb3ProjectSchema, projectJson)) {
@@ -671,6 +790,16 @@ const parseProject = async(projectJsonString: string, loader: Loader, runtime: R
 
     if (!project.stage) {
         throw new Error('No stage target found in project');
+    }
+
+    if (projectJson.monitors) {
+        for (const jsonMonitor of projectJson.monitors) {
+            if (!validateJson(sb3MonitorSchema, jsonMonitor)) {
+                validateJsonOrError(sb3MonitorSchema, jsonMonitor);
+                throw new Error('Invalid monitor JSON');
+            }
+            parseMonitor(jsonMonitor, runtime, project);
+        }
     }
 
     return project;

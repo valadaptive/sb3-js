@@ -4,7 +4,7 @@ import Target from '../target.js';
 import Costume from '../costume.js';
 
 import Shader from './shader.js';
-import Rectangle from './rectangle.js';
+import Rectangle from '../rectangle.js';
 import {effectTransformColor, effectTransformPoint} from './effect-transform.js';
 import {GraphicEffects} from '../effects.js';
 import Silhouette from './silhouette.js';
@@ -209,8 +209,6 @@ export default class Drawable {
         if (localPosition[0] < 0 || localPosition[0] > 1 || localPosition[1] < 0 || localPosition[1] > 1) {
             return false;
         }
-        // The texture's Y-axis is flipped
-        localPosition[1] = 1 - localPosition[1];
         const effects = this.target.effects;
         if ((effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0) {
             effectTransformPoint(effects, this.costume.dimensions, localPosition, localPosition);

@@ -1,12 +1,6 @@
 import h from './html.js';
-
-const randomId = (() => {
-    const randBuf = new Uint32Array(1);
-    return () => {
-        crypto.getRandomValues(randBuf);
-        return randBuf[0].toString(36);
-    };
-})();
+import {defineInternalElement} from './internal-element.js';
+import {MonitorElement, internalMonitor} from './monitor.js';
 
 const stageTemplate = h('template',
     h('style', `
@@ -14,12 +8,22 @@ const stageTemplate = h('template',
             position: relative;
             width: 480px;
             height: 360px;
+            overflow: hidden;
         }
 
         #canvas, #monitors {
             position: absolute;
             width: 100%;
             height: 100%;
+        }
+
+        #monitors {
+            /* Prevents text from being selected when double-clicking outside specific monitors */
+            pointer-events: none;
+        }
+
+        .monitor {
+            pointer-events: auto;
         }
     `),
     h('div', {id: 'stage'},
@@ -30,19 +34,24 @@ const stageTemplate = h('template',
 
 export class InternalStageElement extends HTMLElement {
     public canvas: HTMLCanvasElement;
+    private monitorContainer: HTMLDivElement;
     constructor() {
         super();
         const shadow = this.attachShadow({mode: 'open'});
         const stageContents = stageTemplate.content.cloneNode(true) as HTMLElement;
         shadow.append(stageContents);
         this.canvas = shadow.getElementById('canvas') as HTMLCanvasElement;
+        this.monitorContainer = shadow.getElementById('monitors') as HTMLDivElement;
+    }
+
+    createMonitorView(): MonitorElement {
+        const elem = internalMonitor.h({className: 'monitor'}) as MonitorElement;
+        elem.style.position = 'absolute';
+        this.monitorContainer.append(elem);
+        return elem;
     }
 }
 
-// Allow the library user to define which name they want for the stage element themselves, and use a random scoped name
-// for our usages of it.
-export const stageTagName = `sb3js-stage-internal-${randomId()}`;
-customElements.define(stageTagName, InternalStageElement);
-export const createStage = () => document.createElement(stageTagName) as InternalStageElement;
+export const internalStage = defineInternalElement(InternalStageElement, 'sb3js-stage');
 
 export class StageElement extends InternalStageElement {}

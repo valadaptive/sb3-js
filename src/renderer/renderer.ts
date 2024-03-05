@@ -3,7 +3,7 @@ import Shader from './shader.js';
 import Target from '../target.js';
 import BitmapSkin from './bitmap-skin.js';
 import SVGSkin from './svg-skin.js';
-import Rectangle from './rectangle.js';
+import Rectangle from '../rectangle.js';
 
 export default class Renderer {
     public readonly canvas;

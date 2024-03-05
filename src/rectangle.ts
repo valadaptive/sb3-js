@@ -59,6 +59,15 @@ export default class Rectangle {
         );
     }
 
+    public intersectsStrict(other: Rectangle) {
+        return (
+            this.left < other.right &&
+            this.right > other.left &&
+            this.bottom < other.top &&
+            this.top > other.bottom
+        );
+    }
+
     /**
      * Get the intersection of two rectangles. Either rectangle is allowed to alias `result`.
      */
@@ -87,6 +96,14 @@ export default class Rectangle {
         this.bottom = Math.floor(this.bottom);
         this.top = Math.ceil(this.top);
         return this;
+    }
+
+    public static expand(rect: Rectangle, amount: number, result = new Rectangle()) {
+        result.left = rect.left - amount;
+        result.right = rect.right + amount;
+        result.bottom = rect.bottom - amount;
+        result.top = rect.top + amount;
+        return result;
     }
 
     get width() {

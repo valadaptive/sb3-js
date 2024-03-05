@@ -4,7 +4,7 @@ import {GraphicEffects} from './effects.js';
 import Thread from './interpreter/thread.js';
 import Project from './project.js';
 import Drawable from './renderer/drawable.js';
-import Rectangle from './renderer/rectangle.js';
+import Rectangle from './rectangle.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
 import {TypedEvent} from './typed-events.js';

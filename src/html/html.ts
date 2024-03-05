@@ -10,6 +10,15 @@ type Props<Elem extends HTMLElement> = {
     [Prop in keyof Elem]?: Elem[Prop];
 };
 
+export type CustomH<Elem extends HTMLElement> =
+& ((
+    ...children: (HTMLElement | string)[]
+) => Elem)
+& ((
+    props: {[K in string]: K extends `$${infer E}` ? Listener<Event> : string},
+    ...children: (HTMLElement | string)[]
+) => Elem);
+
 export default function h<Tag extends keyof HTMLElementTagNameMap>(
     tag: Tag,
     ...children: (HTMLElement | string)[]

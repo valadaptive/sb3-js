@@ -1,4 +1,6 @@
 import BlockContext from './interpreter/block-context.js';
+import Target from './target.js';
+import {ColorCategory} from './theme.js';
 import {TypedEventConstructor} from './typed-events.js';
 
 // The type of a block input's value. An array represents a union of types, and an object represents an object whose
@@ -12,6 +14,7 @@ export type BlockInputValue =
     | {type: 'union'; values: BlockInputValue[]}
     | {type: 'array'; items: BlockInputValue}
     | {type: 'object'; values: {[x: string]: BlockInputValue}}
+    | {type: 'instance'; of: new() => unknown}
     | {type: 'literal'; value: string}
     | BlockInput<string, BlockInputValue>;
 
@@ -19,6 +22,8 @@ export const objectInput = <T extends {[x: string]: BlockInputValue}>(values: T)
     type: 'object',
     values,
 });
+
+export const instanceInput = <T>(of: new(...args: any[]) => T) => ({type: 'instance', of} as const);
 
 export const literalInput = <T extends string>(value: T): {type: 'literal'; value: T} => ({type: 'literal', value});
 
@@ -49,7 +54,7 @@ type BlockInputValueShapeForInner<T extends BlockInputValue, Iterations extends 
                 : T extends 'null'
                     ? null
                     : T extends 'block'
-                        ? Block
+                        ? Block<ProtoBlock>
                         : T extends {type: 'union'; values: (infer UnionItem)[]}
                             ? UnionItem extends BlockInputValue
                                 ? BlockInputValueShapeForInner<UnionItem, Decrement<Iterations>>
@@ -66,12 +71,14 @@ type BlockInputValueShapeForInner<T extends BlockInputValue, Iterations extends 
                                         Decrement<Iterations>
                                         >
                                     }
-                                    : T extends {type: 'literal'; value: infer LiteralValue extends string}
-                                        ? LiteralValue
-                                        :
-                                        T extends BlockInput<string, infer Value>
-                                            ? BlockInputValueShapeForInner<Value, Decrement<Iterations>> :
-                                            never;
+                                    : T extends {type: 'instance'; of: new() => infer Instance}
+                                        ? Instance
+                                        : T extends {type: 'literal'; value: infer LiteralValue extends string}
+                                            ? LiteralValue
+                                            :
+                                            T extends BlockInput<string, infer Value>
+                                                ? BlockInputValueShapeForInner<Value, Decrement<Iterations>> :
+                                                never;
 
 /** Map the user-defined BlockInput type to its TypeScript type. */
 export type BlockInputValueShapeFor<T extends BlockInputValue> = BlockInputValueShapeForInner<T, 4>;
@@ -108,6 +115,9 @@ export class BlockInput<Type extends string = string, Value extends BlockInputVa
                 return false;
             }
             return value.every(item => BlockInput.validateInput(valueType.items, item));
+        }
+        if (valueType.type === 'instance') {
+            return value instanceof valueType.of;
         }
         if (valueType.type === 'literal') {
             return value === valueType.value;
@@ -153,6 +163,7 @@ export const ColorInput = new BlockInput(
     'color',
     unionInput('number', 'string', 'boolean', 'block', objectInput({r: 'number', g: 'number', b: 'number'})),
 );
+export const SingleBlockInput = new BlockInput('block', 'block');
 export const StackInput = new BlockInput('stack', arrayInput('block'), {unpluggedValue: []});
 export const StringField = new BlockInput('string', 'string');
 export const VariableField = new BlockInput('variable', objectInput({value: 'string', id: 'string'}));
@@ -195,9 +206,24 @@ export class ProtoBlock<
      * always produces the same output for a given input. This allows it to be constant-folded.
      */
     public pure;
+    /**
+     * Metadata about hat-block-related functionality, if this block is a hat block.
+     */
     public hat: MyHatInfo | undefined;
+    /**
+     * Function to generate the label for a monitor of this block.
+     */
+    public monitorLabel;
+    /**
+     * Function to handle slider changes for a monitor of this block.
+     */
+    public monitorSliderHandler;
+    /**
+     * The category this block is in, which determines its monitor's color.
+     */
+    public colorCategory;
 
-    constructor({opcode, inputs, execute, returnType, pure, hat}: {
+    constructor({opcode, inputs, execute, returnType, pure, hat, monitorLabel, monitorSliderHandler, colorCategory}: {
         opcode: MyOpCode;
         inputs: MyInputs;
         execute: MyHatInfo extends {type: 'event'; event: new (...args: any[]) => infer Evt}
@@ -213,6 +239,15 @@ export class ProtoBlock<
         returnType?: MyReturnType;
         pure?: boolean;
         hat?: MyHatInfo;
+        monitorLabel?: (
+            inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>}
+        ) => string;
+        monitorSliderHandler?: (
+            inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
+            target: Target,
+            value: number,
+        ) => void;
+        colorCategory?: ColorCategory;
     }) {
         this.opcode = opcode;
         this.inputs = inputs;
@@ -220,6 +255,9 @@ export class ProtoBlock<
         this.returnType = returnType ?? null;
         this.pure = !!pure;
         this.hat = hat;
+        this.monitorLabel = monitorLabel;
+        this.monitorSliderHandler = monitorSliderHandler;
+        this.colorCategory = colorCategory;
     }
 }
 
@@ -232,13 +270,13 @@ HatInfo | undefined
 
 export class Block<P = unknown> {
     public proto: ProtoBlock;
-    public id: string;
+    public id: string | symbol;
 
     public inputValues;
 
     constructor({proto, id, inputValues}: {
         proto: P;
-        id: string;
+        id: string | symbol;
         inputValues: P extends ProtoBlock<string, infer MyInputs>
             ? {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>}
             : never;

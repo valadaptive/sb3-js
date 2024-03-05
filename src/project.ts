@@ -1,9 +1,22 @@
 import Target from './target.js';
 import Sprite from './sprite.js';
+import {Monitor, updateMonitor, ScalarMonitor, ListMonitor, ScalarMonitorParams, ListMonitorParams} from './monitor.js';
+import {Block, BlockInputShape, BlockInputValueShapeFor, ProtoBlock, VariableField} from './block.js';
+import {TypedEvent, TypedEventTarget} from './typed-events.js';
 
-export default class Project {
+export class CreateMonitorEvent extends TypedEvent<'createmonitor'> {
+    constructor(public readonly monitor: Monitor) {
+        super('createmonitor');
+    }
+}
+
+export default class Project extends TypedEventTarget<CreateMonitorEvent> {
     public readonly targets: Target[] = [];
     public readonly sprites: Sprite[] = [];
+    public readonly monitors: readonly {
+        monitor: Monitor;
+        updateMonitorBlock: Block<typeof updateMonitor>;
+    }[] = [];
     public stage: Target | null = null;
     public cloneCount = 0;
 
@@ -94,5 +107,74 @@ export default class Project {
 
         this.targets.splice(index, 1);
         target.destroy();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public getOrCreateMonitorFor<P extends ProtoBlock<string, any>>(
+        proto: P,
+        inputValues: P extends ProtoBlock<string, infer MyInputs>
+            ? {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>}
+            : never,
+        target: Target | null,
+        params?: Partial<ScalarMonitorParams> | Partial<ListMonitorParams>,
+    ): Monitor {
+        for (const {monitor} of this.monitors) {
+            const innerBlock = monitor.block;
+            if (innerBlock.proto !== proto) continue;
+            if (monitor.target !== target) continue;
+            for (const key in proto.inputs) {
+                if (!Object.prototype.hasOwnProperty.call(proto.inputs, key)) continue;
+                // If variable field, check if the variable names match. Otherwise, do normal comparison. Special-casing
+                // this is a bit ugly, but I want to phase out VariableField and just use variable names everywhere so
+                // we can remove this code then.
+                const inputsMatch = proto .inputs[key] === VariableField ?
+                    (innerBlock.inputValues[key] as BlockInputValueShapeFor<typeof VariableField>).value ===
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (inputValues[key] as any).value :
+                    innerBlock.inputValues[key] === inputValues[key];
+                if (!inputsMatch) {
+                    continue;
+                }
+                return monitor;
+            }
+        }
+        const monitoredBlock = new Block({proto, inputValues, id: Symbol('createdMonitor')});
+        if (!proto.monitorLabel) {
+            throw new Error(`Block ${proto.opcode} must have a monitor label function in order to be monitored`);
+        }
+        const monitorMode = params?.mode ?? {mode: 'default'};
+        let monitor;
+        if (monitorMode.mode === 'list') {
+            monitor = new ListMonitor(target, monitoredBlock, Object.assign({
+                visible: true,
+                mode: 'list',
+                position: null,
+                label: proto.monitorLabel(inputValues),
+                size: {width: 0, height: 0},
+            }, (params ?? {}) as Partial<ListMonitorParams>));
+        } else {
+            monitor = new ScalarMonitor(target, monitoredBlock, Object.assign({
+                visible: true,
+                mode: 'default',
+                position: null,
+                label: proto.monitorLabel(inputValues),
+            }, (params ?? {}) as Partial<ScalarMonitorParams>));
+        }
+
+        this.addMonitor(monitor);
+        return monitor;
+    }
+
+    private addMonitor(monitor: Monitor) {
+        const updateMonitorBlock = new Block({
+            proto: updateMonitor,
+            id: Symbol('updateMonitor'),
+            inputValues: {MONITOR: monitor},
+        });
+        (this.monitors as {
+            monitor: Monitor;
+            updateMonitorBlock: Block;
+        }[]).push({monitor, updateMonitorBlock});
+        this.dispatchEvent(new CreateMonitorEvent(monitor));
     }
 }

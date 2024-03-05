@@ -1,7 +1,7 @@
 import {Block, BlockGenerator, ProtoBlock} from '../block.js';
 import IO from '../io.js';
 import Project from '../project.js';
-import Rectangle from '../renderer/rectangle.js';
+import Rectangle from '../rectangle.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
 
@@ -81,9 +81,10 @@ export default class BlockContext {
         this.interpreter.requestRedraw();
         // TODO: Even in scratch-vm, this has a tendency to busy-wait. See if there's a way to park threads without the
         // execution order or non-determinism issues that occurred with setTimeout.
-        while (this.interpreter.currentMSecs - start < ms) {
+        // Always yield at least once, even if the wait time is 0
+        do {
             yield;
-        }
+        } while (this.interpreter.currentMSecs - start < ms);
     }
 
     stopOtherTargetThreads() {
@@ -161,5 +162,25 @@ export default class BlockContext {
 
     isRecursiveCall(procedure: ProtoBlock) {
         return this.thread.isRecursiveCall(procedure);
+    }
+
+    lookupOrCreateVariable(name: string): number | string | boolean {
+        let value = this.target.variables.get(name);
+        // Check local variables first, then global variables
+        if (value === undefined) value = this.stage.variables.get(name);
+        if (value !== undefined) return value;
+        // Create the variable locally if it doesn't exist
+        this.target.variables.set(name, 0);
+        return 0;
+    }
+
+    lookupOrCreateList(name: string): (number | string | boolean)[] {
+        let value = this.target.lists.get(name);
+        // Check local lists first, then global lists
+        if (value === undefined) value = this.stage.lists.get(name);
+        if (value !== undefined) return value;
+        const list: (number | string | boolean)[] = [];
+        this.target.lists.set(name, list);
+        return list;
     }
 }

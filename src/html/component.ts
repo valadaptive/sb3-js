@@ -1,6 +1,6 @@
 import h from './html.js';
 import Runtime from '../runtime.js';
-import {InternalStageElement, stageTagName} from './stage.js';
+import {InternalStageElement, internalStage} from './stage.js';
 
 const style = `
 #container {
@@ -51,7 +51,7 @@ const template = h('template',
                 h('img', {width: 24, height: 24, src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath fill='%23eb2126' d='M8.272 21 3 15.728V8.272L8.272 3h7.456L21 8.272v7.456L15.728 21z'/%3E%3Cpath fill='%23f5f5f5' d='M7.443 1 1 7.443v9.114L7.443 23h9.114L23 16.557V7.443L16.557 1zm1.243 3h6.628L20 8.686v6.628L15.314 20H8.686L4 15.314V8.686z'/%3E%3Cpath fill='none' stroke='%23a71122' stroke-linejoin='round' stroke-width='2' d='M7.444 23 1 16.556V7.444L7.444 1h9.112L23 7.444v9.112L16.556 23z'/%3E%3C/svg%3E"}),
             ),
         ),
-        h<InternalStageElement>(stageTagName, {id: 'stage'}),
+        internalStage.h({id: 'stage'}),
     ),
 );
 
@@ -75,7 +75,7 @@ export default class ProjectElement extends HTMLElement {
         stopAll.addEventListener('click', () => {
             this.runtime.stopAll();
         });
-        const stage = shadow.querySelector<InternalStageElement>(stageTagName)!;
+        const stage = shadow.querySelector<InternalStageElement>(internalStage.tagName)!;
         this.runtime.attachStage(stage);
     }
 
