@@ -8,7 +8,8 @@
 - Fencing (done)
 - Monitors (done)
 - Edge-activated hats
-- Speech bubbles
+- Speech bubbles (done)
+- Proper Unicode grapheme segmentation for speech bubble text wrapping
 - Pen
 - Audio engine
 - Audio effects

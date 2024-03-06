@@ -8,6 +8,7 @@ import Rectangle from './rectangle.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
 import {TypedEvent} from './typed-events.js';
+import TextBubbleSkin from './renderer/text-bubble-skin.js';
 
 export type RotationStyle = 'all around' | 'left-right' | 'don\'t rotate';
 
@@ -21,6 +22,15 @@ const FENCE_SIZE = 15;
  * Reused memory location for storing targets' bounds temporarily.
  */
 const __boundsRect = new Rectangle();
+
+export type TextBubble = {
+    type: 'say' | 'think' | 'ask';
+    text: string;
+    skin: TextBubbleSkin | null;
+    // The side a text bubble is rendered on is "sticky"--it doesn't change unless it has to.
+    direction: 'left' | 'right';
+    id: symbol;
+};
 
 export default class Target {
     public readonly runtime: Runtime;
@@ -42,6 +52,7 @@ export default class Target {
     public videoTransparency: number;
     public videoState: string;
     public effects: GraphicEffects;
+    public textBubble: TextBubble | null = null;
 
     public variables: Map<string, string | number | boolean>;
     public lists: Map<string, (string | number | boolean)[]>;
@@ -263,6 +274,31 @@ export default class Target {
             this.drawable.setTransformDirty();
         }
         this.runtime.requestRedraw();
+    }
+
+    /**
+     * Set the text bubble for this target. If the text is empty, the text bubble will be removed.
+     * @param type The type of text bubble to set.
+     * @param text The text in the bubble.
+     * @returns A symbol that can be used to identify this text bubble. This is used in "say/think for () secs" so that
+     * they only remove the text bubble they created.
+     */
+    public setTextBubble(type: 'say' | 'think' | 'ask', text: string): symbol {
+        const id = Symbol('TEXT_BUBBLE');
+        if (text === '') {
+            this.textBubble?.skin?.destroy();
+            this.textBubble = null;
+            return id;
+        }
+
+        if (this.textBubble) {
+            this.textBubble.type = type;
+            this.textBubble.text = text;
+            this.textBubble.id = id;
+        } else {
+            this.textBubble = {type, text, skin: null, direction: 'left', id};
+        }
+        return id;
     }
 
     get position(): {readonly x: number; readonly y: number} {

@@ -436,6 +436,60 @@ const setBackdrop = function(backdrop: string | number | boolean, ctx: BlockCont
     return ctx.startHats('switchbackdrop', new SwitchBackdropEvent(stage.sprite.costumes[stage.currentCostume].name));
 };
 
+export const looks_sayforsecs = new ProtoBlock({
+    opcode: 'looks_sayforsecs',
+    inputs: {
+        MESSAGE: StringInput,
+        SECS: NumberInput,
+    },
+    execute: function* ({MESSAGE, SECS}, ctx) {
+        const message = toString(ctx.evaluateFast(MESSAGE));
+        const duration = toNumber(ctx.evaluateFast(SECS)) * 1000;
+        const bubbleId = ctx.target.setTextBubble('say', message);
+        yield* ctx.waitForMS(duration);
+        // Don't clear the bubble if it's been changed since we set it
+        if (ctx.target.textBubble?.id === bubbleId) ctx.target.setTextBubble('say', '');
+    },
+});
+
+export const looks_say = new ProtoBlock({
+    opcode: 'looks_say',
+    inputs: {
+        MESSAGE: StringInput,
+    },
+    execute: function* ({MESSAGE}, ctx) {
+        const message = toString(ctx.evaluateFast(MESSAGE));
+        ctx.target.setTextBubble('say', message);
+    },
+});
+
+export const looks_thinkforsecs = new ProtoBlock({
+    opcode: 'looks_thinkforsecs',
+    inputs: {
+        MESSAGE: StringInput,
+        SECS: NumberInput,
+    },
+    execute: function* ({MESSAGE, SECS}, ctx) {
+        const message = toString(ctx.evaluateFast(MESSAGE));
+        const duration = toNumber(ctx.evaluateFast(SECS)) * 1000;
+        const bubbleId = ctx.target.setTextBubble('think', message);
+        yield* ctx.waitForMS(duration);
+        // Don't clear the bubble if it's been changed since we set it
+        if (ctx.target.textBubble?.id === bubbleId) ctx.target.setTextBubble('think', '');
+    },
+});
+
+export const looks_think = new ProtoBlock({
+    opcode: 'looks_think',
+    inputs: {
+        MESSAGE: StringInput,
+    },
+    execute: function* ({MESSAGE}, ctx) {
+        const message = toString(ctx.evaluateFast(MESSAGE));
+        ctx.target.setTextBubble('think', message);
+    },
+});
+
 export const looks_costume = new ProtoBlock({
     opcode: 'looks_costume',
     inputs: {

@@ -8,5 +8,5 @@ export default {
         format: 'esm',
         sourcemap: true
     },
-    plugins: [nodeResolve(), typescript()]
+    plugins: [nodeResolve({browser: true}), typescript()]
 };

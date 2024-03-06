@@ -1,9 +1,15 @@
 import {vertexShader, fragmentShader} from './shaders.js';
 import Shader from './shader.js';
-import Target from '../target.js';
+import Target, {TextBubble} from '../target.js';
 import BitmapSkin from './bitmap-skin.js';
 import SVGSkin from './svg-skin.js';
 import Rectangle from '../rectangle.js';
+import TextBubbleSkin from './text-bubble-skin.js';
+import {mat3} from 'gl-matrix';
+import TextWrapper from './text-wrapper.js';
+
+/** Reused memory location for the currently-being-drawn text bubble's transform matrix */
+const __textBubbleMatrix = mat3.create();
 
 export default class Renderer {
     public readonly canvas;
@@ -11,6 +17,7 @@ export default class Renderer {
     private readonly stageBounds: Rectangle;
     private readonly spriteShader: Shader;
     private readonly spriteEffectsShader: Shader;
+    private readonly textWrapper = new TextWrapper();
 
     private currentShader!: Shader;
 
@@ -96,6 +103,68 @@ export default class Renderer {
         }
     }
 
+    private drawTextBubble(target: Target, textBubble: TextBubble) {
+        const gl = this.gl;
+        const screenSpaceScalingFactor = this.canvas.width / this.stageBounds.width;
+
+        let bubbleSkin = textBubble.skin;
+        if (!bubbleSkin) {
+            bubbleSkin = new TextBubbleSkin(gl);
+            textBubble.skin = bubbleSkin;
+        }
+
+        // Position bubble relative to sprite
+        const bubbleSize = bubbleSkin.getDimensions(textBubble.text, this.textWrapper);
+        const targetBounds = target.drawable.getTightBounds();
+        const bubblePosition = [
+            Math.round(textBubble.direction === 'right' ?
+                targetBounds.left - bubbleSize.width :
+                targetBounds.right), Math.round(targetBounds.top)] satisfies [number, number];
+
+        // If the bubble would be offscreen, switch sides
+        if (
+            bubblePosition[0] + bubbleSize.width > this.stageBounds.right &&
+            // If the bubble is too wide to fit on the other side, don't switch
+            targetBounds.left - bubbleSize.width > this.stageBounds.left
+        ) {
+            textBubble.direction = 'right';
+            bubblePosition[0] = targetBounds.left - bubbleSize.width;
+        } else if (
+            bubblePosition[0] < this.stageBounds.left &&
+            // If the bubble is too wide to fit on the other side, don't switch
+            targetBounds.right + bubbleSize.width < this.stageBounds.right
+        ) {
+            textBubble.direction = 'left';
+            bubblePosition[0] = targetBounds.right;
+        }
+
+        // Clamp bubble to stage bounds
+        bubblePosition[0] = Math.max(
+            this.stageBounds.left, Math.min(bubblePosition[0], this.stageBounds.right - bubbleSize.width));
+        bubblePosition[1] = Math.max(
+            this.stageBounds.bottom, Math.min(bubblePosition[1], this.stageBounds.top - bubbleSize.height));
+
+        const texture = bubbleSkin.getTexture(
+            screenSpaceScalingFactor,
+            textBubble.text,
+            textBubble.type,
+            textBubble.direction,
+            this.textWrapper,
+        );
+
+        mat3.fromTranslation(__textBubbleMatrix, bubblePosition);
+        mat3.scale(
+            __textBubbleMatrix,
+            __textBubbleMatrix,
+            [Math.round(bubbleSize.width), Math.round(bubbleSize.height)],
+        );
+        gl.uniformMatrix3fv(this.currentShader.uniformLocations.u_transform, false, __textBubbleMatrix);
+
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(this.currentShader.uniformLocations.u_texture, 0);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
     public draw(targets: Target[]) {
         const gl = this.gl;
         this.resize();
@@ -122,11 +191,15 @@ export default class Renderer {
 
                 costume.skin = skin;
             }
-            const texture = skin.getTexture(target.size * screenSpaceScalingFactor * 0.01);
-            if (!texture) continue;
 
             this.setShader(target.effects.bitmask ? this.spriteEffectsShader : this.spriteShader);
 
+            if (target.textBubble) {
+                this.drawTextBubble(target, target.textBubble);
+            }
+
+            const texture = skin.getTexture(target.size * screenSpaceScalingFactor * 0.01);
+            if (!texture) continue;
             target.drawable.setUniforms(gl, this.currentShader);
 
             gl.bindTexture(gl.TEXTURE_2D, texture);

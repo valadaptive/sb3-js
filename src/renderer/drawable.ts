@@ -59,10 +59,9 @@ export default class Drawable {
 
 
     private updateTransform() {
-        mat3.identity(this.transform);
         const currentCostume = this.costume;
         const targetPosition = this.target.position;
-        mat3.translate(this.transform, this.transform, [targetPosition.x, targetPosition.y]);
+        mat3.fromTranslation(this.transform, [targetPosition.x, targetPosition.y]);
         switch (this.target.rotationStyle) {
             case 'all around':
                 mat3.rotate(this.transform, this.transform, -(this.target.direction - 90) * Math.PI / 180);

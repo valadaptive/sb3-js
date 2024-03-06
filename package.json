@@ -34,6 +34,7 @@
   },
   "description": "",
   "dependencies": {
+    "@cto.af/linebreak": "git://github.com/valadaptive/linebreak.git#web",
     "gl-matrix": "^3.4.3",
     "unzipit": "^1.4.3"
   }
