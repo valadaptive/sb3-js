@@ -8,6 +8,8 @@ import Rectangle from '../rectangle.js';
 import {effectTransformColor, effectTransformPoint} from './effect-transform.js';
 import {GraphicEffects} from '../effects.js';
 import Silhouette from './silhouette.js';
+import PenLayer from './pen-layer.js';
+import Samplable from './samplable.js';
 
 const __localPosition = vec2.create();
 const __intersectionBoundsSelf = new Rectangle();
@@ -178,7 +180,7 @@ export default class Drawable {
      * Return the best pixel-snapped bounds currently available, used to estimate the area needed for touching queries.
      * Uses the convex hull if available, otherwise uses the tight bounds.
      */
-    getFastPixelBounds(result = new Rectangle()) {
+    getSamplingBounds(result = new Rectangle()) {
         // Note that this isn't transformedHullDirty, but convexHullDirty. Transforming the hull isn't expensive
         // compared to calculating it in the first place, and saves a lot of pixel checks.
         if (this.convexHullDirty) {
@@ -219,7 +221,7 @@ export default class Drawable {
      * Sample this drawable's color at a given (Scratch-space) point. Requires the inverse transform to be up-to-date.
      * Faster than `isTouchingPoint` when called in a loop.
      */
-    private sampleColorAtPoint(
+    sampleColorAtPoint(
         x: number,
         y: number,
         silhouette: Silhouette,
@@ -248,8 +250,8 @@ export default class Drawable {
     }
 
     isTouchingDrawable(other: Drawable) {
-        const myBounds = this.getFastPixelBounds(__intersectionBoundsSelf);
-        const otherBounds = other.getFastPixelBounds(__intersectionBoundsOther);
+        const myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
+        const otherBounds = other.getSamplingBounds(__intersectionBoundsOther);
         if (!myBounds.intersects(otherBounds)) {
             return false;
         }
@@ -318,7 +320,7 @@ export default class Drawable {
      * @returns The sampled color.
      */
     static sampleStageAtPointUnchecked(
-        targets: {drawable: Drawable; silhouette: Silhouette}[],
+        targets: {samplable: Samplable; silhouette: Silhouette}[],
         x: number,
         y: number,
         dst: Uint8ClampedArray,
@@ -326,9 +328,9 @@ export default class Drawable {
         dst[0] = dst[1] = dst[2] = 0;
         let blendAlpha = 1;
         for (let i = targets.length - 1; i >= 0 && blendAlpha !== 0; i--) {
-            const {drawable, silhouette} = targets[i];
+            const {samplable, silhouette} = targets[i];
             // Ignore ghost effect
-            drawable.sampleColorAtPoint(x, y, silhouette, __blendColor, ~0);
+            samplable.sampleColorAtPoint(x, y, silhouette, __blendColor, ~0);
             // Apply alpha blending for premultiplied alpha
             dst[0] += __blendColor[0] * blendAlpha;
             dst[1] += __blendColor[1] * blendAlpha;
@@ -352,25 +354,33 @@ export default class Drawable {
      */
     private candidatesTouching(
         targets: Target[],
+        penLayer: PenLayer | null,
         stageBounds: Rectangle,
-    ): {drawable: Drawable; silhouette: Silhouette}[] {
-        let myBounds = this.getFastPixelBounds(__intersectionBoundsSelf);
+    ): {samplable: Samplable; silhouette: Silhouette}[] {
+        let myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
         myBounds = Rectangle.intersection(stageBounds, myBounds, __intersectionBoundsSelf);
-        const candidates: {drawable: Drawable; silhouette: Silhouette}[] = [];
+        const candidates: {samplable: Samplable; silhouette: Silhouette}[] = [];
         for (let i = 0; i < targets.length; i++) {
             const target = targets[i];
-            if (target === this.target) continue;
-            const drawable = target.drawable;
-            let otherBounds = drawable.getFastPixelBounds(__intersectionBoundsOther);
-            otherBounds = Rectangle.intersection(stageBounds, otherBounds, __intersectionBoundsOther);
-            if (otherBounds.intersects(myBounds)) {
-                const silhouette = drawable.costume.skin?.getSilhouette(target.size * 0.01);
-                if (!silhouette) continue;
-                if (drawable.inverseTransformDirty) {
-                    drawable.updateInverseTransform();
+            if (target !== this.target) {
+                const drawable = target.drawable;
+                let otherBounds = drawable.getSamplingBounds(__intersectionBoundsOther);
+                otherBounds = Rectangle.intersection(stageBounds, otherBounds, __intersectionBoundsOther);
+                if (otherBounds.intersects(myBounds)) {
+                    const silhouette = drawable.costume.skin?.getSilhouette(target.size * 0.01);
+                    if (silhouette) {
+                        if (drawable.inverseTransformDirty) {
+                            drawable.updateInverseTransform();
+                        }
+                        candidates.push({samplable: drawable, silhouette});
+                    }
                 }
-                candidates.push({drawable, silhouette});
             }
+            // Add the pen layer after the stage
+            if (target.sprite.isStage && penLayer) {
+                candidates.push({samplable: penLayer, silhouette: penLayer.getSilhouette()});
+            }
+
         }
         return candidates;
     }
@@ -385,20 +395,21 @@ export default class Drawable {
      */
     isTouchingColor(
         targets: Target[],
+        penLayer: PenLayer | null,
         color: Uint8ClampedArray,
         stageBounds: Rectangle,
         colorMask: Uint8ClampedArray | null = null,
     ) {
         const mySilhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
         if (!mySilhouette) return false;
-        let myBounds = this.getFastPixelBounds(__intersectionBoundsSelf);
+        let myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
         myBounds = Rectangle.intersection(stageBounds, myBounds, __intersectionBoundsSelf);
         if (this.inverseTransformDirty) {
             this.updateInverseTransform();
         }
         const hasMask = !!colorMask;
 
-        const candidates = this.candidatesTouching(targets, stageBounds);
+        const candidates = this.candidatesTouching(targets, penLayer, stageBounds);
         let candidatesBounds = new Rectangle();
         if (Drawable.colorMatches(color, BACKGROUND_COLOR)) {
             // If we are checking for the background color, we can't limit the check to other sprites' bounds. The
@@ -413,7 +424,7 @@ export default class Drawable {
             candidatesBounds.top = -Infinity;
 
             for (const candidate of candidates) {
-                let bounds = candidate.drawable.getFastPixelBounds(__intersectionBoundsOther);
+                let bounds = candidate.samplable.getSamplingBounds(__intersectionBoundsOther);
                 bounds = Rectangle.intersection(stageBounds, bounds, __intersectionBoundsOther);
                 bounds = Rectangle.intersection(myBounds, bounds, __intersectionBoundsOther);
                 Rectangle.union(bounds, candidatesBounds, candidatesBounds);

@@ -1,5 +1,6 @@
 import {Block} from '../block.js';
 import Project from '../project.js';
+import Renderer from '../renderer/renderer.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
 
@@ -30,6 +31,10 @@ export default class Interpreter {
         this.blockContext.project = project!;
         // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
         this.blockContext.stage = project?.stage!;
+    }
+
+    public setRenderer(renderer: Renderer | null) {
+        this.blockContext.renderer = renderer;
     }
 
     public requestRedraw() {

@@ -212,7 +212,7 @@ const sb3BlockSchema = {
         topLevel: 'boolean',
         mutation: sb3MutationSchema,
     },
-    optional: ['mutation'],
+    optional: ['mutation', 'parent', 'next'],
 } as const satisfies Schema;
 type Sb3Block = ObjectForSchema<typeof sb3BlockSchema>;
 
@@ -489,7 +489,7 @@ const sb3CustomBlockMutationSchema = [
             argumentids: 'string',
             argumentnames: 'string',
             argumentdefaults: 'string',
-            warp: 'string',
+            warp: ['string', 'boolean'],
         },
     },
 ] as const satisfies Schema;
@@ -533,7 +533,7 @@ const parseCustomBlockPrototype = (
         argumentids,
         argumentnames,
         argumentdefaults,
-        mutation.warp === 'true',
+        mutation.warp === 'true' || mutation.warp === true,
     ), {jsonBlock, blockId});
 };
 
@@ -564,11 +564,11 @@ const parseScript = (
 ): Block[] => {
     const blocks: Block[] = [];
     let currentBlock: Sb3Block | null = jsonBlock;
-    let currentBlockId: string | null = blockId;
+    let currentBlockId: string | null | undefined = blockId;
 
     while (true) {
         blocks.push(parseBlock(currentBlock, currentBlockId!, jsonTarget, customBlocks));
-        if (currentBlock.next === null) {
+        if (typeof currentBlock.next !== 'string') {
             break;
         }
         if (!Object.prototype.hasOwnProperty.call(jsonTarget.blocks, currentBlock.next)) {

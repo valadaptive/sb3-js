@@ -9,7 +9,15 @@
 - Monitors (done)
 - Edge-activated hats
 - Speech bubbles (done)
-- Pen
+- Pen (done)
+- The rest of the sensing blocks
 - Audio engine
 - Audio effects
+- Costumes' fonts
+- Music blocks
+- Draw pen lines with instancing
+- Revamp block introspection API
+    - want to be able to type ctx.evaluate properly
+    - specify "only accept blocks returning X"
+- Switch the renderer over to 2x3 matrices
 - Promise-throwing stuff for async reporters

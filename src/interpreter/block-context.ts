@@ -2,6 +2,7 @@ import {Block, BlockGenerator, ProtoBlock} from '../block.js';
 import IO from '../io.js';
 import Project from '../project.js';
 import Rectangle from '../rectangle.js';
+import Renderer from '../renderer/renderer.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
 
@@ -10,6 +11,7 @@ import Thread, {PARK_THREAD, ThreadStatus} from './thread.js';
 
 export type BlockContextParams = {
     io: IO;
+    renderer: Renderer | null;
     stageBounds: Rectangle;
 };
 
@@ -21,10 +23,12 @@ export default class BlockContext {
     public target!: Target;
     public stage!: Target;
     public thread!: Thread;
+    public renderer: Renderer | null;
 
     constructor(interpreter: Interpreter, params: BlockContextParams) {
         this.interpreter = interpreter;
         this.io = params.io;
+        this.renderer = params.renderer;
         this.stageBounds = params.stageBounds;
     }
 

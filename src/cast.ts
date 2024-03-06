@@ -70,11 +70,11 @@ export const toListIndex = (value: string | number | boolean | void, length: num
  * Cast a value to a color. Supports raw numbers and hex strings (both shorthand like #fff and standard like #ffffff).
  * @param value The value to cast to a string.
  * @param dst Optionally, the destination array to write the result to. If not provided, a new array is created.
- * @returns The color as an array of 3 bytes (RGB).
+ * @returns The color as an array of 4 bytes (RGBA).
  */
 export const toColor = (
     value: string | number | boolean | void,
-    dst = new Uint8ClampedArray(3),
+    dst = new Uint8ClampedArray(4),
 ): Uint8ClampedArray => {
     let color;
     if (typeof value === 'string' && value[0] === '#') {
@@ -97,6 +97,8 @@ export const toColor = (
     dst[0] = (color >> 16) & 0xff;
     dst[1] = (color >> 8) & 0xff;
     dst[2] = color & 0xff;
+    const alpha = (color >> 24) & 0xff;
+    dst[3] = alpha === 0 ? 0xff : alpha;
     return dst;
 };
 

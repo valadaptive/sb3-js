@@ -47,6 +47,7 @@ export default class Runtime {
         this.interpreter = new Interpreter(this.stepTime, {
             io: this.io,
             stageBounds: this.stageBounds,
+            renderer: null,
         });
         this.theme = settings?.theme ?? defaultTheme;
     }
@@ -94,6 +95,7 @@ export default class Runtime {
             for (const {monitor} of project.monitors) {
                 this.removeMonitorView(monitor);
             }
+            this.penLayer?.clear();
             unregisterProject();
             controller.abort();
             this.interpreter.setProject(null);
@@ -109,6 +111,7 @@ export default class Runtime {
         if (!stage) return;
 
         const renderer = this.renderer = new Renderer(stage.canvas, this.stageBounds);
+        this.interpreter.setRenderer(renderer);
         // Allow stage to receive keyboard events
         stage.tabIndex = 0;
         const teardownEventListeners = this.setupEventListeners(stage);
@@ -116,6 +119,7 @@ export default class Runtime {
 
         this.unsetPreviousStage = () => {
             this.renderer = null;
+            this.interpreter.setRenderer(null);
             this.stage = null;
             renderer.destroy();
             teardownEventListeners();
@@ -230,6 +234,10 @@ export default class Runtime {
         restartExistingThreads: boolean,
     ) {
         return this.interpreter.launch(script, target, event, restartExistingThreads);
+    }
+
+    public get penLayer() {
+        return this.renderer?.penLayer;
     }
 
     public greenFlag() {

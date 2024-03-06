@@ -2,6 +2,7 @@ import {SomeProtoBlock} from './block.js';
 import {control_start_as_clone, event_whenstageclicked, event_whenthisspriteclicked} from './blocks.js';
 import {GraphicEffects} from './effects.js';
 import Thread from './interpreter/thread.js';
+import PenState from './pen-state.js';
 import Project from './project.js';
 import Drawable from './renderer/drawable.js';
 import Rectangle from './rectangle.js';
@@ -53,6 +54,7 @@ export default class Target {
     public videoState: string;
     public effects: GraphicEffects;
     public textBubble: TextBubbleState | null = null;
+    public penState: PenState;
 
     public variables: Map<string, string | number | boolean>;
     public lists: Map<string, (string | number | boolean)[]>;
@@ -81,6 +83,7 @@ export default class Target {
         videoTransparency: number;
         videoState: string;
         effects?: GraphicEffects;
+        penState?: PenState;
         variables: Map<string, string | number | boolean>;
         lists: Map<string, (string | number | boolean)[]>;
     }) {
@@ -105,6 +108,7 @@ export default class Target {
         this.videoTransparency = options.videoTransparency;
         this.videoState = options.videoState;
         this.effects = options.effects ? GraphicEffects.fromExisting(options.effects, this) : new GraphicEffects(this);
+        this.penState = options.penState ?? new PenState();
         this.variables = options.variables;
         this.lists = options.lists;
 
@@ -153,6 +157,7 @@ export default class Target {
             videoTransparency: this.videoTransparency,
             videoState: this.videoState,
             effects: this.effects,
+            penState: this.penState.clone(),
             variables: new Map(this.variables),
             lists: newLists,
         });
@@ -165,6 +170,7 @@ export default class Target {
 
     public reset() {
         this.effects.clear();
+        this.setTextBubble('say', '');
     }
 
     private setUpScriptListeners(): () => void {
@@ -268,11 +274,23 @@ export default class Target {
             y = Math.floor(this._position.y + (stageTop - fenceBounds.bottom));
         }
 
+        if (this.penState.down) {
+            this.runtime.penLayer?.penLine(
+                this._position.x,
+                this._position.y,
+                x,
+                y,
+                this.penState.rgba,
+                this.penState.thickness,
+            );
+        }
+
         this._position.x = x;
         this._position.y = y;
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
+
         this.runtime.requestRedraw();
     }
 

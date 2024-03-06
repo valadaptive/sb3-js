@@ -1061,7 +1061,7 @@ const evaluateColorInput = (
     }
 };
 
-const __color = new Uint8ClampedArray(3);
+const __color = new Uint8ClampedArray(4);
 export const sensing_touchingcolor = new ProtoBlock({
     opcode: 'sensing_touchingcolor',
     inputs: {
@@ -1069,7 +1069,12 @@ export const sensing_touchingcolor = new ProtoBlock({
     },
     execute: function* ({COLOR}, ctx) {
         const color = evaluateColorInput(COLOR, ctx, __color);
-        const isTouching = ctx.target.drawable.isTouchingColor(ctx.project.targets, color, ctx.stageBounds);
+        const isTouching = ctx.target.drawable.isTouchingColor(
+            ctx.project.targets,
+            ctx.renderer?.penLayer ?? null,
+            color,
+            ctx.stageBounds,
+        );
         return isTouching;
     },
 });
@@ -1086,7 +1091,13 @@ export const sensing_coloristouchingcolor = new ProtoBlock({
         const color2 = evaluateColorInput(COLOR2, ctx, __color2);
         // COLOR is the mask and COLOR2 is the target color, as opposed to "touching color" where COLOR is the target
         // color. Why? Ask Scratch.
-        const isTouching = ctx.target.drawable.isTouchingColor(ctx.project.targets, color2, ctx.stageBounds, color);
+        const isTouching = ctx.target.drawable.isTouchingColor(
+            ctx.project.targets,
+            ctx.renderer?.penLayer ?? null,
+            color2,
+            ctx.stageBounds,
+            color,
+        );
         return isTouching;
     },
 });
@@ -1680,6 +1691,174 @@ export const data_listcontainsitem = new ProtoBlock({
         return false;
     },
     returnType: ['boolean'],
+});
+
+/**
+ * Pen
+ */
+
+export const pen_clear = new ProtoBlock({
+    opcode: 'pen_clear',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.renderer?.penLayer.clear();
+    },
+});
+
+export const pen_stamp = new ProtoBlock({
+    opcode: 'pen_stamp',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.renderer?.stamp(ctx.target);
+    },
+});
+
+export const pen_penDown = new ProtoBlock({
+    opcode: 'pen_penDown',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.target.penState.down = true;
+        // Move so we draw a pen dot
+        ctx.target.moveTo(ctx.target.position.x, ctx.target.position.y);
+    },
+});
+
+export const pen_penUp = new ProtoBlock({
+    opcode: 'pen_penUp',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.target.penState.down = false;
+    },
+});
+
+const __color3 = new Uint8ClampedArray(4);
+export const pen_setPenColorToColor = new ProtoBlock({
+    opcode: 'pen_setPenColorToColor',
+    inputs: {
+        COLOR: ColorInput,
+    },
+    execute: function* ({COLOR}, ctx) {
+        evaluateColorInput(COLOR, ctx, __color3);
+        ctx.target.penState.setFromRgbaInt(__color3);
+    },
+});
+
+export const pen_menu_colorParam = new ProtoBlock({
+    opcode: 'pen_menu_colorParam',
+    inputs: {
+        colorParam: StringField,
+    },
+    execute: function* ({colorParam}) {
+        return colorParam;
+    },
+    pure: true,
+});
+
+export const pen_changePenColorParamBy = new ProtoBlock({
+    opcode: 'pen_changePenColorParamBy',
+    inputs: {
+        COLOR_PARAM: StringInput,
+        VALUE: NumberInput,
+    },
+    execute: function* ({COLOR_PARAM, VALUE}, ctx) {
+        const param = toString(ctx.evaluateFast(COLOR_PARAM));
+        const value = toNumber(ctx.evaluateFast(VALUE));
+        if (param === 'color' || param === 'saturation' || param === 'brightness' || param === 'transparency') {
+            ctx.target.penState[param] += value;
+        }
+    },
+});
+
+export const pen_setPenColorParamTo = new ProtoBlock({
+    opcode: 'pen_setPenColorParamTo',
+    inputs: {
+        COLOR_PARAM: StringInput,
+        VALUE: NumberInput,
+    },
+    execute: function* ({COLOR_PARAM, VALUE}, ctx) {
+        const param = toString(ctx.evaluateFast(COLOR_PARAM));
+        const value = toNumber(ctx.evaluateFast(VALUE));
+        if (param === 'color' || param === 'saturation' || param === 'brightness' || param === 'transparency') {
+            ctx.target.penState[param] = value;
+        }
+    },
+});
+
+export const pen_changePenSizeBy = new ProtoBlock({
+    opcode: 'pen_changePenSizeBy',
+    inputs: {
+        SIZE: NumberInput,
+    },
+    execute: function* ({SIZE}, ctx) {
+        const size = toNumber(ctx.evaluateFast(SIZE));
+        ctx.target.penState.thickness += size;
+    },
+});
+
+export const pen_setPenSizeTo = new ProtoBlock({
+    opcode: 'pen_setPenSizeTo',
+    inputs: {
+        SIZE: NumberInput,
+    },
+    execute: function* ({SIZE}, ctx) {
+        const size = toNumber(ctx.evaluateFast(SIZE));
+        ctx.target.penState.thickness = size;
+    },
+});
+
+// Legacy 2.0 "set pen color to"
+export const pen_setPenHueToNumber = new ProtoBlock({
+    opcode: 'pen_setPenHueToNumber',
+    inputs: {
+        HUE: NumberInput,
+    },
+    execute: function* ({HUE}, ctx) {
+        const hue = toNumber(ctx.evaluateFast(HUE));
+        // Unlike the 3.0 version, this wraps in the correct range
+        ctx.target.penState.color = (((hue * 0.5) % 100) + 100) % 100;
+        ctx.target.penState.transparency = 0; // Not sure why this is here, but Scratch does it
+        ctx.target.penState.updateLegacyColor();
+    },
+});
+
+// Legacy 2.0 "change pen color by"
+export const pen_changePenHueBy = new ProtoBlock({
+    opcode: 'pen_changePenHueBy',
+    inputs: {
+        HUE: NumberInput,
+    },
+    execute: function* ({HUE}, ctx) {
+        const hue = toNumber(ctx.evaluateFast(HUE));
+        // Unlike the 3.0 version, this wraps in the correct range
+        ctx.target.penState.color = ctx.target.penState.color + ((((hue * 0.5) % 100) + 100) % 100);
+        ctx.target.penState.updateLegacyColor();
+    },
+});
+
+// Legacy 2.0 "set pen shade to"
+export const pen_setPenShadeToNumber = new ProtoBlock({
+    opcode: 'pen_setPenShadeToNumber',
+    inputs: {
+        SHADE: NumberInput,
+    },
+    execute: function* ({SHADE}, ctx) {
+        const shade = toNumber(ctx.evaluateFast(SHADE));
+        ctx.target.penState.legacyShade = shade;
+        ctx.target.penState.updateLegacyColor();
+    },
+});
+
+// Legacy 2.0 "change pen shade by"
+export const pen_changePenShadeBy = new ProtoBlock({
+    opcode: 'pen_changePenShadeBy',
+    inputs: {
+        SHADE: NumberInput,
+    },
+    execute: function* ({SHADE}, ctx) {
+        const shade = toNumber(ctx.evaluateFast(SHADE));
+        ctx.target.penState.legacyShade += shade;
+        ctx.target.penState.updateLegacyColor();
+    },
 });
 
 /**
