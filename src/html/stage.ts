@@ -33,10 +33,13 @@ const stageTemplate = h('template',
 );
 
 export class InternalStageElement extends HTMLElement {
-    public canvas: HTMLCanvasElement;
-    private monitorContainer: HTMLDivElement;
+    public canvas!: HTMLCanvasElement;
+    private monitorContainer!: HTMLDivElement;
     constructor() {
         super();
+    }
+
+    connectedCallback() {
         const shadow = this.attachShadow({mode: 'open'});
         const stageContents = stageTemplate.content.cloneNode(true) as HTMLElement;
         shadow.append(stageContents);

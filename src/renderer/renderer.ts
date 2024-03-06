@@ -1,10 +1,10 @@
 import {vertexShader, fragmentShader} from './shaders.js';
 import Shader from './shader.js';
-import Target, {TextBubble} from '../target.js';
+import Target, {TextBubbleState} from '../target.js';
 import BitmapSkin from './bitmap-skin.js';
 import SVGSkin from './svg-skin.js';
 import Rectangle from '../rectangle.js';
-import TextBubbleSkin from './text-bubble-skin.js';
+import TextBubble from './text-bubble.js';
 import {mat3} from 'gl-matrix';
 import TextWrapper from './text-wrapper.js';
 
@@ -103,14 +103,14 @@ export default class Renderer {
         }
     }
 
-    private drawTextBubble(target: Target, textBubble: TextBubble) {
+    private drawTextBubble(target: Target, textBubble: TextBubbleState) {
         const gl = this.gl;
         const screenSpaceScalingFactor = this.canvas.width / this.stageBounds.width;
 
-        let bubbleSkin = textBubble.skin;
+        let bubbleSkin = textBubble.bubble;
         if (!bubbleSkin) {
-            bubbleSkin = new TextBubbleSkin(gl);
-            textBubble.skin = bubbleSkin;
+            bubbleSkin = new TextBubble(gl);
+            textBubble.bubble = bubbleSkin;
         }
 
         // Position bubble relative to sprite

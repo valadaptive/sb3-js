@@ -1,5 +1,24 @@
 import {Rules} from '@cto.af/linebreak';
 
+let segmentString: (text: string) => Generator<string>;
+if (typeof Intl.Segmenter === 'function') {
+    const segmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
+    segmentString = function*(text: string) {
+        for (const seg of segmenter.segment(text)) {
+            yield seg.segment;
+        }
+    };
+} else {
+    // TODO: remove this once Intl.Segmenter makes it to Firefox ESR
+    segmentString = function*(text: string) {
+        const regex = /\P{M}\p{M}*/uy;
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            yield match[0];
+        }
+    };
+}
+
 export default class TextWrapper {
     private cache = new Map<string, string[]>();
     private breaker: Rules = new Rules({string: true});
@@ -24,14 +43,13 @@ export default class TextWrapper {
                 const wordWidth = ctx.measureText(word).width;
                 if (wordWidth > maxWidth) {
                     // If the word itself is too long, split it
-                    // TODO: split grapheme clusters
-                    for (let i = 0; i < word.length; i++) {
-                        const splitLine: string = (currentLine ?? '') + word[i];
+                    for (const segment of segmentString(word)) {
+                        const splitLine: string = (currentLine ?? '') + segment;
                         if (ctx.measureText(splitLine).width <= maxWidth) {
                             currentLine = splitLine;
                         } else {
                             if (currentLine !== null) lines.push(currentLine);
-                            currentLine = word[i];
+                            currentLine = segment;
                         }
                     }
                 } else {

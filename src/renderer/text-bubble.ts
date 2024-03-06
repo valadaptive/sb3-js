@@ -1,4 +1,3 @@
-import Silhouette from './silhouette.js';
 import TextWrapper from './text-wrapper.js';
 
 const bubbleStyle = {
@@ -20,7 +19,7 @@ const bubbleStyle = {
     textFill: 'hsl(226, 14.7%, 40%)',
 };
 
-export default class TextBubbleSkin {
+export default class TextBubble {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private gl;
@@ -145,6 +144,7 @@ export default class TextBubbleSkin {
         ctx.translate(width - borderRadius, height);
 
         if (type === 'say' || type === 'ask') {
+            // For a speech bubble, draw a single "tail"
             ctx.bezierCurveTo(0, 4, 4, 8, 4, 10);
             ctx.arcTo(4, 12, 2, 12, 2);
             ctx.bezierCurveTo(-1, 12, -11, 8, -16, 0);
@@ -159,9 +159,11 @@ export default class TextBubbleSkin {
             // and two circles detached from it
             ctx.moveTo(-7, 7.25);
             ctx.arc(-9.25, 7.25, 2.25, 0, Math.PI * 2);
+            ctx.closePath();
 
             ctx.moveTo(0, 9.5);
             ctx.arc(-1.5, 9.5, 1.5, 0, Math.PI * 2);
+            ctx.closePath();
         }
 
         ctx.restore();
@@ -201,10 +203,6 @@ export default class TextBubbleSkin {
         this.renderedType = type;
         this.renderedDirection = direction;
         this.renderedScale = scale;
-    }
-
-    getSilhouette(): Silhouette | null {
-        return null;
     }
 
     public destroy() {

@@ -8,7 +8,7 @@ import Rectangle from './rectangle.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
 import {TypedEvent} from './typed-events.js';
-import TextBubbleSkin from './renderer/text-bubble-skin.js';
+import TextBubble from './renderer/text-bubble.js';
 
 export type RotationStyle = 'all around' | 'left-right' | 'don\'t rotate';
 
@@ -23,12 +23,12 @@ const FENCE_SIZE = 15;
  */
 const __boundsRect = new Rectangle();
 
-export type TextBubble = {
+export type TextBubbleState = {
     type: 'say' | 'think' | 'ask';
     text: string;
-    skin: TextBubbleSkin | null;
     // The side a text bubble is rendered on is "sticky"--it doesn't change unless it has to.
     direction: 'left' | 'right';
+    bubble: TextBubble | null;
     id: symbol;
 };
 
@@ -52,7 +52,7 @@ export default class Target {
     public videoTransparency: number;
     public videoState: string;
     public effects: GraphicEffects;
-    public textBubble: TextBubble | null = null;
+    public textBubble: TextBubbleState | null = null;
 
     public variables: Map<string, string | number | boolean>;
     public lists: Map<string, (string | number | boolean)[]>;
@@ -286,7 +286,7 @@ export default class Target {
     public setTextBubble(type: 'say' | 'think' | 'ask', text: string): symbol {
         const id = Symbol('TEXT_BUBBLE');
         if (text === '') {
-            this.textBubble?.skin?.destroy();
+            this.textBubble?.bubble?.destroy();
             this.textBubble = null;
             return id;
         }
@@ -296,7 +296,7 @@ export default class Target {
             this.textBubble.text = text;
             this.textBubble.id = id;
         } else {
-            this.textBubble = {type, text, skin: null, direction: 'left', id};
+            this.textBubble = {type, text, bubble: null, direction: 'left', id};
         }
         return id;
     }
