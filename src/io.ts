@@ -4,6 +4,7 @@ export default class IO {
     public mousePosition: {x: number; y: number} = {x: 0, y: 0};
     public mouseDown: boolean = false;
     public keysDown: Set<string> = new Set();
+    public username: string = '';
 
     public isKeyPressed(key: string): boolean {
         return this.keysDown.has(key);

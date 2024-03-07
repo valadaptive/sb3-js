@@ -19,6 +19,8 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent> {
     }[] = [];
     public stage: Target | null = null;
     public cloneCount = 0;
+    public timerStart: number = Date.now();
+    public currentMSecs: number = this.timerStart;
 
     register(): () => void {
         const unregisterCallbacks: (() => void)[] = [];
@@ -99,6 +101,8 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent> {
             }
         }
         this.targets.length = nextOriginalTargetIndex;
+        // Reset timer when the project is stopped
+        this.timerStart = this.currentMSecs;
     }
 
     public removeTarget(target: Target) {

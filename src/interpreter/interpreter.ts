@@ -9,7 +9,6 @@ import Thread, {ThreadStatus} from './thread.js';
 
 export default class Interpreter {
     public turboMode: boolean = false;
-    public currentMSecs = 0;
 
     private stepTime;
     private threads: Thread[];
@@ -89,7 +88,8 @@ export default class Interpreter {
         /** How long we can perform computations for before force-yielding. */
         const WORK_TIME = this.stepTime * 0.75;
 
-        const startTime = this.currentMSecs = Date.now();
+        const startTime = Date.now();
+        if (this.project) this.project.currentMSecs = startTime;
         let anyThreadsActive = true;
 
         while (

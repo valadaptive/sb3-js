@@ -21,6 +21,7 @@ const STEP_TIME = 1000 / 30;
 
 export type RuntimeSettings = {
     theme?: Theme;
+    username?: string;
 };
 
 export default class Runtime {
@@ -50,6 +51,7 @@ export default class Runtime {
             renderer: null,
         });
         this.theme = settings?.theme ?? defaultTheme;
+        this.io.username = settings?.username ?? '';
     }
 
     public async loadProjectFromLoader(loader: Loader): Promise<Project> {

@@ -105,7 +105,11 @@ export class MonitorElement extends HTMLElement implements MonitorView {
         }
         if (monitor.position) this.setPosition(monitor.position);
 
-        this.monitorElement.setLabel(monitor.label);
+        const label = !monitor.target || monitor.target?.sprite.isStage ?
+            monitor.label :
+            `${monitor.target.sprite.name}: ${monitor.label}`;
+
+        this.monitorElement.setLabel(label);
     }
     setPosition(to: {x: number; y: number}): void {
         this.style.left = `${to.x}px`;
@@ -243,7 +247,7 @@ class ScalarMonitorElement extends HTMLElement {
     setValue(to: string | number | boolean): void {
         this.value = typeof to === 'number' ?
         // Display up to 6 decimal places
-            to.toFixed(6).replace(/\.0+$/, '') :
+            to.toFixed(6).replace(/\.?0+$/, '') :
             String(to);
         this.valueElement.replaceChildren(this.value);
         this.monitorElement.style.removeProperty('display');

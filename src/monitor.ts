@@ -55,7 +55,7 @@ class BaseMonitor extends TypedEventTarget<UpdateMonitorEvent> {
     public readonly block: Block;
 
     protected _label: string;
-    protected _value: string | number | boolean | (string | number | boolean)[];
+    protected _value: string | number | boolean | (string | number | boolean)[] | null;
     protected _visible: boolean;
     protected _position: {x: number; y: number} | null;
     protected _mode: MonitorMode = {mode: 'default'};
@@ -66,7 +66,7 @@ class BaseMonitor extends TypedEventTarget<UpdateMonitorEvent> {
         this.block = block;
 
         this._label = params.label;
-        this._value = '';
+        this._value = null;
         this._visible = params.visible;
         this._position = params.position;
         this._mode = params.mode;

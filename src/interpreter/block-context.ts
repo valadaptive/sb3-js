@@ -80,7 +80,7 @@ export default class BlockContext {
     }
 
     *waitForMS(ms: number) {
-        const start = this.interpreter.currentMSecs;
+        const start = this.project.currentMSecs;
         // "wait" blocks always request a redraw, even if the wait time is 0
         this.interpreter.requestRedraw();
         // TODO: Even in scratch-vm, this has a tendency to busy-wait. See if there's a way to park threads without the
@@ -88,7 +88,7 @@ export default class BlockContext {
         // Always yield at least once, even if the wait time is 0
         do {
             yield;
-        } while (this.interpreter.currentMSecs - start < ms);
+        } while (this.project.currentMSecs - start < ms);
     }
 
     stopOtherTargetThreads() {
@@ -157,7 +157,7 @@ export default class BlockContext {
     }
 
     get currentTime() {
-        return this.interpreter.currentMSecs;
+        return this.project.currentMSecs;
     }
 
     get warpMode() {

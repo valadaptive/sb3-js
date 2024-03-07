@@ -443,7 +443,7 @@ export const looks_sayforsecs = new ProtoBlock({
         SECS: NumberInput,
     },
     execute: function* ({MESSAGE, SECS}, ctx) {
-        const message = toString(ctx.evaluateFast(MESSAGE));
+        const message = ctx.evaluateFast(MESSAGE);
         const duration = toNumber(ctx.evaluateFast(SECS)) * 1000;
         const bubbleId = ctx.target.setTextBubble('say', message);
         yield* ctx.waitForMS(duration);
@@ -458,7 +458,7 @@ export const looks_say = new ProtoBlock({
         MESSAGE: StringInput,
     },
     execute: function* ({MESSAGE}, ctx) {
-        const message = toString(ctx.evaluateFast(MESSAGE));
+        const message = ctx.evaluateFast(MESSAGE);
         ctx.target.setTextBubble('say', message);
     },
 });
@@ -470,7 +470,7 @@ export const looks_thinkforsecs = new ProtoBlock({
         SECS: NumberInput,
     },
     execute: function* ({MESSAGE, SECS}, ctx) {
-        const message = toString(ctx.evaluateFast(MESSAGE));
+        const message = ctx.evaluateFast(MESSAGE);
         const duration = toNumber(ctx.evaluateFast(SECS)) * 1000;
         const bubbleId = ctx.target.setTextBubble('think', message);
         yield* ctx.waitForMS(duration);
@@ -485,7 +485,7 @@ export const looks_think = new ProtoBlock({
         MESSAGE: StringInput,
     },
     execute: function* ({MESSAGE}, ctx) {
-        const message = toString(ctx.evaluateFast(MESSAGE));
+        const message = ctx.evaluateFast(MESSAGE);
         ctx.target.setTextBubble('think', message);
     },
 });
@@ -1102,6 +1102,50 @@ export const sensing_coloristouchingcolor = new ProtoBlock({
     },
 });
 
+export const sensing_distancetomenu = new ProtoBlock({
+    opcode: 'sensing_distancetomenu',
+    inputs: {
+        DISTANCETOMENU: StringField,
+    },
+    execute: function* ({DISTANCETOMENU}) {
+        return DISTANCETOMENU;
+    },
+    pure: true,
+});
+
+export const sensing_distanceto = new ProtoBlock({
+    opcode: 'sensing_distanceto',
+    inputs: {
+        DISTANCETOMENU: StringInput,
+    },
+    execute: function* ({DISTANCETOMENU}, ctx) {
+        if (ctx.target.sprite.isStage) return 10000;
+
+        const target = toString(ctx.evaluateFast(DISTANCETOMENU));
+        let targetX, targetY;
+        if (target === '_mouse_') {
+            targetX = ctx.io.mousePosition.x;
+            targetY = ctx.io.mousePosition.y;
+        } else {
+            const other = ctx.project.getTargetByName(target);
+            if (other) {
+                targetX = other.position.x;
+                targetY = other.position.y;
+            } else {
+                return 10000;
+            }
+        }
+
+
+        const dx = ctx.target.position.x - targetX;
+        const dy = ctx.target.position.y - targetY;
+        return Math.sqrt((dx * dx) + (dy * dy));
+
+        return 0;
+    },
+    returnType: ['number'],
+});
+
 export const sensing_keyoptions = new ProtoBlock({
     opcode: 'sensing_keyoptions',
     inputs: {
@@ -1151,6 +1195,131 @@ export const sensing_mousey = new ProtoBlock({
         return ctx.io.mousePosition.y;
     },
     returnType: ['boolean'],
+});
+
+export const sensing_timer = new ProtoBlock({
+    opcode: 'sensing_timer',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return (ctx.project.currentMSecs - ctx.project.timerStart) / 1000;
+    },
+    returnType: ['number'],
+    monitorLabel: () => 'timer',
+    colorCategory: 'sensing',
+});
+
+export const sensing_resettimer = new ProtoBlock({
+    opcode: 'sensing_resettimer',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.project.timerStart = ctx.project.currentMSecs;
+    },
+});
+
+export const sensing_of_object_menu = new ProtoBlock({
+    opcode: 'sensing_of_object_menu',
+    inputs: {
+        OBJECT: StringField,
+    },
+    execute: function* ({OBJECT}) {
+        return OBJECT;
+    },
+    pure: true,
+});
+
+export const sensing_of = new ProtoBlock({
+    opcode: 'sensing_of',
+    inputs: {
+        PROPERTY: StringField,
+        OBJECT: StringInput,
+    },
+    execute: function* ({PROPERTY, OBJECT}, ctx) {
+        let target;
+        if (OBJECT === '_stage_') {
+            target = ctx.stage;
+        } else {
+            target = ctx.project.getTargetByName(toString(ctx.evaluateFast(OBJECT)));
+        }
+        if (!target) return 0;
+
+        // Check for specific attributes
+        if (target.sprite.isStage) {
+            switch (PROPERTY) {
+                case 'background #':
+                case 'backdrop #': return target.currentCostume + 1;
+                case 'backdrop name': return target.sprite.costumes[target.currentCostume].name;
+                case 'volume': return target.volume;
+            }
+        } else {
+            switch (PROPERTY) {
+                case 'x position': return target.position.x;
+                case 'y position': return target.position.y;
+                case 'direction': return target.direction;
+                case 'costume #': return target.currentCostume + 1;
+                case 'costume name': return target.sprite.costumes[target.currentCostume].name;
+                case 'size': return target.size;
+                case 'volume': return target.volume;
+            }
+        }
+
+        // Local variables
+        const varValue = target.variables.get(toString(PROPERTY));
+
+        // Return 0 if all else fails
+        return varValue ?? 0;
+    },
+});
+
+export const sensing_current = new ProtoBlock({
+    opcode: 'sensing_current',
+    inputs: {
+        CURRENTMENU: StringField,
+    },
+    execute: function* ({CURRENTMENU}) {
+        const date = new Date();
+        switch (CURRENTMENU.toLowerCase()) {
+            case 'year': return date.getFullYear();
+            case 'month': return date.getMonth() + 1;
+            case 'date': return date.getDate();
+            case 'dayofweek': return date.getDay() + 1;
+            case 'hour': return date.getHours();
+            case 'minute': return date.getMinutes();
+            case 'second': return date.getSeconds();
+        }
+        return 0;
+    },
+    monitorLabel: ({CURRENTMENU}) => {
+        const current = CURRENTMENU.toLowerCase();
+        if (current === 'dayofweek') return 'day of week';
+        return current;
+    },
+    colorCategory: 'sensing',
+});
+
+export const sensing_dayssince2000 = new ProtoBlock({
+    opcode: 'sensing_dayssince2000',
+    inputs: {},
+    execute: function* () {
+        const start = new Date(2000, 0, 1);
+        const now = new Date();
+        let delta = now.getTime() - start.getTime();
+        // TODO: Scratch does a more convoluted thing here that I *think* is mathematically equivalent
+        delta += start.getTimezoneOffset() * 60 * 1000;
+        return delta / (1000 * 60 * 60 * 24);
+    },
+    returnType: ['number'],
+    monitorLabel: () => 'days since 2000',
+    colorCategory: 'sensing',
+});
+
+export const sensing_username = new ProtoBlock({
+    opcode: 'sensing_username',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return ctx.io.username;
+    },
+    monitorLabel: () => 'username',
+    colorCategory: 'sensing',
 });
 
 /**

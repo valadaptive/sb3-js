@@ -301,7 +301,7 @@ export default class Target {
      * @returns A symbol that can be used to identify this text bubble. This is used in "say/think for () secs" so that
      * they only remove the text bubble they created.
      */
-    public setTextBubble(type: 'say' | 'think' | 'ask', text: string): symbol {
+    public setTextBubble(type: 'say' | 'think' | 'ask', text: string | number | boolean): symbol {
         const id = Symbol('TEXT_BUBBLE');
         if (text === '') {
             this.textBubble?.bubble?.destroy();
@@ -309,12 +309,17 @@ export default class Target {
             return id;
         }
 
+        let formattedText = text;
+        if (typeof text === 'number' && Math.abs(text) >= 0.01 && text % 1 !== 0) {
+            formattedText = text.toFixed(2);
+        }
+
         if (this.textBubble) {
             this.textBubble.type = type;
-            this.textBubble.text = text;
+            this.textBubble.text = String(formattedText);
             this.textBubble.id = id;
         } else {
-            this.textBubble = {type, text, bubble: null, direction: 'left', id};
+            this.textBubble = {type, text: String(formattedText), bubble: null, direction: 'left', id};
         }
         return id;
     }
