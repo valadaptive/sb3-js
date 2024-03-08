@@ -267,6 +267,14 @@ export default class Runtime {
             throw new Error('Cannot step without a project');
         }
         this.project.step();
+
+
+        for (const target of this.project.targets) {
+            for (const {hat, script} of target.sprite.edgeActivatedScripts) {
+                this.interpreter.launch(script, target, null, hat.hat!.restartExistingThreads);
+            }
+        }
+
         this.interpreter.stepThreads();
         // Step monitors after threads to capture the latest values
         this.stepMonitors();

@@ -7,7 +7,7 @@
 - Sprite click / color / graphic sensing (done)
 - Fencing (done)
 - Monitors (done)
-- Edge-activated hats
+- Edge-activated hats (done)
 - Speech bubbles (done)
 - Pen (done)
 - The rest of the sensing blocks (done)

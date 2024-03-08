@@ -1,4 +1,4 @@
-import {SomeProtoBlock} from './block.js';
+import {Block, SomeProtoBlock} from './block.js';
 import {control_start_as_clone, event_whenstageclicked, event_whenthisspriteclicked} from './blocks.js';
 import {GraphicEffects} from './effects.js';
 import Thread from './interpreter/thread.js';
@@ -59,6 +59,7 @@ export default class Target {
 
     public variables: Map<string, string | number | boolean>;
     public lists: Map<string, (string | number | boolean)[]>;
+    public edgeActivatedHatValues: Map<Block, boolean> = new Map();
 
     public audio;
     public drawable;
@@ -167,6 +168,9 @@ export default class Target {
             variables: new Map(this.variables),
             lists: newLists,
         });
+        for (const [hat, value] of this.edgeActivatedHatValues) {
+            clone.edgeActivatedHatValues.set(hat, value);
+        }
         return clone;
     }
 
@@ -193,14 +197,21 @@ export default class Target {
             const proto = topBlock.proto as SomeProtoBlock;
             if (!proto.hat) continue;
 
-            if (proto.hat.type === 'event') {
-                const hat = proto.hat;
-                const eventName = hat.event.EVENT_NAME;
+            switch (proto.hat.type) {
+                case 'event': {
+                    const hat = proto.hat;
+                    const eventName = hat.event.EVENT_NAME;
 
-                const onEvent = (evt: TypedEvent) => {
-                    return this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
-                };
-                this.addHatListener(eventName, onEvent, signal);
+                    const onEvent = (evt: TypedEvent) => {
+                        return this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
+                    };
+                    this.addHatListener(eventName, onEvent, signal);
+                    break;
+                }
+                case 'edgeActivated': {
+                    this.edgeActivatedHatValues.set(topBlock, false);
+                    break;
+                }
             }
 
             if (proto === event_whenthisspriteclicked || proto === event_whenstageclicked) {

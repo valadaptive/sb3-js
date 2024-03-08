@@ -874,6 +874,26 @@ export const event_whenbackdropswitchesto = new ProtoBlock({
     },
 });
 
+export const event_whengreaterthan = new ProtoBlock({
+    opcode: 'event_whengreaterthan',
+    inputs: {
+        WHENGREATERTHANMENU: StringField,
+        VALUE: NumberInput,
+    },
+    execute: function* ({WHENGREATERTHANMENU, VALUE}, ctx) {
+        const menuOption = WHENGREATERTHANMENU.toLowerCase();
+        const threshold = toNumber(ctx.evaluateFast(VALUE));
+        const value = menuOption === 'loudness' ?
+            -1 : // TODO: loudness
+            (ctx.project.currentMSecs - ctx.project.timerStart) / 1000;
+        return value > threshold;
+    },
+    hat: {
+        type: 'edgeActivated',
+        restartExistingThreads: false,
+    },
+});
+
 export const event_whenbroadcastreceived = new ProtoBlock({
     opcode: 'event_whenbroadcastreceived',
     inputs: {
