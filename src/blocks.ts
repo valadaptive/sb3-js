@@ -798,6 +798,16 @@ export const sound_setvolumeto = new ProtoBlock({
     },
 });
 
+export const sound_volume = new ProtoBlock({
+    opcode: 'sound_volume',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return ctx.target.volume;
+    },
+    monitorLabel: () => 'volume',
+    colorCategory: 'sound',
+});
+
 /**
  * Events
  */
