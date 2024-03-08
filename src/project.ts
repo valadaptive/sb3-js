@@ -3,6 +3,7 @@ import Sprite from './sprite.js';
 import {Monitor, updateMonitor, ScalarMonitor, ListMonitor, ScalarMonitorParams, ListMonitorParams} from './monitor.js';
 import {Block, BlockInputShape, BlockInputValueShapeFor, ProtoBlock, VariableField} from './block.js';
 import {TypedEvent, TypedEventTarget} from './typed-events.js';
+import Thread, {ThreadStatus} from './interpreter/thread.js';
 
 export class CreateMonitorEvent extends TypedEvent<'createmonitor'> {
     constructor(public readonly monitor: Monitor) {
@@ -10,7 +11,44 @@ export class CreateMonitorEvent extends TypedEvent<'createmonitor'> {
     }
 }
 
-export default class Project extends TypedEventTarget<CreateMonitorEvent> {
+export class QuestionEvent extends TypedEvent<'question'> {
+    constructor(public readonly question: Question) {
+        super('question');
+    }
+}
+
+export class AnswerEvent extends TypedEvent<'answer'> {
+    constructor(public readonly answer: string) {
+        super('answer');
+    }
+}
+
+export class QuestionCancelEvent extends TypedEvent<'cancel'> {
+    constructor() {
+        super('cancel');
+    }
+}
+
+export class Question extends TypedEventTarget<AnswerEvent | QuestionCancelEvent> {
+    constructor(
+        public readonly prompt: string | number | boolean,
+        public readonly target: Target,
+        public readonly thread: Thread,
+        public readonly threadGeneration: number,
+    ) {
+        super();
+    }
+
+    respond(answer: string) {
+        this.dispatchEvent(new AnswerEvent(answer));
+    }
+
+    cancel() {
+        this.dispatchEvent(new QuestionCancelEvent());
+    }
+}
+
+export default class Project extends TypedEventTarget<CreateMonitorEvent | QuestionEvent> {
     public readonly targets: Target[] = [];
     public readonly sprites: Sprite[] = [];
     public readonly monitors: readonly {
@@ -21,6 +59,9 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent> {
     public cloneCount = 0;
     public timerStart: number = Date.now();
     public currentMSecs: number = this.timerStart;
+    public answer = '';
+
+    private questionQueue: Question[] = [];
 
     register(): () => void {
         const unregisterCallbacks: (() => void)[] = [];
@@ -103,6 +144,62 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent> {
         this.targets.length = nextOriginalTargetIndex;
         // Reset timer when the project is stopped
         this.timerStart = this.currentMSecs;
+        // Clear question queue immediately
+        while (this.questionQueue.length > 0) {
+            this.questionQueue.shift()!.cancel();
+        }
+    }
+
+    private askNextQuestion() {
+        if (this.questionQueue.length === 0) return;
+        const question = this.questionQueue[0];
+
+        let bubbleId: symbol | undefined;
+        if (!question.target.sprite.isStage) {
+            bubbleId = question.target.setTextBubble('ask', question.prompt);
+        }
+
+        const onAnswerOrCancel = (event: AnswerEvent | QuestionCancelEvent) => {
+            this.questionQueue.shift();
+            this.askNextQuestion();
+            if (event instanceof AnswerEvent) this.answer = event.answer;
+            if (bubbleId && question.target.textBubble?.id === bubbleId) {
+                question.target.setTextBubble('ask', '');
+            }
+        };
+
+        this.dispatchEvent(new QuestionEvent(question));
+        question.addEventListener('answer', onAnswerOrCancel);
+        question.addEventListener('cancel', onAnswerOrCancel);
+    }
+
+    public async ask(question: Question) {
+        this.questionQueue.push(question);
+        if (this.questionQueue.length === 1) {
+            this.askNextQuestion();
+        }
+
+        await new Promise(resolve => {
+            question.addEventListener('answer', resolve);
+            question.addEventListener('cancel', resolve);
+        });
+    }
+
+    public step() {
+        for (let i = 0; i < this.questionQueue.length; i++) {
+            const question = this.questionQueue[i];
+            // Filter out questions being asked by threads that are no longer running or have been restarted
+            if (
+                question.thread.status === ThreadStatus.DONE ||
+                question.thread.generation !== question.threadGeneration
+            ) {
+                this.questionQueue.splice(i, 1);
+                i--;
+                // Remove the question from the queue before emitting the cancel event so that askNextQuestion doesn't
+                // try to ask the same question again
+                question.cancel();
+            }
+        }
     }
 
     public removeTarget(target: Target) {

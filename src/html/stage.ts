@@ -1,3 +1,4 @@
+import AnswerBoxElement, {internalAnswerBox} from './answer-box.js';
 import h from './html.js';
 import {defineInternalElement} from './internal-element.js';
 import {MonitorElement, internalMonitor} from './monitor.js';
@@ -25,15 +26,24 @@ const stageTemplate = h('template',
         .monitor {
             pointer-events: auto;
         }
+
+        #answer-box {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0.5rem;
+            right: 0.5rem;
+        }
     `),
     h('div', {id: 'stage'},
-        h('canvas', {id: 'canvas'}),
+        h('canvas', {id: 'canvas', tabIndex: 0}),
         h('div', {id: 'monitors'}),
+        internalAnswerBox.h({id: 'answer-box'}),
     ),
 );
 
 export class InternalStageElement extends HTMLElement {
     public canvas!: HTMLCanvasElement;
+    public answerBox!: AnswerBoxElement;
     private monitorContainer!: HTMLDivElement;
     constructor() {
         super();
@@ -45,6 +55,8 @@ export class InternalStageElement extends HTMLElement {
         shadow.append(stageContents);
         this.canvas = shadow.getElementById('canvas') as HTMLCanvasElement;
         this.monitorContainer = shadow.getElementById('monitors') as HTMLDivElement;
+        this.answerBox = shadow.getElementById('answer-box') as AnswerBoxElement;
+        this.answerBox.style.display = 'none';
     }
 
     createMonitorView(): MonitorElement {

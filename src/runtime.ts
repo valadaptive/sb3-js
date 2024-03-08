@@ -5,7 +5,7 @@ import IO from './io.js';
 import Interpreter from './interpreter/interpreter.js';
 import {Loader, WebLoader, ZipLoader, ZipSrc} from './loader.js';
 import parseProject from './parser.js';
-import Project, {CreateMonitorEvent} from './project.js';
+import Project, {CreateMonitorEvent, QuestionEvent} from './project.js';
 import Renderer from './renderer/renderer.js';
 import Sound from './sound.js';
 import Target from './target.js';
@@ -15,6 +15,8 @@ import Rectangle from './rectangle.js';
 import {InternalStageElement} from './html/stage.js';
 import {Theme, defaultTheme} from './theme.js';
 import {Monitor, MonitorView} from './monitor.js';
+import {RespondEvent} from './html/answer-box.js';
+import anyAbortSignal from './util/any-abort-signal.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
@@ -34,6 +36,7 @@ export default class Runtime {
     private renderer: Renderer | null = null;
     private io: IO;
     private stage: InternalStageElement | null = null;
+    private stageAbortController: AbortController | null = null;
     private theme: Theme;
     private monitorViews: Map<Monitor, {view: MonitorView; abort: AbortController}> = new Map();
 
@@ -89,6 +92,7 @@ export default class Runtime {
         for (const {monitor} of project.monitors) {
             this.handleMonitorCreated(controller.signal, new CreateMonitorEvent(monitor));
         }
+        project.addEventListener('question', this.handleQuestionAsked.bind(this), {signal: controller.signal});
 
         const unregisterProject = project.register();
         this.unregisterPreviousProject = () => {
@@ -116,7 +120,7 @@ export default class Runtime {
         this.interpreter.setRenderer(renderer);
         // Allow stage to receive keyboard events
         stage.tabIndex = 0;
-        const teardownEventListeners = this.setupEventListeners(stage);
+        this.stageAbortController = this.setupEventListeners(stage);
         this.stage = stage;
 
         this.unsetPreviousStage = () => {
@@ -124,12 +128,13 @@ export default class Runtime {
             this.interpreter.setRenderer(null);
             this.stage = null;
             renderer.destroy();
-            teardownEventListeners();
+            this.stageAbortController?.abort();
+            this.stageAbortController = null;
         };
     }
 
     private setupEventListeners(stage: InternalStageElement) {
-        if (!this.renderer) return () => {};
+        if (!this.renderer) null;
         const abortController = new AbortController();
         const signal = abortController.signal;
 
@@ -157,7 +162,7 @@ export default class Runtime {
             this.io.mousePosition.y = y;
         }, {signal});
 
-        stage.addEventListener('pointerdown', () => {
+        stage.canvas.addEventListener('pointerdown', () => {
             this.io.mouseDown = true;
             if (!this.project || !this.renderer) return;
             const {x, y} = this.io.mousePosition;
@@ -172,7 +177,7 @@ export default class Runtime {
             this.io.mouseDown = false;
         }, {signal});
 
-        stage.addEventListener('keydown', event => {
+        stage.canvas.addEventListener('keydown', event => {
             const key = IO.domToScratchKey(event.key);
             if (key === null) return;
 
@@ -188,9 +193,7 @@ export default class Runtime {
             this.io.keysDown.delete(key);
         }, {signal});
 
-        return () => {
-            abortController.abort();
-        };
+        return abortController;
     }
 
     public destroy() {
@@ -260,6 +263,7 @@ export default class Runtime {
         if (!this.project) {
             throw new Error('Cannot step without a project');
         }
+        this.project.step();
         this.interpreter.stepThreads();
         // Step monitors after threads to capture the latest values
         this.stepMonitors();
@@ -341,5 +345,26 @@ export default class Runtime {
             viewAndAbortController.abort.abort();
             this.monitorViews.delete(monitor);
         }
+    }
+
+    private handleQuestionAsked(event: QuestionEvent) {
+        if (!this.stage) return;
+        const answerBox = this.stage.answerBox;
+        const question = event.question;
+        // Need to cancel the event handler either when the stage is unregistered or when we get an answer
+        const answerController = new AbortController();
+
+        answerBox.addEventListener('respond', event => {
+            answerBox.hide();
+            question.respond((event as RespondEvent).answer);
+            answerController.abort();
+        }, {signal: anyAbortSignal(this.stageAbortController?.signal, answerController.signal)});
+
+        question.addEventListener('cancel', () => {
+            answerBox.hide();
+            answerController.abort();
+        }, {signal: anyAbortSignal(this.stageAbortController?.signal, answerController.signal)});
+
+        answerBox.show();
     }
 }

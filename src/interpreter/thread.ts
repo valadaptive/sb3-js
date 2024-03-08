@@ -50,10 +50,10 @@ export default class Thread {
     /* The resolved value of the last promise we yielded to. */
     private resolvedValue: string | number | boolean | void = undefined;
     /**
-     * Generation counter, incremented every time the thread is restarted. This is used so promises from an older
-     * thread generation don't clobber the resolvedValue of the current one.
+     * Generation counter, incremented every time the thread is restarted. This is used to avoid operating on stale
+     * state after a thread has been restarted.
      */
-    private generation: number = 0;
+    public generation: number = 0;
     private unparkListeners: (() => void)[] = [];
 
     constructor(script: Block[], target: Target, blockContext: BlockContext, startingEvent: TypedEvent | null) {

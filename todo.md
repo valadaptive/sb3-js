@@ -10,7 +10,7 @@
 - Edge-activated hats
 - Speech bubbles (done)
 - Pen (done)
-- The rest of the sensing blocks
+- The rest of the sensing blocks (done)
 - Audio engine
 - Audio effects
 - Costumes' fonts

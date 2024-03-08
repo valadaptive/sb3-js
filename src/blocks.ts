@@ -1146,6 +1146,28 @@ export const sensing_distanceto = new ProtoBlock({
     returnType: ['number'],
 });
 
+export const sensing_askandwait = new ProtoBlock({
+    opcode: 'sensing_askandwait',
+    inputs: {
+        QUESTION: StringInput,
+    },
+    execute: function* ({QUESTION}, ctx) {
+        const question = ctx.evaluateFast(QUESTION);
+        yield* ctx.ask(question);
+    },
+});
+
+export const sensing_answer = new ProtoBlock({
+    opcode: 'sensing_answer',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return ctx.project.answer;
+    },
+    returnType: ['string'],
+    monitorLabel: () => 'answer',
+    colorCategory: 'sensing',
+});
+
 export const sensing_keyoptions = new ProtoBlock({
     opcode: 'sensing_keyoptions',
     inputs: {

@@ -73,6 +73,8 @@ export default class TextBubble {
             return this.renderedLayout!;
         }
 
+        // We have to set the font for proper text measuring--the style is reset whenever the canvas is resized
+        this.ctx.font = `${bubbleStyle.fontSize}px ${bubbleStyle.font}`;
         const lines = textWrapper.wrap(text, bubbleStyle.maxLineWidth, this.ctx);
         const longestLineWidth = Math.ceil(Math.max(...lines.map(line => this.ctx.measureText(line).width)));
         const textWidth = Math.max(bubbleStyle.minWidth, longestLineWidth) + (bubbleStyle.padding * 2);

@@ -12,9 +12,6 @@ import PenLayer from './pen-layer.js';
 /** Reused memory location for the currently-being-drawn text bubble's transform matrix */
 const __textBubbleMatrix = mat3.create();
 
-/** Reused memory location for the pen layer's transform matrix */
-const __penLayerMatrix = mat3.create();
-
 export type FramebufferInfo = {width: number; height: number; framebuffer: WebGLFramebuffer};
 
 export default class Renderer {

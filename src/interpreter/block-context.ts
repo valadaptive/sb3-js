@@ -1,6 +1,6 @@
 import {Block, BlockGenerator, ProtoBlock} from '../block.js';
 import IO from '../io.js';
-import Project from '../project.js';
+import Project, {Question} from '../project.js';
 import Rectangle from '../rectangle.js';
 import Renderer from '../renderer/renderer.js';
 import Target from '../target.js';
@@ -138,6 +138,10 @@ export default class BlockContext {
 
             yield;
         }
+    }
+
+    *ask(prompt: string | number | boolean) {
+        yield* this.await(this.project.ask(new Question(prompt, this.target, this.thread, this.thread.generation)));
     }
 
     startHats<T extends string>(eventName: T, event: TypedEvent<T>): Thread[] | null {
