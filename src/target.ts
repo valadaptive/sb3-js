@@ -10,6 +10,7 @@ import Runtime from './runtime.js';
 import Sprite from './sprite.js';
 import {TypedEvent} from './typed-events.js';
 import TextBubble from './renderer/text-bubble.js';
+import AudioTarget from './audio/audio-target.js';
 
 export type RotationStyle = 'all around' | 'left-right' | 'don\'t rotate';
 
@@ -48,7 +49,7 @@ export default class Target {
     public draggable: boolean;
     private _currentCostume: number;
 
-    public volume: number;
+    private _volume!: number;
     public tempo: number;
     public videoTransparency: number;
     public videoState: string;
@@ -59,8 +60,10 @@ export default class Target {
     public variables: Map<string, string | number | boolean>;
     public lists: Map<string, (string | number | boolean)[]>;
 
-    private scriptListenerCleanup: (() => void);
+    public audio;
     public drawable;
+
+    private scriptListenerCleanup: (() => void);
     private hatListeners: Map<string, ((evt: TypedEvent) => Thread)[]> = new Map();
     public click!: () => void;
 
@@ -91,6 +94,7 @@ export default class Target {
         this.project = options.project;
         this.sprite = options.sprite;
         this.drawable = new Drawable(this, this.sprite.costumes[options.currentCostume]);
+        this.audio = new AudioTarget(this.runtime.audio);
         this.isOriginal = options.isOriginal;
         if (!this.isOriginal && !options.original) {
             throw new Error('Clones must reference an original target');
@@ -111,6 +115,8 @@ export default class Target {
         this.penState = options.penState ?? new PenState();
         this.variables = options.variables;
         this.lists = options.lists;
+
+        this.audio.connect(this.runtime.audio);
 
         this.scriptListenerCleanup = this.setUpScriptListeners();
     }
@@ -166,11 +172,13 @@ export default class Target {
 
     public remove() {
         this.project.removeTarget(this);
+        this.audio.disconnect();
     }
 
     public reset() {
         this.effects.clear();
         this.setTextBubble('say', '');
+        this.audio.stopAllSounds();
     }
 
     private setUpScriptListeners(): () => void {
@@ -408,5 +416,14 @@ export default class Target {
             bounds.right > this.runtime.stageBounds.right ||
             bounds.top > this.runtime.stageBounds.top ||
             bounds.bottom < this.runtime.stageBounds.bottom;
+    }
+
+    public get volume(): number {
+        return this._volume;
+    }
+
+    public set volume(volume: number) {
+        this._volume = volume;
+        this.audio.setVolume(volume);
     }
 }

@@ -11,10 +11,14 @@
 - Speech bubbles (done)
 - Pen (done)
 - The rest of the sensing blocks (done)
-- Audio engine
+- Audio engine (done)
 - Audio effects
+- Loudness sensing
 - Costumes' fonts
 - Music blocks
+- ADPCM decoding
+- "stop other scripts in sprite" should stop waiting sounds
+- Apply proper viewbox offset to SVG skin rotation centers
 - Draw pen lines with instancing
 - Revamp block introspection API
     - want to be able to type ctx.evaluate properly

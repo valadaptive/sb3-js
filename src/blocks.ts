@@ -725,6 +725,80 @@ export const looks_size = new ProtoBlock({
 });
 
 /**
+ * Sound
+ */
+
+export const sound_sounds_menu = new ProtoBlock({
+    opcode: 'sound_sounds_menu',
+    inputs: {
+        SOUND_MENU: StringField,
+    },
+    execute: function* ({SOUND_MENU}) {
+        return SOUND_MENU;
+    },
+    pure: true,
+});
+
+export const sound_playuntildone = new ProtoBlock({
+    opcode: 'sound_playuntildone',
+    inputs: {
+        SOUND_MENU: StringInput,
+    },
+    execute: function* ({SOUND_MENU}, ctx) {
+        const soundName = toString(ctx.evaluateFast(SOUND_MENU));
+        const sound = ctx.target.sprite.getSoundByName(soundName);
+        if (!sound) return;
+        yield* ctx.await(ctx.target.audio.play(sound));
+    },
+});
+
+export const sound_play = new ProtoBlock({
+    opcode: 'sound_play',
+    inputs: {
+        SOUND_MENU: StringInput,
+    },
+    execute: function* ({SOUND_MENU}, ctx) {
+        const soundName = toString(ctx.evaluateFast(SOUND_MENU));
+        const sound = ctx.target.sprite.getSoundByName(soundName);
+        if (!sound) return;
+        ctx.target.audio.play(sound);
+    },
+});
+
+export const sound_stopallsounds = new ProtoBlock({
+    opcode: 'sound_stopallsounds',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.target.audio.stopAllSounds();
+    },
+});
+
+export const sound_changevolumeby = new ProtoBlock({
+    opcode: 'sound_changevolumeby',
+    inputs: {
+        VOLUME: NumberInput,
+    },
+    execute: function* ({VOLUME}, ctx) {
+        const volume = toNumber(ctx.evaluateFast(VOLUME));
+        ctx.target.volume += volume;
+        // Yield until the next tick.
+        yield* ctx.await(Promise.resolve());
+    },
+});
+
+export const sound_setvolumeto = new ProtoBlock({
+    opcode: 'sound_setvolumeto',
+    inputs: {
+        VOLUME: NumberInput,
+    },
+    execute: function* ({VOLUME}, ctx) {
+        ctx.target.volume = toNumber(ctx.evaluateFast(VOLUME));
+        // Yield until the next tick.
+        yield* ctx.await(Promise.resolve());
+    },
+});
+
+/**
  * Events
  */
 

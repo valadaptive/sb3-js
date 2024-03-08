@@ -34,7 +34,9 @@ export default class Sprite {
         return this.costumeIndicesByName.get(name) ?? -1;
     }
 
-    public getSoundIndexByName(name: string): number {
-        return this.soundIndicesByName.get(name) ?? -1;
+    public getSoundByName(name: string): Sound | null {
+        const index = this.soundIndicesByName.get(name);
+        if (typeof index === 'undefined') return null;
+        return this.sounds[index];
     }
 }

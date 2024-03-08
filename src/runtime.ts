@@ -17,6 +17,7 @@ import {Theme, defaultTheme} from './theme.js';
 import {Monitor, MonitorView} from './monitor.js';
 import {RespondEvent} from './html/answer-box.js';
 import anyAbortSignal from './util/any-abort-signal.js';
+import AudioEngine from './audio/audio-engine.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
@@ -30,7 +31,7 @@ export default class Runtime {
     public stepTime: number = STEP_TIME;
     public stageBounds = Rectangle.fromBounds(-240, 240, -180, 180);
 
-    private audioContext: AudioContext;
+    public audio: AudioEngine;
     private project: Project | null = null;
     private interpreter: Interpreter;
     private renderer: Renderer | null = null;
@@ -46,7 +47,7 @@ export default class Runtime {
     private unsetPreviousStage: (() => void) | null = null;
 
     constructor(settings?: RuntimeSettings) {
-        this.audioContext = new AudioContext();
+        this.audio = new AudioEngine();
         this.io = new IO();
         this.interpreter = new Interpreter(this.stepTime, {
             io: this.io,
@@ -217,11 +218,13 @@ export default class Runtime {
         const buffer = await src.arrayBuffer();
         let audioBuffer = null;
         try {
-            audioBuffer = await this.audioContext.decodeAudioData(buffer);
+            audioBuffer = await this.audio.loadSound(buffer);
         } catch (err) {
             // TODO: decode ADPCM
+            // eslint-disable-next-line no-console
+            console.warn(`Failed to decode sound "${name}"`, err);
         }
-        return new Sound(name, audioBuffer, this.audioContext);
+        return new Sound(name, audioBuffer);
     }
 
     public async loadCostume(name: string, src: Blob, params: CostumeParams): Promise<Costume> {
