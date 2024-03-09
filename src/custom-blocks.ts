@@ -17,7 +17,7 @@ export const makeCustomBlockStub = (
     proccode: string,
     argumentids: string[],
     argumentnames: string[],
-    argumentdefaults: string[],
+    argumentdefaults: (string | number | boolean)[],
     warp: boolean,
 ) => {
     const inputs: Record<string, BlockInput> = {};

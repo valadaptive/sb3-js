@@ -1,9 +1,18 @@
 import Target from './target.js';
 import Sprite from './sprite.js';
-import {Monitor, updateMonitor, ScalarMonitor, ListMonitor, ScalarMonitorParams, ListMonitorParams} from './monitor.js';
+import {
+    Monitor,
+    updateMonitor,
+    ScalarMonitor,
+    ListMonitor,
+    ScalarMonitorParams,
+    ListMonitorParams,
+    listMonitorContents,
+} from './monitor.js';
 import {Block, BlockInputShape, BlockInputValueShapeFor, ProtoBlock, VariableField} from './block.js';
 import {TypedEvent, TypedEventTarget} from './typed-events.js';
 import Thread, {ThreadStatus} from './interpreter/thread.js';
+import {data_listcontents} from './blocks.js';
 
 export class CreateMonitorEvent extends TypedEvent<'createmonitor'> {
     constructor(public readonly monitor: Monitor) {
@@ -219,6 +228,11 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
         target: Target | null,
         params?: Partial<ScalarMonitorParams> | Partial<ListMonitorParams>,
     ): Monitor {
+        if (proto === data_listcontents) {
+            // data_listcontents returns a stringified list; we want to replace it with a block that returns the list
+            // itself
+            proto = listMonitorContents as P;
+        }
         for (const {monitor} of this.monitors) {
             const innerBlock = monitor.block;
             if (innerBlock.proto !== proto) continue;

@@ -7,7 +7,7 @@ import {Schema, ObjectForSchema, validateJson, validateJsonOrError} from './sche
 import {Block, BlockInputValue, BlockInputValueShapeFor, ProtoBlock} from './block.js';
 import Runtime from './runtime.js';
 import {CustomBlockStub, makeCustomBlockStub} from './custom-blocks.js';
-import {MonitorMode, listMonitorContents} from './monitor.js';
+import {MonitorMode} from './monitor.js';
 
 const enum ShadowInfo {
     /**
@@ -216,6 +216,8 @@ const sb3BlockSchema = {
 } as const satisfies Schema;
 type Sb3Block = ObjectForSchema<typeof sb3BlockSchema>;
 
+const sb3BlockOrPrimitiveSchema = [sb3BlockSchema, sb3InputPrimitiveSchema] as const satisfies Schema;
+
 const sb3TargetSchema = {
     type: 'object',
     props: {
@@ -231,7 +233,7 @@ const sb3TargetSchema = {
         currentCostume: 'number',
         variables: {type: 'map', items: sb3VariableSchema},
         lists: {type: 'map', items: sb3ListSchema},
-        blocks: {type: 'map', items: sb3BlockSchema},
+        blocks: {type: 'map', items: sb3BlockOrPrimitiveSchema},
     },
     optional: ['tempo', 'videoTransparency', 'videoState'],
 } as const satisfies Schema;
@@ -321,6 +323,44 @@ const getBlockByOpcode = (opcode: string) => {
     return block;
 };
 
+const isCompressedPrimitive = (input: Sb3Block | Sb3InputPrimitive): input is Sb3InputPrimitive => Array.isArray(input);
+
+const parseCompressedPrimitive = (primitive: Sb3InputPrimitive) => {
+    const [primType, value, id] = primitive;
+
+    switch (primType) {
+        case CompressedPrimitiveType.MATH_NUM_PRIMITIVE:
+        case CompressedPrimitiveType.POSITIVE_NUM_PRIMITIVE:
+        case CompressedPrimitiveType.WHOLE_NUM_PRIMITIVE:
+        case CompressedPrimitiveType.INTEGER_NUM_PRIMITIVE:
+        case CompressedPrimitiveType.ANGLE_NUM_PRIMITIVE:
+        case CompressedPrimitiveType.COLOR_PICKER_PRIMITIVE:
+        case CompressedPrimitiveType.TEXT_PRIMITIVE:
+            return value;
+
+        case CompressedPrimitiveType.VAR_PRIMITIVE: {
+            return new Block({
+                proto: allBlocks.data_variable,
+                id,
+                inputValues: {VARIABLE: {value, id}},
+            });
+        }
+        case CompressedPrimitiveType.LIST_PRIMITIVE: {
+            return new Block({
+                proto: allBlocks.data_listcontents,
+                id,
+                inputValues: {LIST: {value, id}},
+            });
+        }
+        case CompressedPrimitiveType.BROADCAST_PRIMITIVE:
+            return new Block({
+                proto: allBlocks.event_broadcast_menu,
+                id,
+                inputValues: {BROADCAST_OPTION: {value, id}},
+            });
+    }
+};
+
 const parseBlockInput = (
     inputName: string,
     jsonInput: string | null | Sb3InputPrimitive,
@@ -348,55 +388,35 @@ const parseBlockInput = (
             throw new Error(`Block input ${inputName} points to block ${jsonInput} which does not exist`);
         }
         if (protoInput.type === 'stack') {
-            parsedInput = parseScript(jsonTarget.blocks[jsonInput], jsonInput, jsonTarget, customBlocks);
+            const jsonBlock = jsonTarget.blocks[jsonInput];
+            if (!jsonBlock) {
+                throw new Error(`Block with ID ${jsonInput} does not exist`);
+            }
+            if (isCompressedPrimitive(jsonBlock)) {
+                throw new Error(`Block stack input ${inputName} points to block ${jsonInput} which is a compressed primitive`);
+            }
+            parsedInput = parseScript(jsonBlock, jsonInput, jsonTarget, customBlocks);
         } else if (protoInput.type === 'custom_block') {
             // Only procedures_definition uses this input type
             const jsonBlockProto = jsonTarget.blocks[jsonInput];
             if (!jsonBlockProto) {
                 throw new Error(`Custom block prototype ${jsonInput} does not exist`);
             }
+            if (isCompressedPrimitive(jsonBlockProto)) {
+                throw new Error(`Block stack input ${inputName} points to block ${jsonInput} which is a compressed primitive`);
+            }
             parsedInput = parseCustomBlockPrototype(jsonBlockProto, jsonInput);
         } else {
-            parsedInput = parseBlock(jsonTarget.blocks[jsonInput], jsonInput, jsonTarget, customBlocks);
+            const jsonBlock = jsonTarget.blocks[jsonInput];
+            if (isCompressedPrimitive(jsonBlock)) {
+                parsedInput = parseCompressedPrimitive(jsonBlock);
+            } else {
+                parsedInput = parseBlock(jsonBlock, jsonInput, jsonTarget, customBlocks);
+            }
         }
     } else {
         // compressed primitive
-        const [primType, value, id] = jsonInput;
-
-        switch (primType) {
-            case CompressedPrimitiveType.MATH_NUM_PRIMITIVE:
-            case CompressedPrimitiveType.POSITIVE_NUM_PRIMITIVE:
-            case CompressedPrimitiveType.WHOLE_NUM_PRIMITIVE:
-            case CompressedPrimitiveType.INTEGER_NUM_PRIMITIVE:
-            case CompressedPrimitiveType.ANGLE_NUM_PRIMITIVE:
-            case CompressedPrimitiveType.COLOR_PICKER_PRIMITIVE:
-            case CompressedPrimitiveType.TEXT_PRIMITIVE:
-                parsedInput = value;
-                break;
-
-            case CompressedPrimitiveType.VAR_PRIMITIVE: {
-                parsedInput = new Block({
-                    proto: allBlocks.data_variable,
-                    id,
-                    inputValues: {VARIABLE: {value, id}},
-                });
-                break;
-            }
-            case CompressedPrimitiveType.LIST_PRIMITIVE: {
-                parsedInput = new Block({
-                    proto: allBlocks.data_listcontents,
-                    id,
-                    inputValues: {LIST: {value, id}},
-                });
-                break;
-            }
-            case CompressedPrimitiveType.BROADCAST_PRIMITIVE:
-                parsedInput = new Block({
-                    proto: allBlocks.event_broadcast_menu,
-                    id,
-                    inputValues: {BROADCAST_OPTION: {value, id}},
-                });
-        }
+        parsedInput = parseCompressedPrimitive(jsonInput);
     }
 
     if (!protoInput.validate(parsedInput)) {
@@ -495,6 +515,7 @@ const sb3CustomBlockMutationSchema = [
 ] as const satisfies Schema;
 
 const arrayStringSchema = {type: 'array', items: 'string'} as const satisfies Schema;
+const arrayScalarSchema = {type: 'array', items: ['string', 'number', 'boolean']} as const satisfies Schema;
 
 type CustomBlocks = Map<string, CustomBlockStub & {jsonBlock: Sb3Block; blockId: string}>;
 
@@ -511,7 +532,7 @@ const parseCustomBlockPrototype = (
     }
     if (!validateJson(sb3CustomBlockMutationSchema, mutation)) {
         validateJsonOrError(sb3CustomBlockMutationSchema, mutation);
-        throw new Error('Invalid mutation');
+        throw new Error(`Invalid mutation: ${JSON.stringify(mutation)}`);
     }
 
     const argumentids = JSON.parse(mutation.argumentids);
@@ -519,13 +540,13 @@ const parseCustomBlockPrototype = (
     const argumentdefaults = JSON.parse(mutation.argumentdefaults);
 
     if (!validateJson(arrayStringSchema, argumentids)) {
-        throw new Error('Invalid argumentids');
+        throw new Error(`Invalid argumentids: ${JSON.stringify(mutation.argumentids)}`);
     }
     if (!validateJson(arrayStringSchema, argumentnames)) {
-        throw new Error('Invalid argumentnames');
+        throw new Error(`Invalid argumentnames: ${JSON.stringify(mutation.argumentnames)}`);
     }
-    if (!validateJson(arrayStringSchema, argumentdefaults)) {
-        throw new Error('Invalid argumentdefaults');
+    if (!validateJson(arrayScalarSchema, argumentdefaults)) {
+        throw new Error(`Invalid argumentdefaults: ${JSON.stringify(mutation.argumentdefaults)}`);
     }
 
     return Object.assign(makeCustomBlockStub(
@@ -563,7 +584,7 @@ const parseScript = (
     customBlocks: CustomBlocks,
 ): Block[] => {
     const blocks: Block[] = [];
-    let currentBlock: Sb3Block | null = jsonBlock;
+    let currentBlock: Sb3Block | Sb3InputPrimitive | null = jsonBlock;
     let currentBlockId: string | null | undefined = blockId;
 
     while (true) {
@@ -575,6 +596,9 @@ const parseScript = (
             throw new Error(`Block ${currentBlock.opcode} has next block ${currentBlock.next} which does not exist`);
         }
         currentBlock = jsonTarget.blocks[currentBlock.next];
+        if (isCompressedPrimitive(currentBlock)) {
+            throw new Error(`Unexpected compressed primitive with ID ${currentBlockId} in script`);
+        }
         currentBlockId = currentBlock.next;
     }
 
@@ -602,7 +626,7 @@ const parseTarget = async(
             continue;
         }
         const block = jsonTarget.blocks[blockId];
-        if (block.topLevel) {
+        if (!isCompressedPrimitive(block) && block.topLevel) {
             topLevelBlocks.push({block, id: blockId});
         }
     }
@@ -698,9 +722,7 @@ const parseMonitor = (
     project: Project,
 ) => {
     const target = jsonMonitor.spriteName === null ? null : project.getTargetByName(jsonMonitor.spriteName);
-    const monitorProtoBlock = jsonMonitor.opcode === 'data_listcontents' ?
-        listMonitorContents :
-        getBlockByOpcode(jsonMonitor.opcode) as ProtoBlock;
+    const monitorProtoBlock = getBlockByOpcode(jsonMonitor.opcode) as ProtoBlock;
     if (!monitorProtoBlock) {
         throw new Error(`Unknown monitor block: ${jsonMonitor.opcode}`);
     }

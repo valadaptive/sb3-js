@@ -1988,6 +1988,38 @@ export const data_listcontainsitem = new ProtoBlock({
     returnType: ['boolean'],
 });
 
+export const data_showlist = new ProtoBlock({
+    opcode: 'data_showlist',
+    inputs: {
+        LIST: VariableField,
+    },
+    execute: function* ({LIST}, ctx) {
+        const varTarget = ctx.stage.lists.has(LIST.value) ? null : ctx.target;
+        const monitor = ctx.project.getOrCreateMonitorFor(
+            data_listcontents,
+            {LIST: {id: LIST.id, value: LIST.value}},
+            varTarget,
+        );
+        monitor.update({visible: true});
+    },
+});
+
+export const data_hidelist = new ProtoBlock({
+    opcode: 'data_hidelist',
+    inputs: {
+        LIST: VariableField,
+    },
+    execute: function* ({LIST}, ctx) {
+        const varTarget = ctx.stage.lists.has(LIST.value) ? null : ctx.target;
+        const monitor = ctx.project.getOrCreateMonitorFor(
+            data_listcontents,
+            {LIST: {id: LIST.id, value: LIST.value}},
+            varTarget,
+        );
+        monitor.update({visible: false});
+    },
+});
+
 /**
  * Pen
  */
