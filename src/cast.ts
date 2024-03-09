@@ -91,7 +91,7 @@ export const toColor = (
     } else if (typeof value === 'boolean') {
         color = value ? 1 : 0;
     } else {
-        color = toNumber(value) & 0xffffff;
+        color = toNumber(value) & 0xffffffff;
     }
 
     dst[0] = (color >> 16) & 0xff;

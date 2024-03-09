@@ -136,9 +136,13 @@ export default class PenLayer implements Samplable {
         }
 
         if (shaderChanged || !this.lastPenState.rgba || !vec4.exactEquals(this.lastPenState.rgba, color)) {
-            this.gl.uniform4fv(
+            // Premultiply by alpha
+            this.gl.uniform4f(
                 this.renderer.penLineShader.uniformLocations.u_penColor,
-                color,
+                color[0] * color[3],
+                color[1] * color[3],
+                color[2] * color[3],
+                color[3],
             );
             vec4.copy(this.lastPenState.rgba, color);
         }
