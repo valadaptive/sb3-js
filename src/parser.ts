@@ -65,7 +65,7 @@ const sb3CostumeSchema = {
         rotationCenterX: 'number',
         rotationCenterY: 'number',
     },
-    optional: ['bitmapResolution'],
+    optional: ['bitmapResolution', 'md5ext'],
 } as const satisfies Schema;
 
 const sb3SoundSchema = {
@@ -79,6 +79,7 @@ const sb3SoundSchema = {
         assetId: 'string',
         md5ext: 'string',
     },
+    optional: ['md5ext'],
 } as const satisfies Schema;
 
 const sb3VariableSchema = [
@@ -667,7 +668,7 @@ const parseTarget = async(
     }
 
     const costumePromises = jsonTarget.costumes.map(costume => loader.loadAsset(
-        costume.md5ext,
+        `${costume.assetId}.${costume.dataFormat}`,
         contentTypeForDataFormat[costume.dataFormat],
     )
         .then(asset => runtime.loadCostume(costume.name, asset, {
@@ -677,7 +678,7 @@ const parseTarget = async(
         })));
 
     const soundPromises = jsonTarget.sounds.map(sound => loader.loadAsset(
-        sound.md5ext,
+        `${sound.assetId}.${sound.dataFormat}`,
         contentTypeForDataFormat[sound.dataFormat],
     )
         .then(asset => runtime.loadSound(sound.name, asset)));
