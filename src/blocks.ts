@@ -942,7 +942,7 @@ export const event_whengreaterthan = new ProtoBlock({
         const menuOption = WHENGREATERTHANMENU.toLowerCase();
         const threshold = toNumber(ctx.evaluateFast(VALUE));
         const value = menuOption === 'loudness' ?
-            -1 : // TODO: loudness
+            ctx.audio?.getLoudness() ?? -1 :
             (ctx.project.currentMSecs - ctx.project.timerStart) / 1000;
         return value > threshold;
     },
@@ -1369,6 +1369,17 @@ export const sensing_mousey = new ProtoBlock({
         return ctx.io.mousePosition.y;
     },
     returnType: ['boolean'],
+});
+
+export const sensing_loudness = new ProtoBlock({
+    opcode: 'sensing_loudness',
+    inputs: {},
+    execute: function* (_, ctx) {
+        return ctx.audio?.getLoudness() ?? -1;
+    },
+    returnType: ['number'],
+    monitorLabel: () => 'loudness',
+    colorCategory: 'sensing',
 });
 
 export const sensing_timer = new ProtoBlock({

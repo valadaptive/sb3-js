@@ -13,9 +13,10 @@
 - The rest of the sensing blocks (done)
 - Audio engine (done)
 - Audio effects (done)
-- Loudness sensing
+- Loudness sensing (done)
 - Costumes' fonts
 - Music blocks
+- Draggable sprites
 - ADPCM decoding
 - "stop other scripts in sprite" should stop waiting sounds
 - Apply proper viewbox offset to SVG skin rotation centers

@@ -53,6 +53,7 @@ export default class Runtime {
             io: this.io,
             stageBounds: this.stageBounds,
             renderer: null,
+            audio: this.audio,
         });
         this.theme = settings?.theme ?? defaultTheme;
         this.io.username = settings?.username ?? '';
@@ -268,6 +269,8 @@ export default class Runtime {
         }
         this.project.step();
 
+        // Loudness updates once per frame
+        this.audio.resetCachedLoudness();
 
         for (const target of this.project.targets) {
             for (const {hat, script} of target.sprite.edgeActivatedScripts) {
