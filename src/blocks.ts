@@ -773,6 +773,54 @@ export const sound_stopallsounds = new ProtoBlock({
     },
 });
 
+export const sound_changeeffectby = new ProtoBlock({
+    opcode: 'sound_changeeffectby',
+    inputs: {
+        EFFECT: StringField,
+        VALUE: NumberInput,
+    },
+    execute: function* ({EFFECT, VALUE}, ctx) {
+        const effect = EFFECT.toLowerCase();
+        const value = toNumber(ctx.evaluateFast(VALUE));
+        switch (effect) {
+            case 'pitch':
+                ctx.target.audio.pitch += value;
+                break;
+            case 'pan':
+                ctx.target.audio.pan += value;
+                break;
+        }
+    },
+});
+
+export const sound_seteffectto = new ProtoBlock({
+    opcode: 'sound_seteffectto',
+    inputs: {
+        EFFECT: StringField,
+        VALUE: NumberInput,
+    },
+    execute: function* ({EFFECT, VALUE}, ctx) {
+        const effect = EFFECT.toLowerCase();
+        const value = toNumber(ctx.evaluateFast(VALUE));
+        switch (effect) {
+            case 'pitch':
+                ctx.target.audio.pitch = value;
+                break;
+            case 'pan':
+                ctx.target.audio.pan = value;
+                break;
+        }
+    },
+});
+
+export const sound_cleareffects = new ProtoBlock({
+    opcode: 'sound_cleareffects',
+    inputs: {},
+    execute: function* (_, ctx) {
+        ctx.target.audio.clearEffects();
+    },
+});
+
 export const sound_changevolumeby = new ProtoBlock({
     opcode: 'sound_changevolumeby',
     inputs: {

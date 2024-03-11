@@ -12,7 +12,7 @@
 - Pen (done)
 - The rest of the sensing blocks (done)
 - Audio engine (done)
-- Audio effects
+- Audio effects (done)
 - Loudness sensing
 - Costumes' fonts
 - Music blocks

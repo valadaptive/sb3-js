@@ -49,7 +49,6 @@ export default class Target {
     public draggable: boolean;
     private _currentCostume: number;
 
-    private _volume!: number;
     public tempo: number;
     public videoTransparency: number;
     public videoState: string;
@@ -86,6 +85,7 @@ export default class Target {
         tempo: number;
         videoTransparency: number;
         videoState: string;
+        audio?: AudioTarget;
         effects?: GraphicEffects;
         penState?: PenState;
         variables: Map<string, string | number | boolean>;
@@ -95,7 +95,7 @@ export default class Target {
         this.project = options.project;
         this.sprite = options.sprite;
         this.drawable = new Drawable(this, this.sprite.costumes[options.currentCostume]);
-        this.audio = new AudioTarget(this.runtime.audio);
+        this.audio = options.audio ? AudioTarget.fromExisting(options.audio) : new AudioTarget(this.runtime.audio);
         this.isOriginal = options.isOriginal;
         if (!this.isOriginal && !options.original) {
             throw new Error('Clones must reference an original target');
@@ -113,7 +113,7 @@ export default class Target {
         this.videoTransparency = options.videoTransparency;
         this.videoState = options.videoState;
         this.effects = options.effects ? GraphicEffects.fromExisting(options.effects, this) : new GraphicEffects(this);
-        this.penState = options.penState ?? new PenState();
+        this.penState = options.penState ? options.penState.clone() : new PenState();
         this.variables = options.variables;
         this.lists = options.lists;
 
@@ -163,8 +163,9 @@ export default class Target {
             tempo: this.tempo,
             videoTransparency: this.videoTransparency,
             videoState: this.videoState,
+            audio: this.audio,
             effects: this.effects,
-            penState: this.penState.clone(),
+            penState: this.penState,
             variables: new Map(this.variables),
             lists: newLists,
         });
@@ -183,6 +184,7 @@ export default class Target {
         this.effects.clear();
         this.setTextBubble('say', '');
         this.audio.stopAllSounds();
+        this.audio.clearEffects();
     }
 
     private setUpScriptListeners(): () => void {
@@ -430,11 +432,10 @@ export default class Target {
     }
 
     public get volume(): number {
-        return this._volume;
+        return this.audio.volume;
     }
 
     public set volume(volume: number) {
-        this._volume = volume;
-        this.audio.setVolume(volume);
+        this.audio.volume = volume;
     }
 }
