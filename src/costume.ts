@@ -1,3 +1,4 @@
+import loadSVG from './load-svg.js';
 import Skin from './renderer/skin.js';
 
 export type CostumeParams = {
@@ -35,16 +36,9 @@ export default class Costume {
         this.type = params.type;
     }
 
-    static load(name: string, blob: Blob, params: CostumeParams): Promise<Costume> {
-        const image = document.createElement('img');
-        const url = URL.createObjectURL(blob);
-
-        image.src = url;
-
+    private static async waitForImageToLoad(image: HTMLImageElement): Promise<void> {
         if (image.complete) {
-            URL.revokeObjectURL(url);
-            return Promise.resolve(new Costume(
-                name, image, {width: image.naturalWidth, height: image.naturalHeight}, params));
+            return Promise.resolve();
         }
 
         return new Promise((resolve, reject) => {
@@ -52,17 +46,39 @@ export default class Costume {
             const signal = abortController.signal;
 
             image.addEventListener('load', () => {
-                resolve(new Costume(
-                    name, image, {width: image.naturalWidth, height: image.naturalHeight}, params));
-                URL.revokeObjectURL(url);
+                resolve();
+                URL.revokeObjectURL(image.src);
                 abortController.abort();
             }, {signal});
 
             image.addEventListener('error', () => {
                 reject(new Error(`Failed to load image: ${image.src}`));
-                URL.revokeObjectURL(url);
+                URL.revokeObjectURL(image.src);
                 abortController.abort();
             }, {signal});
         });
+    }
+
+    static async load(name: string, blob: Blob, params: CostumeParams): Promise<Costume> {
+        const image = document.createElement('img');
+
+        if (params.type === 'svg') {
+            const {url, viewBox} = await loadSVG(blob);
+            image.src = url;
+
+            // SVG costumes' rotation centers are offset by the x and y values of the viewBox
+            params = {
+                ...params,
+                rotationCenter: {
+                    x: params.rotationCenter.x - viewBox.left,
+                    y: params.rotationCenter.y - viewBox.bottom,
+                },
+            };
+        } else {
+            image.src = URL.createObjectURL(blob);
+        }
+
+        await Costume.waitForImageToLoad(image);
+        return new Costume(name, image, {width: image.naturalWidth, height: image.naturalHeight}, params);
     }
 }

@@ -14,12 +14,12 @@
 - Audio engine (done)
 - Audio effects (done)
 - Loudness sensing (done)
-- Costumes' fonts
+- Costumes' fonts (done)
 - Music blocks
 - Draggable sprites
 - ADPCM decoding
 - "stop other scripts in sprite" should stop waiting sounds
-- Apply proper viewbox offset to SVG skin rotation centers
+- Apply proper viewbox offset to SVG skin rotation centers (done)
 - Draw pen lines with instancing
 - Revamp block introspection API
     - want to be able to type ctx.evaluate properly
