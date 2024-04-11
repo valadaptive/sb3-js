@@ -1,4 +1,4 @@
-import {Block} from '../block.js';
+import {Block, SomeProtoBlock} from '../block.js';
 import Project from '../project.js';
 import Renderer from '../renderer/renderer.js';
 import Target from '../target.js';
@@ -43,7 +43,10 @@ export default class Interpreter {
     public launch(script: Block[], target: Target, event: TypedEvent | null, restartExistingThreads: boolean) {
         if (restartExistingThreads) {
             for (const thread of this.threads) {
-                if (thread.topBlock === script[0]) {
+                if (thread.topBlock === script[0] && thread.target === target) {
+                    if (event && !thread.hatBlockMatches(event)) {
+                        continue;
+                    }
                     thread.restart(event);
                     return thread;
                 }
@@ -51,6 +54,10 @@ export default class Interpreter {
         }
 
         const thread = new Thread(script, target, this.blockContext, event);
+        //console.log(target.sprite.name, event, thread.hatBlockMatches(event));
+        if (event && !thread.hatBlockMatches(event)) {
+            return null;
+        }
         this.threads.push(thread);
         return thread;
     }
@@ -70,15 +77,25 @@ export default class Interpreter {
         }
     }
 
-    public startHats<T extends string>(eventName: T, event: TypedEvent<T>): Thread[] | null {
+    public startHats(event: TypedEvent): Thread[] | null {
         const project = this.project;
         if (!project) return null;
 
         const startedThreads = [];
         for (const target of project.targets) {
-            const newThreads = target.fireHatListener(eventName, event);
-            if (newThreads) {
-                startedThreads.push(...newThreads);
+            const hatScripts = target.getScriptsByHat(event.type);
+            if (!hatScripts) continue;
+            for (const script of hatScripts) {
+                const topBlock = script[0];
+                const protoBlock = topBlock.proto;
+                if (!topBlock || !protoBlock.isHat()) continue;
+                const thread = this.launch(
+                    script,
+                    target,
+                    event,
+                    (protoBlock as SomeProtoBlock).hat!.restartExistingThreads,
+                );
+                if (thread) startedThreads.push(thread);
             }
         }
         return startedThreads;

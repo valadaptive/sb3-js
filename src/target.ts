@@ -1,14 +1,12 @@
 import {Block, SomeProtoBlock} from './block.js';
 import {control_start_as_clone, event_whenstageclicked, event_whenthisspriteclicked} from './blocks.js';
 import {GraphicEffects} from './effects.js';
-import Thread from './interpreter/thread.js';
 import PenState from './pen-state.js';
 import Project from './project.js';
 import Drawable from './renderer/drawable.js';
 import Rectangle from './rectangle.js';
 import Runtime from './runtime.js';
 import Sprite from './sprite.js';
-import {TypedEvent} from './typed-events.js';
 import TextBubble from './renderer/text-bubble.js';
 import AudioTarget from './audio/audio-target.js';
 
@@ -64,7 +62,7 @@ export default class Target {
     public drawable;
 
     private scriptListenerCleanup: (() => void);
-    private hatListeners: Map<string, ((evt: TypedEvent) => Thread)[]> = new Map();
+    private scriptsByHatEventName: Map<string, Block[][]> = new Map();
     public click!: () => void;
 
     constructor(options: {
@@ -201,13 +199,7 @@ export default class Target {
 
             switch (proto.hat.type) {
                 case 'event': {
-                    const hat = proto.hat;
-                    const eventName = hat.event.EVENT_NAME;
-
-                    const onEvent = (evt: TypedEvent) => {
-                        return this.runtime.launchScript(script, this, evt, hat.restartExistingThreads);
-                    };
-                    this.addHatListener(eventName, onEvent, signal);
+                    this.addHatListener(script, signal);
                     break;
                 }
                 case 'edgeActivated': {
@@ -237,31 +229,30 @@ export default class Target {
      * Add an event listener for a hat block event. Unlike EventTarget, these listeners will always be fired in the
      * targets' current execution order.
      */
-    private addHatListener<T extends string>(
-        eventName: T, listener: (evt: TypedEvent<T>) => Thread, signal: AbortSignal) {
-        let hatListeners = this.hatListeners.get(eventName);
-        if (!hatListeners) {
-            hatListeners = [];
-            this.hatListeners.set(eventName, hatListeners);
+    private addHatListener(script: Block[], signal: AbortSignal) {
+        const topBlock = script[0];
+        if (!topBlock) return;
+        const protoBlock = topBlock.proto as SomeProtoBlock;
+        const hatInfo = protoBlock.hat!;
+        if (hatInfo.type !== 'event') {
+            throw new Error(`Expected event hat, got ${hatInfo.type}`);
         }
-        hatListeners.push(listener as (evt: TypedEvent) => Thread);
+        let hatScripts = this.scriptsByHatEventName.get(hatInfo.event.EVENT_NAME);
+        if (!hatScripts) {
+            hatScripts = [];
+            this.scriptsByHatEventName.set(hatInfo.event.EVENT_NAME, hatScripts);
+        }
+        hatScripts.push(script);
         signal.addEventListener('abort', () => {
-            const index = hatListeners!.indexOf(listener as (evt: TypedEvent) => Thread);
+            const index = hatScripts!.indexOf(script);
             if (index !== -1) {
-                hatListeners!.splice(index, 1);
+                hatScripts!.splice(index, 1);
             }
         }, {once: true});
     }
 
-    public fireHatListener<T extends string>(eventName: T, evt: TypedEvent<T>) {
-        const listeners = this.hatListeners.get(eventName);
-        if (!listeners) return null;
-
-        const startedThreads = [];
-        for (const listener of listeners) {
-            startedThreads.push(listener(evt));
-        }
-        return startedThreads;
+    public getScriptsByHat(opcode: string) {
+        return this.scriptsByHatEventName.get(opcode) ?? null;
     }
 
     public destroy() {

@@ -433,7 +433,7 @@ const setBackdrop = function(backdrop: string | number | boolean, ctx: BlockCont
         stage.currentCostume = Number(backdrop) - 1;
     }
 
-    return ctx.startHats('switchbackdrop', new SwitchBackdropEvent(stage.sprite.costumes[stage.currentCostume].name));
+    return ctx.startHats(new SwitchBackdropEvent(stage.sprite.costumes[stage.currentCostume].name));
 };
 
 export const looks_sayforsecs = new ProtoBlock({
@@ -863,7 +863,9 @@ export const sound_volume = new ProtoBlock({
 export const event_whenflagclicked = new ProtoBlock({
     opcode: 'event_whenflagclicked',
     inputs: {},
-    execute: function* () {},
+    execute: function* () {
+        return true;
+    },
     hat: {
         type: 'event',
         restartExistingThreads: true,
@@ -878,14 +880,12 @@ export const event_whenkeypressed = new ProtoBlock({
     },
     execute: function* ({KEY_OPTION}, ctx, event) {
         const key = IO.keyArgToScratchKey(KEY_OPTION);
-        if (key === null) return;
+        if (key === null) return false;
         const keyPressed = key === 'any' ?
             true :
             event.key === key;
 
-        if (!keyPressed) {
-            yield* ctx.stopThisScript();
-        }
+        return keyPressed;
     },
     hat: {
         type: 'event',
@@ -921,9 +921,7 @@ export const event_whenbackdropswitchesto = new ProtoBlock({
         BACKDROP: StringField,
     },
     execute: function* ({BACKDROP}, ctx, event) {
-        if (BACKDROP.toUpperCase() !== event.backdrop) {
-            yield* ctx.stopThisScript();
-        }
+        return BACKDROP.toUpperCase() === event.backdrop;
     },
     hat: {
         type: 'event',
@@ -958,13 +956,11 @@ export const event_whenbroadcastreceived = new ProtoBlock({
         BROADCAST_OPTION: VariableField,
     },
     execute: function* ({BROADCAST_OPTION}, ctx, event) {
-        if (event.broadcast !== BROADCAST_OPTION.value.toUpperCase()) {
-            yield* ctx.stopThisScript();
-        }
+        return BROADCAST_OPTION.value.toUpperCase() === event.broadcast;
     },
     hat: {
         type: 'event',
-        restartExistingThreads: false,
+        restartExistingThreads: true,
         event: BroadcastEvent,
     },
 });
@@ -987,7 +983,7 @@ export const event_broadcast = new ProtoBlock({
     },
     execute: function* ({BROADCAST_INPUT}, ctx) {
         const broadcast = toString(ctx.evaluateFast(BROADCAST_INPUT));
-        ctx.startHats('broadcast', new BroadcastEvent(broadcast));
+        ctx.startHats(new BroadcastEvent(broadcast));
     },
 });
 
@@ -998,7 +994,7 @@ export const event_broadcastandwait = new ProtoBlock({
     },
     execute: function* ({BROADCAST_INPUT}, ctx) {
         const broadcast = toString(ctx.evaluateFast(BROADCAST_INPUT));
-        const startedThreads = ctx.startHats('broadcast', new BroadcastEvent(broadcast));
+        const startedThreads = ctx.startHats(new BroadcastEvent(broadcast));
         if (startedThreads) {
             yield* ctx.waitOnThreads(startedThreads);
         }
@@ -1158,7 +1154,7 @@ export const control_delete_this_clone = new ProtoBlock({
     opcode: 'control_delete_this_clone',
     inputs: {},
     execute: function* (_, ctx) {
-        ctx.target.remove();
+        if (!ctx.target.isOriginal) ctx.target.remove();
     },
 });
 

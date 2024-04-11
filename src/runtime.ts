@@ -185,7 +185,7 @@ export default class Runtime {
 
             event.preventDefault();
             this.io.keysDown.add(key);
-            this.interpreter.startHats('keypressed', new KeyPressedEvent(key));
+            this.interpreter.startHats(new KeyPressedEvent(key));
         }, {signal});
 
         window.addEventListener('keyup', event => {
@@ -251,7 +251,7 @@ export default class Runtime {
 
     public greenFlag() {
         this.stopAll();
-        this.interpreter.startHats('greenflag', new GreenFlagEvent());
+        this.interpreter.startHats(new GreenFlagEvent());
     }
 
     public stopAll() {

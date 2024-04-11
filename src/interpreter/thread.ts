@@ -1,4 +1,4 @@
-import {Block, BlockGenerator, ProtoBlock} from '../block.js';
+import {Block, BlockGenerator, ProtoBlock, SomeProtoBlock} from '../block.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
 import BlockContext from './block-context.js';
@@ -140,10 +140,63 @@ export default class Thread {
         return evalResult;
     }
 
+    hatBlockMatches(event: TypedEvent): boolean {
+        // Make sure the thread runs so we can check the hat block.
+        const threadWasDone = this.status === ThreadStatus.DONE;
+        if (threadWasDone) this.restart(event);
+
+        const protoBlock = this.topBlock.proto as SomeProtoBlock;
+        if (protoBlock.hat?.type !== 'event') return false;
+
+        // Hats can be started in the middle of executing other scripts (e.g. "broadcast"), so we need to store
+        // and restore the previous target and thread.
+        const oldTarget = this.blockContext.target;
+        const oldThread = this.blockContext.thread;
+
+        this.blockContext.target = this.target;
+        this.blockContext.thread = this;
+
+        const generator = protoBlock.execute(
+            this.topBlock.inputValues,
+            this.blockContext,
+            event,
+        );
+
+        // Hat blocks must run synchronously and return a boolean.
+        let returnedValue: boolean;
+        while (true) {
+            const {value, done} = generator.next();
+            if (done) {
+                if (typeof value !== 'boolean') {
+                    throw new Error('Hat block did not return a boolean');
+                }
+                returnedValue = value;
+                break;
+            } else if (typeof value !== 'undefined') {
+                throw new Error('Hat block did not complete synchronously');
+            }
+        }
+
+        // Restore the previous target and thread.
+        if (threadWasDone) {
+            this.retire();
+        } else {
+            this.resume();
+        }
+        this.blockContext.target = oldTarget;
+        this.blockContext.thread = oldThread;
+
+        return returnedValue;
+    }
+
     /**
      * Step the thread until it yields, parks, or finishes.
      */
-    step() {
+    public step() {
+        this.stepGenerator(this.generator);
+    }
+
+    private stepGenerator(generator: BlockGenerator): ReturnType<BlockGenerator['next']> | undefined {
         this.blockContext.target = this.target;
         this.blockContext.thread = this;
 
@@ -152,12 +205,14 @@ export default class Thread {
             this.warpTimer = Date.now();
         }
 
+        let result;
         while (true) {
             // The thread was parked (or stopped), either last iteration or in a previous tick.
             if (this.status !== ThreadStatus.RUNNING) break;
 
             try {
-                const {done, value} = this.generator.next(this.resolvedValue);
+                result = generator.next(this.resolvedValue);
+                const {done, value} = result;
                 if (done) {
                     this.retire();
                 }
@@ -190,6 +245,7 @@ export default class Thread {
             // We've yielded out of the thread. If we're in warp mode and haven't run out of time, keep going.
             if (this.warpCounter === 0 || (Date.now() - this.warpTimer) > WARP_TIME) break;
         }
+        return result;
     }
 
     getParam(name: string): string | number | boolean {

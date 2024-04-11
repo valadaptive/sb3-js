@@ -231,7 +231,7 @@ export class ProtoBlock<
                 inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
                 ctx: BlockContext,
                 event: Evt
-            ) => BlockGenerator
+            ) => Generator<unknown, boolean, boolean>
             : (
                 inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
                 ctx: BlockContext
@@ -258,6 +258,10 @@ export class ProtoBlock<
         this.monitorLabel = monitorLabel;
         this.monitorSliderHandler = monitorSliderHandler;
         this.colorCategory = colorCategory;
+    }
+
+    public isHat(): this is ProtoBlock<MyOpCode, MyInputs, MyReturnType, HatInfo> {
+        return !!this.hat;
     }
 }
 

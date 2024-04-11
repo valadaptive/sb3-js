@@ -148,8 +148,8 @@ export default class BlockContext {
         yield* this.await(this.project.ask(new Question(prompt, this.target, this.thread, this.thread.generation)));
     }
 
-    startHats<T extends string>(eventName: T, event: TypedEvent<T>): Thread[] | null {
-        return this.interpreter.startHats(eventName, event);
+    startHats(event: TypedEvent): Thread[] | null {
+        return this.interpreter.startHats(event);
     }
 
     getParam(name: string): string | number | boolean {
