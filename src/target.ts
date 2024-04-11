@@ -176,6 +176,7 @@ export default class Target {
     public remove() {
         this.project.removeTarget(this);
         this.audio.disconnect();
+        this.destroy();
     }
 
     public reset() {
