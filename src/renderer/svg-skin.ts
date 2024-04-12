@@ -86,7 +86,7 @@ export default class SVGSkin implements Skin {
             return null;
         }
         this.drawToCanvas(width, height);
-        return new Silhouette(this.ctx.getImageData(0, 0, width, height));
+        return new Silhouette(this.ctx.getImageData(0, 0, width, height), false);
     }
 
     getTexture(scale: number): WebGLTexture | null {

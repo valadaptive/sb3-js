@@ -7,7 +7,7 @@ export default class BitmapSkin implements Skin {
     private texture: WebGLTexture;
     private silhouette: Silhouette;
     constructor(gl: WebGL2RenderingContext, costume: Costume) {
-        this.silhouette = new Silhouette(costume.image);
+        this.silhouette = new Silhouette(costume.image, false);
         const texture = gl.createTexture();
         if (!texture) {
             throw new Error('Failed to create texture');

@@ -32,7 +32,7 @@ export default class PenLayer implements Samplable {
         if (!texture) throw new Error('Failed to create texture');
         this.texture = texture;
         this.silhouetteData = new Uint8ClampedArray(bounds.width * bounds.height * 4);
-        this.silhouette = new Silhouette(new ImageData(this.silhouetteData, bounds.width, bounds.height));
+        this.silhouette = new Silhouette(new ImageData(this.silhouetteData, bounds.width, bounds.height), true);
         this.bounds = Rectangle.fromOther(bounds);
 
 

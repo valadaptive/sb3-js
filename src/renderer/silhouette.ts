@@ -7,8 +7,12 @@ export default class Silhouette {
     private data!: Uint8ClampedArray;
     public width!: number;
     public height!: number;
+    private sampleTexel: (x: number, y: number, dst: Uint8ClampedArray) => Uint8ClampedArray;
 
-    constructor(image: HTMLImageElement | ImageData) {
+    constructor(image: HTMLImageElement | ImageData, premultipliedAlpha: boolean) {
+        this.sampleTexel = premultipliedAlpha ?
+            this.sampleTexelPremultiplied :
+            this.sampleTexelStraight;
         this.update(image);
     }
 
@@ -45,7 +49,18 @@ export default class Silhouette {
         return this.sampleTexel(Math.floor(x * this.width), Math.floor(y * this.height), dst);
     }
 
-    public sampleTexel(x: number, y: number, dst: Uint8ClampedArray) {
+    private sampleTexelPremultiplied(x: number, y: number, dst: Uint8ClampedArray) {
+        x = intMin(intMax(x, 0), this.width - 1);
+        y = intMin(intMax(y, 0), this.height - 1);
+        const index = ((y * this.width) + x) * 4;
+        dst[0] = this.data[index];
+        dst[1] = this.data[index + 1];
+        dst[2] = this.data[index + 2];
+        dst[3] = this.data[index + 3];
+        return dst;
+    }
+
+    private sampleTexelStraight(x: number, y: number, dst: Uint8ClampedArray) {
         x = intMin(intMax(x, 0), this.width - 1);
         y = intMin(intMax(y, 0), this.height - 1);
         const index = ((y * this.width) + x) * 4;
