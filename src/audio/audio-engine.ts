@@ -10,7 +10,8 @@ export default class AudioEngine {
     private cachedLoudness: number | null = null;
 
     public async loadSound(data: ArrayBuffer): Promise<AudioBuffer> {
-        return await this.ctx.decodeAudioData(data);
+        // Cloning seems necessary here to avoid getting a detached arraybuffer error in Firefox
+        return await this.ctx.decodeAudioData(data.slice(0));
     }
 
     private async requestMicrophone() {

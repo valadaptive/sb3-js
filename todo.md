@@ -17,7 +17,7 @@
 - Costumes' fonts (done)
 - Music blocks
 - Draggable sprites (done)
-- ADPCM decoding
+- ADPCM decoding (done)
 - "stop other scripts in sprite" should stop waiting sounds
 - Apply proper viewbox offset to SVG skin rotation centers (done)
 - Draw pen lines with instancing

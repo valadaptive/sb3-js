@@ -18,6 +18,7 @@ import {Monitor, MonitorView} from './monitor.js';
 import {RespondEvent} from './html/answer-box.js';
 import anyAbortSignal from './util/any-abort-signal.js';
 import AudioEngine from './audio/audio-engine.js';
+import decodeADPCM from './audio/decode-adpcm.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
@@ -258,9 +259,12 @@ export default class Runtime {
         try {
             audioBuffer = await this.audio.loadSound(buffer);
         } catch (err) {
-            // TODO: decode ADPCM
-            // eslint-disable-next-line no-console
-            console.warn(`Failed to decode sound "${name}"`, err);
+            try {
+                audioBuffer = decodeADPCM(new Uint8Array(buffer));
+            } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn(`Failed to decode sound "${name}"`, err);
+            }
         }
         return new Sound(name, audioBuffer);
     }

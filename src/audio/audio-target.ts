@@ -35,6 +35,8 @@ export default class AudioTarget {
 
     public play(sound: Sound) {
         const buffer = sound.buffer;
+        // Ignore sounds that failed to decode
+        if (!buffer) return Promise.resolve();
         // If this sound is already playing, restart it
         this.stop(sound);
 
