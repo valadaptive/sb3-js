@@ -47,6 +47,7 @@ export default class Target {
     public draggable: boolean;
     private _currentCostume: number;
 
+    public dragging: boolean;
     public tempo: number;
     public videoTransparency: number;
     public videoState: string;
@@ -106,6 +107,7 @@ export default class Target {
         this._rotationStyle = options.rotationStyle;
         this.draggable = options.draggable;
         this._currentCostume = options.currentCostume;
+        this.dragging = false;
         this.volume = options.volume;
         this.tempo = options.tempo;
         this.videoTransparency = options.videoTransparency;
@@ -261,8 +263,9 @@ export default class Target {
         this.runtime.stopTargetThreads(this);
     }
 
-    public moveTo(x: number, y: number): void {
-        if (this.sprite.isStage) return;
+    public moveTo(x: number, y: number, fromDrag = false): void {
+        // When dragging, don't move sprite from motion blocks
+        if (this.sprite.isStage || (this.dragging && !fromDrag)) return;
 
         // Fencing: keep the sprite visible on the stage by preventing it from moving completely off the edge.
         const dx = x - this._position.x;
@@ -287,7 +290,7 @@ export default class Target {
             y = Math.floor(this._position.y + (stageTop - fenceBounds.bottom));
         }
 
-        if (this.penState.down) {
+        if (this.penState.down && !fromDrag) {
             this.runtime.penLayer?.penLine(
                 this._position.x,
                 this._position.y,

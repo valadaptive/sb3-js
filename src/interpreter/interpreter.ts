@@ -109,6 +109,7 @@ export default class Interpreter {
         if (this.project) this.project.currentMSecs = startTime;
         let anyThreadsActive = true;
 
+        this.redrawRequested = false;
         while (
             // We have at least one active thread.
             this.threads.length > 0 &&
@@ -149,7 +150,5 @@ export default class Interpreter {
                 threads.length = nextActiveThreadIndex;
             }
         }
-
-        this.redrawRequested = false;
     }
 }

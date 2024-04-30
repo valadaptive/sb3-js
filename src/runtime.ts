@@ -41,6 +41,9 @@ export default class Runtime {
     private theme: Theme;
     private monitorViews: Map<Monitor, {view: MonitorView; abort: AbortController}> = new Map();
 
+    private dragOffset: {x: number; y: number} | null = null;
+    private draggedTarget: Target | null = null;
+
     private steppingInterval: NodeJS.Timeout | null = null;
 
     private unregisterPreviousProject: (() => void) | null = null;
@@ -57,6 +60,26 @@ export default class Runtime {
         });
         this.theme = settings?.theme ?? defaultTheme;
         this.io.username = settings?.username ?? '';
+
+        this.io.addEventListener('dragstart', event => {
+            if (!this.project || !this.renderer) return;
+            const {x, y} = event;
+            const target = this.renderer.pick(this.project.targets, x, y);
+            if (target?.draggable) {
+                this.dragOffset = {x: target.position.x - x, y: target.position.y - y};
+                this.draggedTarget = target;
+                target.dragging = true;
+                this.project.moveTargetToFront(target);
+            }
+        });
+
+        this.io.addEventListener('dragstop', () => {
+            if (this.draggedTarget) {
+                this.draggedTarget.dragging = false;
+            }
+            this.draggedTarget = null;
+            this.dragOffset = null;
+        });
     }
 
     public async loadProjectFromLoader(loader: Loader): Promise<Project> {
@@ -160,23 +183,33 @@ export default class Runtime {
 
         window.addEventListener('pointermove', event => {
             const {x, y} = stageCoordsFromPointerEvent(event);
-            this.io.mousePosition.x = x;
-            this.io.mousePosition.y = y;
+            this.io.moveMouse(x, y);
         }, {signal});
 
-        stage.canvas.addEventListener('pointerdown', () => {
-            this.io.mouseDown = true;
+        stage.canvas.addEventListener('pointerdown', event => {
+            const {x, y} = stageCoordsFromPointerEvent(event);
+            this.io.pressMouse(x, y);
             if (!this.project || !this.renderer) return;
-            const {x, y} = this.io.mousePosition;
-            // "when this sprite / stage clicked" hats fire when the mouse is pressed, not when it's released.
             // If no target is clicked, always count the stage as being clicked even if it's transparent where the
             // cursor is.
             const clickedTarget = this.renderer.pick(this.project.targets, x, y) ?? this.project.stage;
-            clickedTarget?.click();
+            if (clickedTarget && !clickedTarget.draggable) {
+                // Non-draggable targets start "when clicked" hats when mouse pressed
+                clickedTarget?.click();
+            }
         }, {signal});
 
-        window.addEventListener('pointerup', () => {
-            this.io.mouseDown = false;
+        window.addEventListener('pointerup', event => {
+            const {x, y} = stageCoordsFromPointerEvent(event);
+            if (!this.project || !this.renderer) return;
+            const clickedTarget = this.renderer.pick(this.project.targets, x, y) ?? this.project.stage;
+            const wasDragging = clickedTarget?.dragging;
+            this.io.releaseMouse(x, y);
+            // Dragging targets don't count as being clicked. I can't tell where Scratch does this, but it does.
+            if (clickedTarget && clickedTarget.draggable && !wasDragging) {
+                // Draggable targets start "when clicked" hats when mouse released
+                clickedTarget?.click();
+            }
         }, {signal});
 
         stage.canvas.addEventListener('keydown', event => {
@@ -184,7 +217,7 @@ export default class Runtime {
             if (key === null) return;
 
             event.preventDefault();
-            this.io.keysDown.add(key);
+            this.io.pressKey(key);
             this.interpreter.startHats(new KeyPressedEvent(key));
         }, {signal});
 
@@ -192,8 +225,12 @@ export default class Runtime {
             const key = IO.domToScratchKey(event.key);
             if (key === null) return;
 
-            this.io.keysDown.delete(key);
+            this.io.releaseKey(key);
         }, {signal});
+
+        signal.addEventListener('abort', () => {
+            this.io.resetKeys();
+        });
 
         return abortController;
     }
@@ -268,6 +305,11 @@ export default class Runtime {
             throw new Error('Cannot step without a project');
         }
         this.project.step();
+
+        if (this.draggedTarget && this.dragOffset) {
+            const {x, y} = this.io.mousePosition;
+            this.draggedTarget.moveTo(x + this.dragOffset.x, y + this.dragOffset.y, true);
+        }
 
         // Loudness updates once per frame
         this.audio.resetCachedLoudness();

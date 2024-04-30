@@ -16,7 +16,7 @@
 - Loudness sensing (done)
 - Costumes' fonts (done)
 - Music blocks
-- Draggable sprites
+- Draggable sprites (done)
 - ADPCM decoding
 - "stop other scripts in sprite" should stop waiting sounds
 - Apply proper viewbox offset to SVG skin rotation centers (done)

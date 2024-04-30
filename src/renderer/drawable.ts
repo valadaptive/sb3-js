@@ -250,6 +250,10 @@ export default class Drawable {
     }
 
     isTouchingDrawable(other: Drawable) {
+        // Targets that are being dragged cannot be sensed, but can sense others.
+        if (other.target.dragging) {
+            return false;
+        }
         const myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
         const otherBounds = other.getSamplingBounds(__intersectionBoundsOther);
         if (!myBounds.intersects(otherBounds)) {
