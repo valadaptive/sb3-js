@@ -122,6 +122,7 @@ export default class Runtime {
 
         const unregisterProject = project.register();
         this.unregisterPreviousProject = () => {
+            this.stopAll();
             this.project = null;
             this.stop();
             for (const {monitor} of project.monitors) {
