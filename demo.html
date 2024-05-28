@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>sb3.js demo</title>
+        <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAbElEQVR42rWSgQmAMAwEs4MrWJzUhVywEuHhgQsQgg9P7ZeeCWmQtglyOgPAfXyLZ8rTEpINwJl9O1mmfQmLzt9oz70xgCvgAwZQFtwvZjyFPVD9Bp6TDJf+Bqx1aU2PALMK0p0KdGHQQmN0L0l/a2mitOqcAAAAAElFTkSuQmCC" type="image/png">
+        <style>
+            #project-container {
+                margin-bottom: 0.5rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="project-container"></div>
+        <div>
+            <input type="file" id="file-input" accept=".sb3">
+        </div>
+
+        <script type="module">
+            import {ProjectElement, Loader} from './dist/index.js';
+
+            customElements.define('sb3-project', ProjectElement);
+            const projectElem = document.createElement('sb3-project');
+            document.getElementById('project-container').append(projectElem);
+
+            const fileInput = document.getElementById('file-input');
+            fileInput.addEventListener('change', async (event) => {
+                if (event.target.files.length === 0) {
+                    return;
+                }
+                const file = event.target.files[0];
+                const project = await projectElem.runtime.loadProjectFromZip(file);
+                projectElem.runtime.setProject(project);
+
+                projectElem.start();
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,28 @@
+- Basic interpreter (done)
+- Basic renderer (done)
+- Custom block support (done)
+- Warp mode (done)
+- Clones (done)
+- Graphic effects (done)
+- Sprite click / color / graphic sensing (done)
+- Fencing (done)
+- Monitors (done)
+- Edge-activated hats (done)
+- Speech bubbles (done)
+- Pen (done)
+- The rest of the sensing blocks (done)
+- Audio engine (done)
+- Audio effects (done)
+- Loudness sensing (done)
+- Costumes' fonts (done)
+- Music blocks
+- Draggable sprites (done)
+- ADPCM decoding (done)
+- "stop other scripts in sprite" should stop waiting sounds
+- Apply proper viewbox offset to SVG skin rotation centers (done)
+- Draw pen lines with instancing
+- Revamp block introspection API
+    - want to be able to type ctx.evaluate properly
+    - specify "only accept blocks returning X"
+- Switch the renderer over to 2x3 matrices
+- Promise-throwing stuff for async reporters
