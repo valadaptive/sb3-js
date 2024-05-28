@@ -24,8 +24,8 @@
             document.getElementById('project-container').append(projectElem);
 
             const fileInput = document.getElementById('file-input');
-            fileInput.addEventListener('change', async (event) => {
-                if (event.target.files.length === 0) {
+            async function load(event) {
+                if (event?.target?.files?.length !== 1) {
                     return;
                 }
                 const file = event.target.files[0];
@@ -33,7 +33,9 @@
                 projectElem.runtime.setProject(project);
 
                 projectElem.start();
-            });
+            }
+            fileInput.addEventListener('change', load);
+            load();
         </script>
     </body>
 </html>

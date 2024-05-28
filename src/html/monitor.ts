@@ -1,4 +1,4 @@
-import {ListMonitor, Monitor, MonitorMode, MonitorSliderChangeEvent, MonitorView, ScalarMonitor} from '../monitor.js';
+import {Monitor, MonitorMode, MonitorSliderChangeEvent, MonitorView} from '../monitor.js';
 import Rectangle from '../rectangle.js';
 import h from './html.js';
 import {defineInternalElement} from './internal-element.js';
@@ -98,10 +98,21 @@ export class MonitorElement extends HTMLElement implements MonitorView {
 
         if (monitor.mode.mode === 'list') {
             (this.monitorElement as ListMonitorElement).setSize(monitor.mode.size.width, monitor.mode.size.height);
-            (this.monitorElement as ListMonitorElement).setValue((monitor as ListMonitor).value);
+            (this.monitorElement as ListMonitorElement).setValue(
+                Array.isArray(monitor.value) ?
+                    monitor.value :
+                    // eslint-disable-next-line eqeqeq
+                    monitor.value == null ?
+                        [] :
+                        [monitor.value],
+            );
         } else {
-            (this.monitorElement as ScalarMonitorElement).setMode((monitor as ScalarMonitor).mode);
-            (this.monitorElement as ScalarMonitorElement).setValue((monitor as ScalarMonitor).value);
+            (this.monitorElement as ScalarMonitorElement).setMode(monitor.mode);
+            (this.monitorElement as ScalarMonitorElement).setValue(
+                Array.isArray(monitor.value) ?
+                    monitor.value.join(' ') :
+                    monitor.value,
+            );
         }
         if (monitor.position) this.setPosition(monitor.position);
 

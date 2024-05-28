@@ -1,4 +1,5 @@
 import {
+    AnyInput,
     BlockInput,
     BooleanInput,
     VariableField,
@@ -35,6 +36,7 @@ export const motion_movesteps = new ProtoBlock({
         const position = ctx.target.position;
         ctx.target.moveTo(position.x + dx, position.y + dy);
     },
+    colorCategory: 'motion',
 });
 
 export const motion_turnright = new ProtoBlock({
@@ -46,6 +48,7 @@ export const motion_turnright = new ProtoBlock({
         const degrees = toNumber(ctx.evaluateFast(DEGREES));
         ctx.target.direction += degrees;
     },
+    colorCategory: 'motion',
 });
 
 export const motion_turnleft = new ProtoBlock({
@@ -57,6 +60,7 @@ export const motion_turnleft = new ProtoBlock({
         const degrees = toNumber(ctx.evaluateFast(DEGREES));
         ctx.target.direction -= degrees;
     },
+    colorCategory: 'motion',
 });
 
 export const motion_goto_menu = new ProtoBlock({
@@ -68,6 +72,7 @@ export const motion_goto_menu = new ProtoBlock({
         return TO;
     },
     pure: true,
+    colorCategory: 'motion',
 });
 
 const getPositionByName = (name: string, ctx: BlockContext): {x: number; y: number} | null => {
@@ -101,6 +106,7 @@ export const motion_goto = new ProtoBlock({
             ctx.target.moveTo(position.x, position.y);
         }
     },
+    colorCategory: 'motion',
 });
 
 export const motion_gotoxy = new ProtoBlock({
@@ -114,6 +120,7 @@ export const motion_gotoxy = new ProtoBlock({
         const y = toNumber(ctx.evaluateFast(Y));
         ctx.target.moveTo(x, y);
     },
+    colorCategory: 'motion',
 });
 
 const glideTo = function* (
@@ -148,6 +155,7 @@ export const motion_glideto = new ProtoBlock({
             yield* glideTo(position.x, position.y, position.x, position.y, duration, ctx);
         }
     },
+    colorCategory: 'motion',
 });
 
 export const motion_glideto_menu = new ProtoBlock({
@@ -159,6 +167,7 @@ export const motion_glideto_menu = new ProtoBlock({
         return TO;
     },
     pure: true,
+    colorCategory: 'motion',
 });
 
 export const motion_glidesecstoxy = new ProtoBlock({
@@ -176,6 +185,7 @@ export const motion_glidesecstoxy = new ProtoBlock({
         const position = ctx.target.position;
         yield* glideTo(position.x, position.y, endX, endY, duration, ctx);
     },
+    colorCategory: 'motion',
 });
 
 export const motion_pointindirection = new ProtoBlock({
@@ -186,6 +196,7 @@ export const motion_pointindirection = new ProtoBlock({
     execute: function* ({DIRECTION}, ctx) {
         ctx.target.direction = toNumber(ctx.evaluateFast(DIRECTION));
     },
+    colorCategory: 'motion',
 });
 
 export const motion_pointtowards_menu = new ProtoBlock({
@@ -197,6 +208,7 @@ export const motion_pointtowards_menu = new ProtoBlock({
         return TOWARDS;
     },
     pure: true,
+    colorCategory: 'motion',
 });
 
 export const motion_pointtowards = new ProtoBlock({
@@ -218,6 +230,7 @@ export const motion_pointtowards = new ProtoBlock({
             ctx.target.direction = (-Math.atan2(dy, dx) * 180 / Math.PI) + 90;
         }
     },
+    colorCategory: 'motion',
 });
 
 export const motion_changexby = new ProtoBlock({
@@ -230,6 +243,7 @@ export const motion_changexby = new ProtoBlock({
         const position = ctx.target.position;
         ctx.target.moveTo(position.x + dx, position.y);
     },
+    colorCategory: 'motion',
 });
 
 export const motion_setx = new ProtoBlock({
@@ -241,6 +255,7 @@ export const motion_setx = new ProtoBlock({
         const x = toNumber(ctx.evaluateFast(X));
         ctx.target.moveTo(x, ctx.target.position.y);
     },
+    colorCategory: 'motion',
 });
 
 export const motion_changeyby = new ProtoBlock({
@@ -253,6 +268,7 @@ export const motion_changeyby = new ProtoBlock({
         const position = ctx.target.position;
         ctx.target.moveTo(position.x, position.y + dy);
     },
+    colorCategory: 'motion',
 });
 
 export const motion_sety = new ProtoBlock({
@@ -264,6 +280,7 @@ export const motion_sety = new ProtoBlock({
         const y = toNumber(ctx.evaluateFast(Y));
         ctx.target.moveTo(ctx.target.position.x, y);
     },
+    colorCategory: 'motion',
 });
 
 export const motion_ifonedgebounce = new ProtoBlock({
@@ -337,6 +354,7 @@ export const motion_ifonedgebounce = new ProtoBlock({
         }
         ctx.target.moveTo(ctx.target.position.x + dx, ctx.target.position.y + dy);
     },
+    colorCategory: 'motion',
 });
 
 export const motion_setrotationstyle = new ProtoBlock({
@@ -349,6 +367,7 @@ export const motion_setrotationstyle = new ProtoBlock({
             ctx.target.rotationStyle = STYLE;
         }
     },
+    colorCategory: 'motion',
 });
 
 export const motion_xposition = new ProtoBlock({
@@ -450,6 +469,7 @@ export const looks_sayforsecs = new ProtoBlock({
         // Don't clear the bubble if it's been changed since we set it
         if (ctx.target.textBubble?.id === bubbleId) ctx.target.setTextBubble('say', '');
     },
+    colorCategory: 'looks',
 });
 
 export const looks_say = new ProtoBlock({
@@ -461,6 +481,7 @@ export const looks_say = new ProtoBlock({
         const message = ctx.evaluateFast(MESSAGE);
         ctx.target.setTextBubble('say', message);
     },
+    colorCategory: 'looks',
 });
 
 export const looks_thinkforsecs = new ProtoBlock({
@@ -477,6 +498,7 @@ export const looks_thinkforsecs = new ProtoBlock({
         // Don't clear the bubble if it's been changed since we set it
         if (ctx.target.textBubble?.id === bubbleId) ctx.target.setTextBubble('think', '');
     },
+    colorCategory: 'looks',
 });
 
 export const looks_think = new ProtoBlock({
@@ -488,6 +510,7 @@ export const looks_think = new ProtoBlock({
         const message = ctx.evaluateFast(MESSAGE);
         ctx.target.setTextBubble('think', message);
     },
+    colorCategory: 'looks',
 });
 
 export const looks_costume = new ProtoBlock({
@@ -499,6 +522,7 @@ export const looks_costume = new ProtoBlock({
         return COSTUME;
     },
     pure: true,
+    colorCategory: 'looks',
 });
 
 export const looks_switchcostumeto = new ProtoBlock({
@@ -510,6 +534,7 @@ export const looks_switchcostumeto = new ProtoBlock({
         const costume = ctx.evaluateFast(COSTUME);
         setCostume(ctx.target, costume);
     },
+    colorCategory: 'looks',
 });
 
 export const looks_nextcostume = new ProtoBlock({
@@ -518,6 +543,7 @@ export const looks_nextcostume = new ProtoBlock({
     execute: function* (_, ctx) {
         ctx.target.currentCostume++;
     },
+    colorCategory: 'looks',
 });
 
 export const looks_backdrops = new ProtoBlock({
@@ -529,6 +555,7 @@ export const looks_backdrops = new ProtoBlock({
         return BACKDROP;
     },
     pure: true,
+    colorCategory: 'looks',
 });
 
 export const looks_switchbackdropto = new ProtoBlock({
@@ -541,6 +568,7 @@ export const looks_switchbackdropto = new ProtoBlock({
         const costume = ctx.evaluateFast(BACKDROP);
         setBackdrop(costume, ctx);
     },
+    colorCategory: 'looks',
 });
 
 export const looks_switchbackdroptoandwait = new ProtoBlock({
@@ -556,6 +584,7 @@ export const looks_switchbackdroptoandwait = new ProtoBlock({
             yield* ctx.waitOnThreads(startedThreads);
         }
     },
+    colorCategory: 'looks',
 });
 
 export const looks_nextbackdrop = new ProtoBlock({
@@ -565,6 +594,7 @@ export const looks_nextbackdrop = new ProtoBlock({
         // TODO: trigger "when backdrop switches to" hats
         ctx.stage.currentCostume++;
     },
+    colorCategory: 'looks',
 });
 
 export const looks_changesizeby = new ProtoBlock({
@@ -576,6 +606,7 @@ export const looks_changesizeby = new ProtoBlock({
         const change = toNumber(ctx.evaluateFast(CHANGE));
         ctx.target.size += change;
     },
+    colorCategory: 'looks',
 });
 
 export const looks_setsizeto = new ProtoBlock({
@@ -586,6 +617,7 @@ export const looks_setsizeto = new ProtoBlock({
     execute: function* ({SIZE}, ctx) {
         ctx.target.size = toNumber(ctx.evaluateFast(SIZE));
     },
+    colorCategory: 'looks',
 });
 
 export const looks_show = new ProtoBlock({
@@ -594,6 +626,7 @@ export const looks_show = new ProtoBlock({
     execute: function* (_, ctx) {
         ctx.target.visible = true;
     },
+    colorCategory: 'looks',
 });
 
 export const looks_changeeffectby = new ProtoBlock({
@@ -616,6 +649,7 @@ export const looks_changeeffectby = new ProtoBlock({
         ) ctx.target.effects[effect] += change;
         if (ctx.target.visible) ctx.target.runtime.requestRedraw();
     },
+    colorCategory: 'looks',
 });
 
 export const looks_seteffectto = new ProtoBlock({
@@ -638,6 +672,7 @@ export const looks_seteffectto = new ProtoBlock({
         ) ctx.target.effects[effect] = value;
         if (ctx.target.visible) ctx.target.runtime.requestRedraw();
     },
+    colorCategory: 'looks',
 });
 
 export const looks_cleargraphiceffects = new ProtoBlock({
@@ -647,6 +682,7 @@ export const looks_cleargraphiceffects = new ProtoBlock({
         ctx.target.effects.clear();
         if (ctx.target.visible) ctx.target.runtime.requestRedraw();
     },
+    colorCategory: 'looks',
 });
 
 export const looks_hide = new ProtoBlock({
@@ -655,6 +691,7 @@ export const looks_hide = new ProtoBlock({
     execute: function* (_, ctx) {
         ctx.target.visible = false;
     },
+    colorCategory: 'looks',
 });
 
 export const looks_gotofrontback = new ProtoBlock({
@@ -669,6 +706,7 @@ export const looks_gotofrontback = new ProtoBlock({
             ctx.project.moveTargetToBack(ctx.target);
         }
     },
+    colorCategory: 'looks',
 });
 
 export const looks_goforwardbackwardlayers = new ProtoBlock({
@@ -682,6 +720,7 @@ export const looks_goforwardbackwardlayers = new ProtoBlock({
         if (FORWARD_BACKWARD === 'backward') num = -num;
         ctx.project.moveTargetForwardBackwardLayers(ctx.target, num);
     },
+    colorCategory: 'looks',
 });
 
 export const looks_costumenumbername = new ProtoBlock({
@@ -737,6 +776,7 @@ export const sound_sounds_menu = new ProtoBlock({
         return SOUND_MENU;
     },
     pure: true,
+    colorCategory: 'sound',
 });
 
 export const sound_playuntildone = new ProtoBlock({
@@ -750,6 +790,7 @@ export const sound_playuntildone = new ProtoBlock({
         if (!sound) return;
         yield* ctx.await(ctx.target.audio.play(sound));
     },
+    colorCategory: 'sound',
 });
 
 export const sound_play = new ProtoBlock({
@@ -763,6 +804,7 @@ export const sound_play = new ProtoBlock({
         if (!sound) return;
         ctx.target.audio.play(sound);
     },
+    colorCategory: 'sound',
 });
 
 export const sound_stopallsounds = new ProtoBlock({
@@ -771,6 +813,7 @@ export const sound_stopallsounds = new ProtoBlock({
     execute: function* (_, ctx) {
         ctx.target.audio.stopAllSounds();
     },
+    colorCategory: 'sound',
 });
 
 export const sound_changeeffectby = new ProtoBlock({
@@ -791,6 +834,7 @@ export const sound_changeeffectby = new ProtoBlock({
                 break;
         }
     },
+    colorCategory: 'sound',
 });
 
 export const sound_seteffectto = new ProtoBlock({
@@ -811,6 +855,7 @@ export const sound_seteffectto = new ProtoBlock({
                 break;
         }
     },
+    colorCategory: 'sound',
 });
 
 export const sound_cleareffects = new ProtoBlock({
@@ -819,6 +864,7 @@ export const sound_cleareffects = new ProtoBlock({
     execute: function* (_, ctx) {
         ctx.target.audio.clearEffects();
     },
+    colorCategory: 'sound',
 });
 
 export const sound_changevolumeby = new ProtoBlock({
@@ -832,6 +878,7 @@ export const sound_changevolumeby = new ProtoBlock({
         // Yield until the next tick.
         yield* ctx.await(Promise.resolve());
     },
+    colorCategory: 'sound',
 });
 
 export const sound_setvolumeto = new ProtoBlock({
@@ -844,6 +891,7 @@ export const sound_setvolumeto = new ProtoBlock({
         // Yield until the next tick.
         yield* ctx.await(Promise.resolve());
     },
+    colorCategory: 'sound',
 });
 
 export const sound_volume = new ProtoBlock({
@@ -871,6 +919,7 @@ export const event_whenflagclicked = new ProtoBlock({
         restartExistingThreads: true,
         event: GreenFlagEvent,
     },
+    colorCategory: 'event',
 });
 
 export const event_whenkeypressed = new ProtoBlock({
@@ -892,6 +941,7 @@ export const event_whenkeypressed = new ProtoBlock({
         restartExistingThreads: false,
         event: KeyPressedEvent,
     },
+    colorCategory: 'event',
 });
 
 // The "when clicked" blocks don't do any event filtering--they're dispatched directly on the proper targets.
@@ -903,6 +953,7 @@ export const event_whenthisspriteclicked = new ProtoBlock({
         type: 'noop',
         restartExistingThreads: true,
     },
+    colorCategory: 'event',
 });
 
 export const event_whenstageclicked = new ProtoBlock({
@@ -913,6 +964,7 @@ export const event_whenstageclicked = new ProtoBlock({
         type: 'noop',
         restartExistingThreads: true,
     },
+    colorCategory: 'event',
 });
 
 export const event_whenbackdropswitchesto = new ProtoBlock({
@@ -928,6 +980,7 @@ export const event_whenbackdropswitchesto = new ProtoBlock({
         restartExistingThreads: true,
         event: SwitchBackdropEvent,
     },
+    colorCategory: 'event',
 });
 
 export const event_whengreaterthan = new ProtoBlock({
@@ -948,6 +1001,7 @@ export const event_whengreaterthan = new ProtoBlock({
         type: 'edgeActivated',
         restartExistingThreads: false,
     },
+    colorCategory: 'event',
 });
 
 export const event_whenbroadcastreceived = new ProtoBlock({
@@ -963,6 +1017,7 @@ export const event_whenbroadcastreceived = new ProtoBlock({
         restartExistingThreads: true,
         event: BroadcastEvent,
     },
+    colorCategory: 'event',
 });
 
 export const event_broadcast_menu = new ProtoBlock({
@@ -974,6 +1029,7 @@ export const event_broadcast_menu = new ProtoBlock({
         return BROADCAST_OPTION.value;
     },
     pure: true,
+    colorCategory: 'event',
 });
 
 export const event_broadcast = new ProtoBlock({
@@ -985,6 +1041,7 @@ export const event_broadcast = new ProtoBlock({
         const broadcast = toString(ctx.evaluateFast(BROADCAST_INPUT));
         ctx.startHats(new BroadcastEvent(broadcast));
     },
+    colorCategory: 'event',
 });
 
 export const event_broadcastandwait = new ProtoBlock({
@@ -999,6 +1056,7 @@ export const event_broadcastandwait = new ProtoBlock({
             yield* ctx.waitOnThreads(startedThreads);
         }
     },
+    colorCategory: 'event',
 });
 
 /**
@@ -1014,6 +1072,7 @@ export const control_wait = new ProtoBlock({
         const duration = toNumber(ctx.evaluateFast(DURATION));
         yield* ctx.waitForMS(duration * 1000);
     },
+    colorCategory: 'control',
 });
 
 export const control_repeat = new ProtoBlock({
@@ -1029,6 +1088,7 @@ export const control_repeat = new ProtoBlock({
             yield;
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_forever = new ProtoBlock({
@@ -1042,6 +1102,7 @@ export const control_forever = new ProtoBlock({
             yield;
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_if = new ProtoBlock({
@@ -1055,6 +1116,7 @@ export const control_if = new ProtoBlock({
             yield* ctx.evaluate(SUBSTACK);
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_if_else = new ProtoBlock({
@@ -1071,6 +1133,7 @@ export const control_if_else = new ProtoBlock({
             yield* ctx.evaluate(SUBSTACK2);
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_wait_until = new ProtoBlock({
@@ -1084,6 +1147,7 @@ export const control_wait_until = new ProtoBlock({
             yield;
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_repeat_until = new ProtoBlock({
@@ -1099,6 +1163,7 @@ export const control_repeat_until = new ProtoBlock({
             yield;
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_stop = new ProtoBlock({
@@ -1115,12 +1180,14 @@ export const control_stop = new ProtoBlock({
             ctx.stopOtherTargetThreads();
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_start_as_clone = new ProtoBlock({
     opcode: 'control_start_as_clone',
     inputs: {},
     execute: function* () {},
+    colorCategory: 'control',
 });
 
 export const control_create_clone_of_menu = new ProtoBlock({
@@ -1132,6 +1199,7 @@ export const control_create_clone_of_menu = new ProtoBlock({
         return CLONE_OPTION;
     },
     pure: true,
+    colorCategory: 'control',
 });
 
 export const control_create_clone_of = new ProtoBlock({
@@ -1148,6 +1216,7 @@ export const control_create_clone_of = new ProtoBlock({
             if (other) other.clone();
         }
     },
+    colorCategory: 'control',
 });
 
 export const control_delete_this_clone = new ProtoBlock({
@@ -1156,6 +1225,7 @@ export const control_delete_this_clone = new ProtoBlock({
     execute: function* (_, ctx) {
         if (!ctx.target.isOriginal) ctx.target.remove();
     },
+    colorCategory: 'control',
 });
 
 /**
@@ -1171,6 +1241,7 @@ export const sensing_touchingobjectmenu = new ProtoBlock({
         return TOUCHINGOBJECTMENU;
     },
     pure: true,
+    colorCategory: 'sensing',
 });
 
 export const sensing_touchingobject = new ProtoBlock({
@@ -1195,6 +1266,7 @@ export const sensing_touchingobject = new ProtoBlock({
         }
     },
     returnType: ['boolean'],
+    colorCategory: 'sensing',
 });
 
 const evaluateColorInput = (
@@ -1225,6 +1297,7 @@ export const sensing_touchingcolor = new ProtoBlock({
         );
         return isTouching;
     },
+    colorCategory: 'sensing',
 });
 
 const __color2 = new Uint8ClampedArray(3);
@@ -1248,6 +1321,7 @@ export const sensing_coloristouchingcolor = new ProtoBlock({
         );
         return isTouching;
     },
+    colorCategory: 'sensing',
 });
 
 export const sensing_distancetomenu = new ProtoBlock({
@@ -1259,6 +1333,7 @@ export const sensing_distancetomenu = new ProtoBlock({
         return DISTANCETOMENU;
     },
     pure: true,
+    colorCategory: 'sensing',
 });
 
 export const sensing_distanceto = new ProtoBlock({
@@ -1292,6 +1367,7 @@ export const sensing_distanceto = new ProtoBlock({
         return 0;
     },
     returnType: ['number'],
+    colorCategory: 'sensing',
 });
 
 export const sensing_askandwait = new ProtoBlock({
@@ -1303,6 +1379,7 @@ export const sensing_askandwait = new ProtoBlock({
         const question = ctx.evaluateFast(QUESTION);
         yield* ctx.ask(question);
     },
+    colorCategory: 'sensing',
 });
 
 export const sensing_answer = new ProtoBlock({
@@ -1325,6 +1402,7 @@ export const sensing_keyoptions = new ProtoBlock({
         return KEY_OPTION;
     },
     pure: true,
+    colorCategory: 'sensing',
 });
 
 export const sensing_keypressed = new ProtoBlock({
@@ -1338,6 +1416,7 @@ export const sensing_keypressed = new ProtoBlock({
         return key === 'any' ? ctx.io.isAnyKeyPressed() : ctx.io.isKeyPressed(key);
     },
     returnType: ['boolean'],
+    colorCategory: 'sensing',
 });
 
 export const sensing_mousedown = new ProtoBlock({
@@ -1347,6 +1426,7 @@ export const sensing_mousedown = new ProtoBlock({
         return ctx.io.mouseDown;
     },
     returnType: ['boolean'],
+    colorCategory: 'sensing',
 });
 
 export const sensing_mousex = new ProtoBlock({
@@ -1356,6 +1436,7 @@ export const sensing_mousex = new ProtoBlock({
         return ctx.io.mousePosition.x;
     },
     returnType: ['boolean'],
+    colorCategory: 'sensing',
 });
 
 export const sensing_mousey = new ProtoBlock({
@@ -1365,6 +1446,7 @@ export const sensing_mousey = new ProtoBlock({
         return ctx.io.mousePosition.y;
     },
     returnType: ['boolean'],
+    colorCategory: 'sensing',
 });
 
 export const sensing_loudness = new ProtoBlock({
@@ -1395,6 +1477,7 @@ export const sensing_resettimer = new ProtoBlock({
     execute: function* (_, ctx) {
         ctx.project.timerStart = ctx.project.currentMSecs;
     },
+    colorCategory: 'sensing',
 });
 
 export const sensing_of_object_menu = new ProtoBlock({
@@ -1406,6 +1489,7 @@ export const sensing_of_object_menu = new ProtoBlock({
         return OBJECT;
     },
     pure: true,
+    colorCategory: 'sensing',
 });
 
 export const sensing_of = new ProtoBlock({
@@ -1449,6 +1533,7 @@ export const sensing_of = new ProtoBlock({
         // Return 0 if all else fails
         return varValue ?? 0;
     },
+    colorCategory: 'sensing',
 });
 
 export const sensing_current = new ProtoBlock({
@@ -1520,6 +1605,7 @@ export const operator_add = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_subtract = new ProtoBlock({
@@ -1535,6 +1621,7 @@ export const operator_subtract = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_multiply = new ProtoBlock({
@@ -1550,6 +1637,7 @@ export const operator_multiply = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_divide = new ProtoBlock({
@@ -1565,6 +1653,7 @@ export const operator_divide = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_random = new ProtoBlock({
@@ -1586,6 +1675,7 @@ export const operator_random = new ProtoBlock({
         return (Math.random() * (to - from)) + from;
     },
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_lt = new ProtoBlock({
@@ -1601,6 +1691,7 @@ export const operator_lt = new ProtoBlock({
     },
     pure: true,
     returnType: ['boolean'],
+    colorCategory: 'operator',
 });
 
 export const operator_equals = new ProtoBlock({
@@ -1616,6 +1707,7 @@ export const operator_equals = new ProtoBlock({
     },
     pure: true,
     returnType: ['boolean'],
+    colorCategory: 'operator',
 });
 
 export const operator_gt = new ProtoBlock({
@@ -1631,6 +1723,7 @@ export const operator_gt = new ProtoBlock({
     },
     pure: true,
     returnType: ['boolean'],
+    colorCategory: 'operator',
 });
 
 export const operator_and = new ProtoBlock({
@@ -1646,6 +1739,7 @@ export const operator_and = new ProtoBlock({
     },
     pure: true,
     returnType: ['boolean'],
+    colorCategory: 'operator',
 });
 
 export const operator_or = new ProtoBlock({
@@ -1661,6 +1755,7 @@ export const operator_or = new ProtoBlock({
     },
     pure: true,
     returnType: ['boolean'],
+    colorCategory: 'operator',
 });
 
 export const operator_not = new ProtoBlock({
@@ -1673,6 +1768,7 @@ export const operator_not = new ProtoBlock({
     },
     pure: true,
     returnType: ['boolean'],
+    colorCategory: 'operator',
 });
 
 export const operator_join = new ProtoBlock({
@@ -1688,6 +1784,7 @@ export const operator_join = new ProtoBlock({
     },
     pure: true,
     returnType: ['string'],
+    colorCategory: 'operator',
 });
 
 export const operator_letter_of = new ProtoBlock({
@@ -1704,6 +1801,7 @@ export const operator_letter_of = new ProtoBlock({
     },
     pure: true,
     returnType: ['string'],
+    colorCategory: 'operator',
 });
 
 export const operator_length = new ProtoBlock({
@@ -1717,6 +1815,7 @@ export const operator_length = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_contains = new ProtoBlock({
@@ -1733,6 +1832,7 @@ export const operator_contains = new ProtoBlock({
     },
     pure: true,
     returnType: ['boolean'],
+    colorCategory: 'operator',
 });
 
 export const operator_mod = new ProtoBlock({
@@ -1749,6 +1849,7 @@ export const operator_mod = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_round = new ProtoBlock({
@@ -1762,6 +1863,7 @@ export const operator_round = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 export const operator_mathop = new ProtoBlock({
@@ -1795,6 +1897,7 @@ export const operator_mathop = new ProtoBlock({
     },
     pure: true,
     returnType: ['number'],
+    colorCategory: 'operator',
 });
 
 /**
@@ -1832,6 +1935,7 @@ export const data_setvariableto = new ProtoBlock({
             ctx.stage.variables.set(VARIABLE.value, value);
         }
     },
+    colorCategory: 'data',
 });
 
 export const data_changevariableby = new ProtoBlock({
@@ -1849,6 +1953,7 @@ export const data_changevariableby = new ProtoBlock({
             ctx.stage.variables.set(VARIABLE.value, value + increment);
         }
     },
+    colorCategory: 'data',
 });
 
 export const data_showvariable = new ProtoBlock({
@@ -1865,6 +1970,7 @@ export const data_showvariable = new ProtoBlock({
         );
         monitor.update({visible: true});
     },
+    colorCategory: 'data',
 });
 
 export const data_hidevariable = new ProtoBlock({
@@ -1881,6 +1987,7 @@ export const data_hidevariable = new ProtoBlock({
         );
         monitor.update({visible: false});
     },
+    colorCategory: 'data',
 });
 
 export const data_listcontents = new ProtoBlock({
@@ -1905,6 +2012,7 @@ export const data_listcontents = new ProtoBlock({
         }
         return list.join(' ');
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_addtolist = new ProtoBlock({
@@ -1918,6 +2026,7 @@ export const data_addtolist = new ProtoBlock({
         // TODO: Scratch limits lists to 200000 items. Not sure if that behavior is worth replicating
         ctx.lookupOrCreateList(LIST.value).push(item);
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_deleteoflist = new ProtoBlock({
@@ -1936,6 +2045,7 @@ export const data_deleteoflist = new ProtoBlock({
         const numIndex = toListIndex(index, list.length);
         if (numIndex !== 0) list.splice(numIndex - 1, 1);
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_deletealloflist = new ProtoBlock({
@@ -1946,6 +2056,7 @@ export const data_deletealloflist = new ProtoBlock({
     execute: function* ({LIST}, ctx) {
         ctx.lookupOrCreateList(LIST.value).length = 0;
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_insertatlist = new ProtoBlock({
@@ -1962,6 +2073,7 @@ export const data_insertatlist = new ProtoBlock({
         const numIndex = toListIndex(index, list.length);
         if (numIndex !== 0) list.splice(numIndex - 1, 0, item);
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_replaceitemoflist = new ProtoBlock({
@@ -1978,6 +2090,7 @@ export const data_replaceitemoflist = new ProtoBlock({
         const numIndex = toListIndex(index, list.length);
         if (numIndex !== 0) list[numIndex - 1] = item;
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_itemoflist = new ProtoBlock({
@@ -1993,6 +2106,7 @@ export const data_itemoflist = new ProtoBlock({
         if (numIndex !== 0) return list[numIndex - 1];
         return '';
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_itemnumoflist = new ProtoBlock({
@@ -2013,6 +2127,7 @@ export const data_itemnumoflist = new ProtoBlock({
         return 0;
     },
     returnType: ['number'],
+    colorCategory: 'data_lists',
 });
 
 export const data_lengthoflist = new ProtoBlock({
@@ -2024,6 +2139,7 @@ export const data_lengthoflist = new ProtoBlock({
         return ctx.lookupOrCreateList(LIST.value).length;
     },
     returnType: ['number'],
+    colorCategory: 'data_lists',
 });
 
 export const data_listcontainsitem = new ProtoBlock({
@@ -2041,6 +2157,7 @@ export const data_listcontainsitem = new ProtoBlock({
         return false;
     },
     returnType: ['boolean'],
+    colorCategory: 'data_lists',
 });
 
 export const data_showlist = new ProtoBlock({
@@ -2057,6 +2174,7 @@ export const data_showlist = new ProtoBlock({
         );
         monitor.update({visible: true});
     },
+    colorCategory: 'data_lists',
 });
 
 export const data_hidelist = new ProtoBlock({
@@ -2073,6 +2191,7 @@ export const data_hidelist = new ProtoBlock({
         );
         monitor.update({visible: false});
     },
+    colorCategory: 'data_lists',
 });
 
 /**
@@ -2086,6 +2205,7 @@ export const pen_clear = new ProtoBlock({
         ctx.renderer?.penLayer.clear();
         ctx.target.runtime.requestRedraw();
     },
+    colorCategory: 'extensions',
 });
 
 export const pen_stamp = new ProtoBlock({
@@ -2095,6 +2215,7 @@ export const pen_stamp = new ProtoBlock({
         ctx.renderer?.stamp(ctx.target);
         ctx.target.runtime.requestRedraw();
     },
+    colorCategory: 'extensions',
 });
 
 export const pen_penDown = new ProtoBlock({
@@ -2105,6 +2226,7 @@ export const pen_penDown = new ProtoBlock({
         // Move so we draw a pen dot
         ctx.target.moveTo(ctx.target.position.x, ctx.target.position.y);
     },
+    colorCategory: 'extensions',
 });
 
 export const pen_penUp = new ProtoBlock({
@@ -2113,6 +2235,7 @@ export const pen_penUp = new ProtoBlock({
     execute: function* (_, ctx) {
         ctx.target.penState.down = false;
     },
+    colorCategory: 'extensions',
 });
 
 const __color3 = new Uint8ClampedArray(4);
@@ -2125,6 +2248,7 @@ export const pen_setPenColorToColor = new ProtoBlock({
         evaluateColorInput(COLOR, ctx, __color3);
         ctx.target.penState.setFromRgbaInt(__color3);
     },
+    colorCategory: 'extensions',
 });
 
 export const pen_menu_colorParam = new ProtoBlock({
@@ -2136,6 +2260,7 @@ export const pen_menu_colorParam = new ProtoBlock({
         return colorParam;
     },
     pure: true,
+    colorCategory: 'extensions',
 });
 
 export const pen_changePenColorParamBy = new ProtoBlock({
@@ -2151,6 +2276,7 @@ export const pen_changePenColorParamBy = new ProtoBlock({
             ctx.target.penState[param] += value;
         }
     },
+    colorCategory: 'extensions',
 });
 
 export const pen_setPenColorParamTo = new ProtoBlock({
@@ -2166,6 +2292,7 @@ export const pen_setPenColorParamTo = new ProtoBlock({
             ctx.target.penState[param] = value;
         }
     },
+    colorCategory: 'extensions',
 });
 
 export const pen_changePenSizeBy = new ProtoBlock({
@@ -2177,6 +2304,7 @@ export const pen_changePenSizeBy = new ProtoBlock({
         const size = toNumber(ctx.evaluateFast(SIZE));
         ctx.target.penState.thickness += size;
     },
+    colorCategory: 'extensions',
 });
 
 export const pen_setPenSizeTo = new ProtoBlock({
@@ -2188,6 +2316,7 @@ export const pen_setPenSizeTo = new ProtoBlock({
         const size = toNumber(ctx.evaluateFast(SIZE));
         ctx.target.penState.thickness = size;
     },
+    colorCategory: 'extensions',
 });
 
 // Legacy 2.0 "set pen color to"
@@ -2203,6 +2332,7 @@ export const pen_setPenHueToNumber = new ProtoBlock({
         ctx.target.penState.transparency = 0; // Not sure why this is here, but Scratch does it
         ctx.target.penState.updateLegacyColor();
     },
+    colorCategory: 'extensions',
 });
 
 // Legacy 2.0 "change pen color by"
@@ -2217,6 +2347,7 @@ export const pen_changePenHueBy = new ProtoBlock({
         ctx.target.penState.color = ctx.target.penState.color + ((((hue * 0.5) % 100) + 100) % 100);
         ctx.target.penState.updateLegacyColor();
     },
+    colorCategory: 'extensions',
 });
 
 // Legacy 2.0 "set pen shade to"
@@ -2230,6 +2361,7 @@ export const pen_setPenShadeToNumber = new ProtoBlock({
         ctx.target.penState.legacyShade = shade;
         ctx.target.penState.updateLegacyColor();
     },
+    colorCategory: 'extensions',
 });
 
 // Legacy 2.0 "change pen shade by"
@@ -2243,6 +2375,7 @@ export const pen_changePenShadeBy = new ProtoBlock({
         ctx.target.penState.legacyShade += shade;
         ctx.target.penState.updateLegacyColor();
     },
+    colorCategory: 'extensions',
 });
 
 /**
@@ -2257,6 +2390,7 @@ export const procedures_definition = new ProtoBlock({
         custom_block: new BlockInput('custom_block', {type: 'object', values: {}}),
     },
     execute: function* () {},
+    colorCategory: 'procedures',
 });
 
 export const argument_reporter_string_number = new ProtoBlock({
@@ -2267,6 +2401,7 @@ export const argument_reporter_string_number = new ProtoBlock({
     execute: function* ({VALUE}, ctx) {
         return ctx.getParam(VALUE);
     },
+    colorCategory: 'procedures',
 });
 
 export const argument_reporter_boolean = new ProtoBlock({
@@ -2277,4 +2412,54 @@ export const argument_reporter_boolean = new ProtoBlock({
     execute: function* ({VALUE}, ctx) {
         return ctx.getParam(VALUE);
     },
+    colorCategory: 'procedures',
 });
+
+/**
+ * Internal
+ */
+export const internal_noop = new ProtoBlock({
+    opcode: 'internal_noop',
+    inputs: {},
+    execute: function* () {},
+    colorCategory: 'procedures',
+});
+
+const consoleBlock = (fn: 'log' | 'warn' | 'error') =>
+    new ProtoBlock({
+        opcode: 'internal_scratchAddons_' + fn,
+        inputs: {
+            arg0: AnyInput,
+        },
+        execute: function* ({arg0}, ctx) {
+            const message = ctx.evaluateFast(arg0);
+            let prefix: string[] = [];
+            if (arg0 instanceof Block) {
+                const opcode = arg0.proto.opcode;
+                const text =
+                    opcode === 'data_variable' ?
+                        (arg0.inputValues.VARIABLE as typeof VariableField.value.values).value :
+                        opcode === 'data_listcontents' ?
+                            (arg0.inputValues.LIST as typeof VariableField.value.values).value :
+                            opcode === 'argument_reporter_string_number' ?
+                                arg0.inputValues.VALUE as string :
+                                opcode === 'argument_reporter_boolean' ?
+                                    arg0.inputValues.VALUE as string :
+                                    opcode.split('_')[1];
+                prefix = [
+                    '%c %s ',
+                    'background-color:' + ctx.theme.blocks[arg0.proto.colorCategory].primary + ';' +
+                    'color:' + ctx.theme.text + ';' +
+                    'border-radius:2em',
+                    text,
+                ];
+            }
+            // eslint-disable-next-line no-console
+            console[fn](...prefix, message);
+        },
+        colorCategory: 'procedures',
+    });
+
+export const internal_scratchAddons_log = consoleBlock('log');
+export const internal_scratchAddons_warn = consoleBlock('warn');
+export const internal_scratchAddons_error = consoleBlock('error');

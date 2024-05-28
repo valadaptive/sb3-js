@@ -247,7 +247,7 @@ export class ProtoBlock<
             target: Target,
             value: number,
         ) => void;
-        colorCategory?: ColorCategory;
+        colorCategory: ColorCategory;
     }) {
         this.opcode = opcode;
         this.inputs = inputs;
