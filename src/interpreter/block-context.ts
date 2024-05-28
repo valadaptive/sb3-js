@@ -105,7 +105,7 @@ export default class BlockContext {
     }
 
     *stopAll() {
-        this.interpreter.stopAll();
+        this.target.runtime.stopAll();
         // We will never resume from this yield.
         yield;
     }

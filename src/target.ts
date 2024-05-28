@@ -259,6 +259,7 @@ export default class Target {
     }
 
     public destroy() {
+        this.reset();
         this.scriptListenerCleanup();
         this.runtime.stopTargetThreads(this);
     }
@@ -290,7 +291,9 @@ export default class Target {
             y = Math.floor(this._position.y + (stageTop - fenceBounds.bottom));
         }
 
-        if (this.penState.down && !fromDrag) {
+        const shouldDrawPenLine = this.penState.down && !fromDrag;
+
+        if (shouldDrawPenLine) {
             this.runtime.penLayer?.penLine(
                 this._position.x,
                 this._position.y,
@@ -307,7 +310,7 @@ export default class Target {
             this.drawable.setTransformDirty();
         }
 
-        this.runtime.requestRedraw();
+        if (this.visible || shouldDrawPenLine) this.runtime.requestRedraw();
     }
 
     /**
@@ -359,7 +362,7 @@ export default class Target {
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
-        this.runtime.requestRedraw();
+        if (this.visible) this.runtime.requestRedraw();
     }
 
     get size(): number {
@@ -372,7 +375,7 @@ export default class Target {
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
-        this.runtime.requestRedraw();
+        if (this.visible) this.runtime.requestRedraw();
     }
 
     get rotationStyle(): RotationStyle {
@@ -385,7 +388,7 @@ export default class Target {
         if (this.drawable) {
             this.drawable.setTransformDirty();
         }
-        this.runtime.requestRedraw();
+        if (this.visible) this.runtime.requestRedraw();
     }
 
     get currentCostume(): number {
@@ -405,7 +408,7 @@ export default class Target {
         if (this.drawable) {
             this.drawable.setCostume(this.sprite.costumes[index]);
         }
-        this.runtime.requestRedraw();
+        if (this.visible) this.runtime.requestRedraw();
     }
 
     get visible(): boolean {
@@ -415,7 +418,7 @@ export default class Target {
     set visible(visible: boolean) {
         if (this.sprite.isStage) return;
         this._visible = visible;
-        this.runtime.requestRedraw();
+        if (visible) this.runtime.requestRedraw();
     }
 
     public isTouchingEdge(): boolean {

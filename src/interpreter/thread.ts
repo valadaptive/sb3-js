@@ -280,7 +280,8 @@ export default class Thread {
      * Scratch does.
      */
     isRecursiveCall(procedure: ProtoBlock) {
-        for (let i = this.callStack.length - 1, j = 5; i >= 0 && j > 0; i--, j--) {
+        // We just pushed the procedure we're testing against to the stack, so skip over it
+        for (let i = this.callStack.length - 2, j = 5; i >= 0 && j > 0; i--, j--) {
             if (this.callStack[i].procedure === procedure) return true;
         }
         return false;

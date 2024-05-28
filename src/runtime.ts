@@ -297,7 +297,7 @@ export default class Runtime {
     }
 
     public stopAll() {
-        this.interpreter.stopAll();
+        this.interpreter.stopAllThreads();
         this.project?.stopAll();
     }
 

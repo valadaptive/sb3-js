@@ -2084,6 +2084,7 @@ export const pen_clear = new ProtoBlock({
     inputs: {},
     execute: function* (_, ctx) {
         ctx.renderer?.penLayer.clear();
+        ctx.target.runtime.requestRedraw();
     },
 });
 
@@ -2092,6 +2093,7 @@ export const pen_stamp = new ProtoBlock({
     inputs: {},
     execute: function* (_, ctx) {
         ctx.renderer?.stamp(ctx.target);
+        ctx.target.runtime.requestRedraw();
     },
 });
 
