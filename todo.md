@@ -18,9 +18,11 @@
 - Music blocks
 - Draggable sprites (done)
 - ADPCM decoding (done)
+- A real test suite!!!
 - "stop other scripts in sprite" should stop waiting sounds
 - Apply proper viewbox offset to SVG skin rotation centers (done)
-- Draw pen lines with instancing
+- Draw pen lines with instancing (no longer planned; tested and has no performance benefit)
+- Really small sprites should trigger "touching" blocks (see: griffpatch's Ball Physics Scroll v0.4)
 - Revamp block introspection API
     - want to be able to type ctx.evaluate properly
     - specify "only accept blocks returning X"

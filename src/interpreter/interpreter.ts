@@ -51,6 +51,16 @@ export default class Interpreter {
                     return thread;
                 }
             }
+        } else {
+            // Give up if an existing thread is running
+            for (const thread of this.threads) {
+                if (thread.topBlock === script[0] && thread.target === target && thread.status !== ThreadStatus.DONE) {
+                    if (event && !thread.hatBlockMatches(event)) {
+                        continue;
+                    }
+                    return null;
+                }
+            }
         }
 
         const thread = new Thread(script, target, this.blockContext, event);
