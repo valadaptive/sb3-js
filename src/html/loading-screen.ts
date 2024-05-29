@@ -45,7 +45,7 @@ const loadingScreenTemplate = h('template',
         }
 
         #loading-bar-progress.active {
-            transition: right 0.1s ease;
+            transition: right 0.1s linear;
         }
     `),
     h('div', {id: 'loading-screen'},

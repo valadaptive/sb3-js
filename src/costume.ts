@@ -81,4 +81,8 @@ export default class Costume {
         await Costume.waitForImageToLoad(image);
         return new Costume(name, image, {width: image.naturalWidth, height: image.naturalHeight}, params);
     }
+
+    destroy() {
+        URL.revokeObjectURL(this.image.src);
+    }
 }

@@ -79,6 +79,10 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
             unregisterCallbacks.push(target.destroy.bind(target));
         }
 
+        for (const sprite of this.sprites) {
+            unregisterCallbacks.push(sprite.destroy.bind(sprite));
+        }
+
         return () => {
             for (const unregister of unregisterCallbacks) {
                 unregister();

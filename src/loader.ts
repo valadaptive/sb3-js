@@ -1,7 +1,9 @@
 import {type ZipInfo, unzip, type ZipEntry, TypedArray, Reader} from 'unzipit';
+import PromisePool from './promise-pool.js';
 
 export abstract class Loader {
     private assetCache: Map<string, Promise<Blob>>;
+    private pool = new PromisePool(100);
 
     constructor() {
         this.assetCache = new Map();
@@ -17,7 +19,7 @@ export abstract class Loader {
         const cachedAsset = this.assetCache.get(assetKey);
         if (cachedAsset) return cachedAsset;
 
-        const assetPromise = this.fetchAsset(filename, contentType);
+        const assetPromise = this.pool.enqueue(() => this.fetchAsset(filename, contentType));
         this.assetCache.set(assetKey, assetPromise);
         return assetPromise;
     }

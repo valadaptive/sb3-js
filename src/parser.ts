@@ -9,6 +9,7 @@ import Runtime from './runtime.js';
 import {CustomBlockStub, makeCustomBlockStub} from './custom-blocks.js';
 import {MonitorMode} from './monitor.js';
 import {TypedEvent, TypedEventTarget} from './typed-events.js';
+import PromisePool from './promise-pool.js';
 
 const enum ShadowInfo {
     /**
@@ -621,6 +622,11 @@ type ParseTargetCtx = {
     runtime: Runtime;
     project: Project;
     progress: Progress;
+    /**
+     * Chrome seems to have issues with large numbers of blobs being created at once. Limit the parallelism of asset
+     * loading to avoid errors when loading.
+     */
+    promisePool: PromisePool;
 };
 
 class ProgressEvent extends TypedEvent<'progress'> {
@@ -672,7 +678,7 @@ const contentTypeForDataFormat = {
 
 const parseTarget = async(
     jsonTarget: Sb3Target | Sb3SpriteTarget,
-    {loader, runtime, project, progress}: ParseTargetCtx,
+    {loader, runtime, project, progress, promisePool}: ParseTargetCtx,
 ): Promise<{sprite: Sprite; target: Target; layerOrder: number}> => {
     const scripts: Block[][] = [];
     const topLevelBlocks: {block: Sb3Block; id: string}[] = [];
@@ -723,7 +729,7 @@ const parseTarget = async(
 
     progress.totalAssets += jsonTarget.costumes.length + jsonTarget.sounds.length;
 
-    const costumePromises = jsonTarget.costumes.map(async jsonCostume => {
+    const costumePromises = jsonTarget.costumes.map(jsonCostume => promisePool.enqueue(async() => {
         const asset = await loader.loadAsset(
             `${jsonCostume.assetId}.${jsonCostume.dataFormat}`,
             contentTypeForDataFormat[jsonCostume.dataFormat],
@@ -735,9 +741,9 @@ const parseTarget = async(
         });
         progress.loadedAssets++;
         return costume;
-    });
+    }));
 
-    const soundPromises = jsonTarget.sounds.map(async jsonSound => {
+    const soundPromises = jsonTarget.sounds.map(jsonSound => promisePool.enqueue(async() => {
         const asset = await loader.loadAsset(
             `${jsonSound.assetId}.${jsonSound.dataFormat}`,
             contentTypeForDataFormat[jsonSound.dataFormat],
@@ -745,7 +751,7 @@ const parseTarget = async(
         const sound = await runtime.loadSound(jsonSound.name, asset);
         progress.loadedAssets++;
         return sound;
-    });
+    }));
 
     const [costumes, sounds] = await Promise.all([Promise.all(costumePromises), Promise.all(soundPromises)]);
 
@@ -876,6 +882,7 @@ const parseProject = async(
         runtime,
         project,
         progress,
+        promisePool: new PromisePool(100),
     };
     const parsedTargetPromises: Promise<{sprite: Sprite; target: Target; layerOrder: number}>[] = [];
 

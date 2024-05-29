@@ -59,4 +59,10 @@ export default class Sprite {
         if (typeof index === 'undefined') return null;
         return this.sounds[index];
     }
+
+    destroy() {
+        for (const costume of this.costumes) {
+            costume.destroy();
+        }
+    }
 }

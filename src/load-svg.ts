@@ -95,7 +95,8 @@ const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => 
             node = nodeIterator.nextNode() as SVGElement
         ) {
             const font = node.getAttribute('font-family');
-            if (font !== null) {
+            // Sometimes an empty group will have a font-family set. We can ignore it.
+            if (font !== null && node.childNodes.length > 0) {
                 foundFonts.add(font);
             }
         }
