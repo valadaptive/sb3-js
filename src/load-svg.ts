@@ -100,23 +100,25 @@ const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => 
             }
         }
 
-        const fontURLs = await loadFonts(foundFonts.values());
+        if (foundFonts.size > 0) {
+            const fontURLs = await loadFonts(foundFonts.values());
 
-        // Inject fonts as data URLs into the SVG
-        for (const fontName of foundFonts) {
-            if (!Object.prototype.hasOwnProperty.call(fonts, fontName)) {
-                continue;
+            // Inject fonts as data URLs into the SVG
+            for (const fontName of foundFonts) {
+                if (!Object.prototype.hasOwnProperty.call(fonts, fontName)) {
+                    continue;
+                }
+                const defs = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const style = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'style');
+                style.setAttribute('type', 'text/css');
+                defs.appendChild(style);
+                const fontURL = fontURLs[fontName as FontName];
+                style.append(`@font-face { font-family: '${fontName}'; src: url(${JSON.stringify(fontURL)}); }`);
+                svgTag.insertBefore(defs, svgTag.firstChild);
             }
-            const defs = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'defs');
-            const style = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'style');
-            style.setAttribute('type', 'text/css');
-            defs.appendChild(style);
-            const fontURL = fontURLs[fontName as FontName];
-            style.append(`@font-face { font-family: '${fontName}'; src: url(${JSON.stringify(fontURL)}); }`);
-            svgTag.insertBefore(defs, svgTag.firstChild);
-        }
 
-        src = new Blob([new XMLSerializer().serializeToString(svgDOM)], {type: 'image/svg+xml'});
+            src = new Blob([new XMLSerializer().serializeToString(svgDOM)], {type: 'image/svg+xml'});
+        }
     }
 
     const url = URL.createObjectURL(src);
