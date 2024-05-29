@@ -251,6 +251,7 @@ export default class Drawable {
     }
 
     isTouchingTargets(renderer: Renderer, others: Target[], stageBounds: Rectangle) {
+        if (!this.target.visible) return false;
         const mySilhouette = renderer.getSilhouetteForTarget(this.target);
         if (!mySilhouette) return false;
         const myBounds = this.getSamplingBounds(mySilhouette, __intersectionBoundsSelf);
@@ -374,7 +375,7 @@ export default class Drawable {
         const candidates: {samplable: Samplable; silhouette: Silhouette}[] = [];
         for (let i = 0; i < targets.length; i++) {
             const target = targets[i];
-            if (target !== this.target) {
+            if (target !== this.target && target.visible) {
                 const drawable = target.drawable;
                 const otherSilhouette = renderer.getSilhouetteForTarget(target);
                 if (otherSilhouette) {
