@@ -40,6 +40,7 @@ export const makeCustomBlockStub = (
         opcode: proccode,
         inputs,
         execute: STUB,
+        colorCategory: 'procedures',
     });
 
     return {

@@ -9,7 +9,8 @@ export type ColorCategory =
     | 'data'
     | 'data_lists'
     | 'procedures'
-    | 'extensions';
+    | 'extensions'
+    | 'internal';
 
 export type BlockTheme = {[C in ColorCategory]: {
     primary: string;
@@ -91,6 +92,12 @@ export const defaultTheme = {
             secondary: '#0DA57A',
             tertiary: '#0B8E69',
             quaternary: '#0B8E69',
+        },
+        internal: {
+            primary: '#000000',
+            secondary: '#000000',
+            tertiary: '#000000',
+            quaternary: '#000000',
         },
     },
 } as const satisfies Theme;

@@ -24,4 +24,5 @@ export const vm_stepEdgeActivatedHat = new ProtoBlock({
         }
         yield* ctx.evaluate(SCRIPT);
     },
+    colorCategory: 'internal',
 });

@@ -174,6 +174,7 @@ export const updateMonitor = new ProtoBlock({
         const value = (yield* ctx.evaluate(MONITOR.block)) as string | number | boolean | (string | number | boolean)[];
         MONITOR.update({value});
     },
+    colorCategory: 'internal',
 });
 
 export const listMonitorContents = new ProtoBlock({
