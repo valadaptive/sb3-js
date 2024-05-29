@@ -92,7 +92,9 @@ export default class Interpreter {
         if (!project) return null;
 
         const startedThreads = [];
-        for (const target of project.targets) {
+        // Sprites execute in top-to-bottom order
+        for (let i = project.targets.length - 1; i >= 0; i--) {
+            const target = project.targets[i];
             const hatScripts = target.getScriptsByHat(event.type);
             if (!hatScripts) continue;
             for (const script of hatScripts) {
