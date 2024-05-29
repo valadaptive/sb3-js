@@ -11,7 +11,7 @@ export default {
     },
     plugins: [
         nodeResolve({browser: true}),
-        typescript(),
+        typescript({noEmitOnError: true}),
         copy({
             targets: [
                 { src: 'src/assets/**/*', dest: 'dist/assets' }
