@@ -3,11 +3,12 @@ import PromisePool from './util/promise-pool.js';
 
 export abstract class Loader {
     private assetCache: Map<string, Promise<Blob>>;
-    private pool = new PromisePool(100);
+    private pool;
     protected signal?: AbortSignal;
 
-    constructor(signal?: AbortSignal) {
+    constructor(concurrency = 100, signal?: AbortSignal) {
         this.assetCache = new Map();
+        this.pool = new PromisePool(concurrency);
         this.signal = signal;
     }
 
@@ -38,12 +39,12 @@ export class WebLoader extends Loader {
     private projectID: string;
 
     constructor(projectID: string, signal?: AbortSignal) {
-        super(signal);
+        super(10, signal);
         this.projectID = projectID;
     }
 
     protected async fetchAsset(filename: string, contentType: string): Promise<Blob> {
-        const response = await fetch(`${WebLoader.assetPath}/${filename}`, {
+        const response = await fetch(`${WebLoader.assetPath}/${filename}/get/`, {
             headers: {
                 'Accept': contentType,
             },
@@ -71,7 +72,7 @@ export class ZipLoader extends Loader {
     private zip: Promise<ZipInfo>;
 
     constructor(zip: ZipSrc, signal?: AbortSignal) {
-        super(signal);
+        super(100, signal);
         this.zip = unzip(zip);
     }
 
