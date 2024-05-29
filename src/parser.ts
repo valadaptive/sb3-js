@@ -676,21 +676,27 @@ const parseTarget = async(
         lists.set(name, value);
     }
 
-    const costumePromises = jsonTarget.costumes.map(costume => loader.loadAsset(
-        `${costume.assetId}.${costume.dataFormat}`,
-        contentTypeForDataFormat[costume.dataFormat],
-    )
-        .then(asset => runtime.loadCostume(costume.name, asset, {
-            rotationCenter: {x: costume.rotationCenterX, y: costume.rotationCenterY},
-            bitmapResolution: costume.bitmapResolution ?? 1,
-            type: costume.dataFormat === 'svg' ? 'svg' : 'bitmap',
-        })));
+    const costumePromises = jsonTarget.costumes.map(async jsonCostume => {
+        const asset = await loader.loadAsset(
+            `${jsonCostume.assetId}.${jsonCostume.dataFormat}`,
+            contentTypeForDataFormat[jsonCostume.dataFormat],
+        );
+        const costume = await runtime.loadCostume(jsonCostume.name, asset, {
+            rotationCenter: {x: jsonCostume.rotationCenterX, y: jsonCostume.rotationCenterY},
+            bitmapResolution: jsonCostume.bitmapResolution ?? 1,
+            type: jsonCostume.dataFormat === 'svg' ? 'svg' : 'bitmap',
+        });
+        return costume;
+    });
 
-    const soundPromises = jsonTarget.sounds.map(sound => loader.loadAsset(
-        `${sound.assetId}.${sound.dataFormat}`,
-        contentTypeForDataFormat[sound.dataFormat],
-    )
-        .then(asset => runtime.loadSound(sound.name, asset)));
+    const soundPromises = jsonTarget.sounds.map(async jsonSound => {
+        const asset = await loader.loadAsset(
+            `${jsonSound.assetId}.${jsonSound.dataFormat}`,
+            contentTypeForDataFormat[jsonSound.dataFormat],
+        );
+        const sound = await runtime.loadSound(jsonSound.name, asset);
+        return sound;
+    });
 
     const [costumes, sounds] = await Promise.all([Promise.all(costumePromises), Promise.all(soundPromises)]);
 
