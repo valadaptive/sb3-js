@@ -2,6 +2,7 @@ import {Block, SomeProtoBlock} from './block.js';
 import Costume from './costume.js';
 import {vm_stepEdgeActivatedHat} from './interpreter/edge-activated-hat.js';
 import Sound from './sound.js';
+import Target from './target.js';
 
 export default class Sprite {
     public readonly name: string;
@@ -9,7 +10,7 @@ export default class Sprite {
     public readonly sounds: Sound[];
     public readonly isStage: boolean;
     public readonly scripts: Block[][];
-    public readonly clones: Sprite[] = [];
+    public readonly clones: Target[] = [];
     public readonly edgeActivatedScripts: {hat: SomeProtoBlock; script: Block[]}[] = [];
 
     private costumeIndicesByName: Map<string, number>;
@@ -64,5 +65,15 @@ export default class Sprite {
         for (const costume of this.costumes) {
             costume.destroy();
         }
+    }
+
+    registerClone(clone: Target) {
+        this.clones.push(clone);
+    }
+
+    unregisterClone(clone: Target) {
+        const cloneIndex = this.clones.indexOf(clone);
+        if (!cloneIndex) return;
+        this.clones.splice(cloneIndex, 1);
     }
 }

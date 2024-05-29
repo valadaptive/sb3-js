@@ -11,7 +11,7 @@ export default {
     },
     plugins: [
         nodeResolve({browser: true}),
-        typescript({noEmitOnError: true}),
+        typescript({noEmitOnError: !process.env.ROLLUP_WATCH}),
         copy({
             targets: [
                 { src: 'src/assets/**/*', dest: 'dist/assets' }

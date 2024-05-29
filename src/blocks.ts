@@ -1260,7 +1260,7 @@ export const sensing_touchingobject = new ProtoBlock({
         } else {
             const other = ctx.project.getTargetByName(target);
             if (other) {
-                const isTouching = ctx.target.drawable.isTouchingDrawable(other.drawable);
+                const isTouching = ctx.target.drawable.isTouchingTargets(other.sprite.clones, ctx.stageBounds);
                 return isTouching;
             } else {
                 return false;

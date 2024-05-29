@@ -10,5 +10,7 @@ export default interface Samplable {
         effectMask: number,
     ): Uint8ClampedArray;
 
+    checkPointCollision(x: number, y: number, silhouette: Silhouette): boolean;
+
     getSamplingBounds(result?: Rectangle): Rectangle;
 }

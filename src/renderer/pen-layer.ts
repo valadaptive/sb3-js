@@ -88,6 +88,17 @@ export default class PenLayer implements Samplable {
         return dst;
     }
 
+    checkPointCollision(x: number, y: number, silhouette: Silhouette): boolean {
+        vec2.set(__samplePoint, x, y);
+        vec2.transformMat3(__samplePoint, __samplePoint, this.inverseTransform);
+        // Flip y
+        __samplePoint[1] = 1 - __samplePoint[1];
+        if (__samplePoint[0] < 0 || __samplePoint[0] > 1 || __samplePoint[1] < 0 || __samplePoint[1] > 1) {
+            return false;
+        }
+        return silhouette.isTouching(__samplePoint[0], __samplePoint[1]);
+    }
+
     public clear() {
         this.renderer.setFramebuffer(this.framebuffer);
         this.gl.clearColor(0, 0, 0, 0);

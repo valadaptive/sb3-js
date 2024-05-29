@@ -205,7 +205,7 @@ export default class Drawable {
      * Check whether a given point collides with this drawable. Requires the inverse transform to be up-to-date. Faster
      * than `isTouchingPoint` when called in a loop.
      */
-    private checkPointCollision(x: number, y: number, silhouette: Silhouette) {
+    checkPointCollision(x: number, y: number, silhouette: Silhouette) {
         const localPosition = this.getLocalPosition(x, y, __localPosition);
         if (localPosition[0] < 0 || localPosition[0] > 1 || localPosition[1] < 0 || localPosition[1] > 1) {
             return false;
@@ -249,37 +249,42 @@ export default class Drawable {
         return this.checkPointCollision(x, y, silhouette);
     }
 
-    isTouchingDrawable(other: Drawable) {
-        // Targets that are being dragged cannot be sensed, but can sense others.
-        if (other.target.dragging) {
-            return false;
-        }
+    isTouchingTargets(others: Target[], stageBounds: Rectangle) {
         const myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
-        const otherBounds = other.getSamplingBounds(__intersectionBoundsOther);
-        if (!myBounds.intersects(otherBounds)) {
-            return false;
-        }
-
-        const bounds = Rectangle.intersection(myBounds, otherBounds, __intersectionBoundsSelf);
         const mySilhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
         if (!mySilhouette) return false;
-        const otherSilhouette = other.costume.skin?.getSilhouette(other.target.size * 0.01);
-        if (!otherSilhouette) return false;
         if (this.inverseTransformDirty) {
             this.updateInverseTransform();
         }
-        if (other.inverseTransformDirty) {
-            other.updateInverseTransform();
+
+        const candidates = this.candidatesTouching(others, null, stageBounds);
+
+        if (candidates.length === 0) return false;
+        const candidatesBounds = new Rectangle();
+        // Set these to infinity and -infinity so that the first candidate's bounds will overwrite them.
+        candidatesBounds.left = Infinity;
+        candidatesBounds.right = -Infinity;
+        candidatesBounds.bottom = Infinity;
+        candidatesBounds.top = -Infinity;
+
+        for (const candidate of candidates) {
+            let bounds = candidate.samplable.getSamplingBounds(__intersectionBoundsOther);
+            bounds = Rectangle.intersection(stageBounds, bounds, __intersectionBoundsOther);
+            bounds = Rectangle.intersection(myBounds, bounds, __intersectionBoundsOther);
+            Rectangle.union(bounds, candidatesBounds, candidatesBounds);
         }
 
-        for (let x = bounds.left; x <= bounds.right; x++) {
-            for (let y = bounds.bottom; y <= bounds.top; y++) {
-                if (this.checkPointCollision(x, y, mySilhouette) && other.checkPointCollision(x, y, otherSilhouette)) {
-                    return true;
+        for (let x = candidatesBounds.left; x < candidatesBounds.right; x++) {
+            for (let y = candidatesBounds.bottom; y < candidatesBounds.top; y++) {
+                const thisMatches = this.checkPointCollision(x, y, mySilhouette);
+                if (!thisMatches) continue;
+                for (let i = 0; i < candidates.length; i++) {
+                    if (candidates[i].samplable.checkPointCollision(x, y, candidates[i].silhouette)) {
+                        return true;
+                    }
                 }
             }
         }
-
         return false;
     }
 

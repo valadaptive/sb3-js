@@ -117,6 +117,7 @@ export default class Target {
         this.variables = options.variables;
         this.lists = options.lists;
 
+        this.sprite.registerClone(this);
         this.audio.connect(this.runtime.audio);
 
         this.scriptListenerCleanup = this.setUpScriptListeners();
@@ -260,6 +261,7 @@ export default class Target {
 
     public destroy() {
         this.reset();
+        this.sprite.unregisterClone(this);
         this.scriptListenerCleanup();
         this.runtime.stopTargetThreads(this);
     }
