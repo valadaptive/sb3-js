@@ -8,12 +8,22 @@
             #project-container {
                 margin-bottom: 0.5rem;
             }
+
+            .load-project-controls {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
         </style>
     </head>
     <body>
         <div id="project-container"></div>
-        <div>
+        <div class="load-project-controls">
             <input type="file" id="file-input" accept=".sb3">
+            <div class="id-input">
+                <input id="id-textbox" type="text" placeholder="Enter a project ID...">
+                <button id="id-button">Load project</button>
+            </div>
         </div>
 
         <script type="module">
@@ -24,17 +34,31 @@
             document.getElementById('project-container').append(projectElem);
 
             const fileInput = document.getElementById('file-input');
-            async function load(event) {
-                if (event?.target?.files?.length !== 1) {
+            async function loadFromFile() {
+                if (fileInput.files.length !== 1) {
                     return;
                 }
-                const file = event.target.files[0];
-                await projectElem.loadProjectFromZip(file);
+                const file = fileInput.files[0];
 
+                await projectElem.loadProjectFromZip(file);
                 projectElem.start();
             }
-            fileInput.addEventListener('change', load);
-            load();
+            fileInput.addEventListener('change', loadFromFile);
+            loadFromFile();
+
+            const idInput = document.getElementById('id-textbox');
+            const idButton = document.getElementById('id-button');
+
+            async function loadFromID() {
+                const urlOrID = idInput.value;
+                const idMatch = urlOrID.match(/(\d+)\/?$/);
+                if (!idMatch) return;
+                const id = idMatch[1];
+
+                await projectElem.loadProjectFromID(id);
+                projectElem.start();
+            }
+            idButton.addEventListener('click', loadFromID);
         </script>
     </body>
 </html>

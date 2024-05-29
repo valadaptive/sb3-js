@@ -18,6 +18,9 @@ const loadingScreenTemplate = h('template',
             flex-direction: column;
             align-items: center;
             gap: 1rem;
+            height: 100%;
+            overflow: auto;
+            justify-content: center;
         }
 
         #loading-text {
@@ -27,12 +30,13 @@ const loadingScreenTemplate = h('template',
 
         #loading-bar {
             width: 75%;
-            height: 2rem;
+            height: 100%;
+            max-height: 2rem;
             border-radius: 0.25rem;
             background-color: rgba(22, 117, 206, 0.25);
             position: relative;
-            overflow: hidden;
-
+            overflow: auto;
+            transition: max-height 0.25s ease, background-color 0.25s ease;
         }
 
         #loading-bar-progress {
@@ -47,27 +51,50 @@ const loadingScreenTemplate = h('template',
         #loading-bar-progress.active {
             transition: right 0.1s linear;
         }
+
+        #error-message {
+            display: none;
+            padding: 0.5rem;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+
+        #loading-bar.error {
+            max-height: 50%;
+            background-color: rgba(255, 40, 0, 0.5);
+        }
+
+        #loading-bar.error #error-message {
+            display: block;
+        }
+
+        #loading-bar.error #loading-bar-progress {
+            display: none;
+        }
     `),
     h('div', {id: 'loading-screen'},
         h('div', {id: 'loading-inner'},
             h('div', {id: 'loading-text'}),
             h('div', {id: 'loading-bar'},
                 h('div', {id: 'loading-bar-progress'}),
+                h('div', {id: 'error-message'}),
             ),
         ),
     ),
 );
 
 export class LoadingScreenElement extends HTMLElement {
-    static observedAttributes = ['total-assets', 'loaded-assets'];
+    static observedAttributes = ['total-assets', 'loaded-assets', 'error'];
 
     private elems: {
         loadingText: HTMLDivElement;
         loadingBar: HTMLDivElement;
         loadingBarProgress: HTMLDivElement;
+        errorMessage: HTMLDivElement;
     } | null = null;
     private loadedAssets = 0;
     private totalAssets = 0;
+    private error = '';
 
     constructor() {
         super();
@@ -81,15 +108,40 @@ export class LoadingScreenElement extends HTMLElement {
             loadingText: shadow.getElementById('loading-text') as HTMLDivElement,
             loadingBar: shadow.getElementById('loading-bar') as HTMLDivElement,
             loadingBarProgress: shadow.getElementById('loading-bar-progress') as HTMLDivElement,
+            errorMessage: shadow.getElementById('error-message') as HTMLDivElement,
         };
     }
 
-    resetAnimation() {
+    reset() {
         if (!this.elems) return;
+        this.loadedAssets = this.totalAssets = 0;
+        this.error = '';
         const {loadingBarProgress} = this.elems;
         loadingBarProgress.classList.remove('active');
-        loadingBarProgress.style.right = '100%';
+        this.update();
         loadingBarProgress.classList.add('active');
+    }
+
+    private update() {
+        if (!this.elems) return;
+        const {loadingText, loadingBar, loadingBarProgress, errorMessage} = this.elems;
+
+        if (this.error !== '') {
+            loadingBar.classList.add('error');
+            loadingText.replaceChildren('Failed to load project');
+            errorMessage.replaceChildren(this.error);
+        } else {
+            loadingBar.classList.remove('error');
+            const message = this.totalAssets === 0 ?
+                'Loading...' :
+                `${this.loadedAssets}/${this.totalAssets} assets loaded`;
+            loadingText.replaceChildren(message);
+
+            const progress = this.totalAssets === 0 ?
+                0 :
+                this.loadedAssets / this.totalAssets;
+            loadingBarProgress.style.right = `${(1 - progress) * 100}%`;
+        }
     }
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
@@ -102,22 +154,13 @@ export class LoadingScreenElement extends HTMLElement {
                 this.loadedAssets = Number(newValue);
                 break;
             }
+            case 'error': {
+                this.error = newValue;
+                break;
+            }
             default: return;
         }
-
-
-        if (!this.elems) return;
-
-        const message = this.totalAssets === 0 ?
-            'Loading...' :
-            `${this.loadedAssets}/${this.totalAssets} assets loaded`;
-        const {loadingText, loadingBarProgress} = this.elems;
-        loadingText.replaceChildren(message);
-
-        const progress = this.totalAssets === 0 ?
-            0 :
-            this.loadedAssets / this.totalAssets;
-        loadingBarProgress.style.right = `${(1 - progress) * 100}%`;
+        this.update();
     }
 }
 export const internalLoadingScreen = defineInternalElement(LoadingScreenElement, 'sb3js-loading-screen');

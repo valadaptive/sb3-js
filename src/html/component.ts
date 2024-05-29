@@ -106,37 +106,31 @@ export default class ProjectElement extends HTMLElement {
         this.loadingScreen?.setAttribute('loaded-assets', String(loadedAssets));
     }
 
-    private async loadProjectFromCallback(cb: () => Promise<Project>) {
-        if (!this.runtime) return;
-        this.loadingScreen?.resetAnimation();
-        this.loadingScreen?.style.removeProperty('display');
-        if (this.abortCurrentProjectLoad) {
-            this.abortCurrentProjectLoad.abort();
-            this.abortCurrentProjectLoad = new AbortController();
-        }
-        const project = await cb();
-        this.abortCurrentProjectLoad = null;
-        this.runtime.setProject(project);
-        this.loadingScreen?.style.setProperty('display', 'none');
-    }
-
     private async loadProjectGeneric<T>(
         source: T,
         loadFn: (source: T, params?: ParseProjectParams) => Promise<Project>,
     ) {
         if (!this.runtime) return;
-        this.loadingScreen?.resetAnimation();
+        this.loadingScreen?.reset();
         this.loadingScreen?.style.removeProperty('display');
         if (this.abortCurrentProjectLoad) {
             this.abortCurrentProjectLoad.abort('started loading a new project');
         }
-        this.abortCurrentProjectLoad = new AbortController();
-        const project = await loadFn(source, {
-            progressCallback: this.updateLoadingScreen.bind(this),
-            signal: this.abortCurrentProjectLoad?.signal,
-        });
+        const abortController = new AbortController();
+        this.abortCurrentProjectLoad = abortController;
+        try {
+            const project = await loadFn(source, {
+                progressCallback: this.updateLoadingScreen.bind(this),
+                signal: this.abortCurrentProjectLoad?.signal,
+            });
+            this.runtime.setProject(project);
+        } catch (err) {
+            // Don't display the "started loading a new project" error
+            if (abortController.signal.aborted) return;
+            this.loadingScreen?.setAttribute('error', String(err));
+            throw new Error('Failed to load project', {cause: err});
+        }
         this.abortCurrentProjectLoad = null;
-        this.runtime.setProject(project);
         this.loadingScreen?.style.setProperty('display', 'none');
     }
 
