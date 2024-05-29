@@ -1262,6 +1262,8 @@ export const sensing_touchingobject = new ProtoBlock({
             if (other) {
                 const isTouching = ctx.target.drawable.isTouchingDrawable(other.drawable);
                 return isTouching;
+            } else {
+                return false;
             }
         }
     },
