@@ -23,6 +23,9 @@
 - Apply proper viewbox offset to SVG skin rotation centers (done)
 - Draw pen lines with instancing (no longer planned; tested and has no performance benefit)
 - Really small sprites should trigger "touching" blocks (see: griffpatch's Ball Physics Scroll v0.4)
+- Clones' audio shouldn't stop playing on clone deletion, and clone sounds should cut off other clones' sounds
+  - Tricky because we don't want to leak a bunch of audio nodes
+  - We can't share the AudioTarget between all clones because the effects are distinct
 - Revamp block introspection API
     - want to be able to type ctx.evaluate properly
     - specify "only accept blocks returning X"

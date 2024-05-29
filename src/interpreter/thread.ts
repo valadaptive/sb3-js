@@ -141,12 +141,16 @@ export default class Thread {
     }
 
     hatBlockMatches(event: TypedEvent): boolean {
-        // Make sure the thread runs so we can check the hat block.
-        const threadWasDone = this.status === ThreadStatus.DONE;
-        if (threadWasDone) this.restart(event);
-
         const protoBlock = this.topBlock.proto as SomeProtoBlock;
         if (protoBlock.hat?.type !== 'event') return false;
+        if (!(event instanceof protoBlock.hat.event)) return false;
+
+        const hatThread = new Thread(
+            this.script,
+            this.target,
+            this.blockContext,
+            event,
+        );
 
         // Hats can be started in the middle of executing other scripts (e.g. "broadcast"), so we need to store
         // and restore the previous target and thread.
@@ -154,7 +158,7 @@ export default class Thread {
         const oldThread = this.blockContext.thread;
 
         this.blockContext.target = this.target;
-        this.blockContext.thread = this;
+        this.blockContext.thread = hatThread;
 
         const generator = protoBlock.execute(
             this.topBlock.inputValues,
@@ -178,11 +182,6 @@ export default class Thread {
         }
 
         // Restore the previous target and thread.
-        if (threadWasDone) {
-            this.retire();
-        } else {
-            this.resume();
-        }
         this.blockContext.target = oldTarget;
         this.blockContext.thread = oldThread;
 

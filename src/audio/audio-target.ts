@@ -45,9 +45,11 @@ export default class AudioTarget {
         source.connect(this.destinationNode);
         this.playingBuffers.set(sound, source);
 
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             source.start();
-            source.addEventListener('ended', resolve, {once: true});
+            source.addEventListener('ended', () => {
+                resolve();
+            }, {once: true});
         });
     }
 
