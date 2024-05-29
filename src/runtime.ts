@@ -53,13 +53,14 @@ export default class Runtime {
     constructor(settings?: RuntimeSettings) {
         this.audio = new AudioEngine();
         this.io = new IO();
+        this.theme = settings?.theme ?? defaultTheme;
         this.interpreter = new Interpreter(this.stepTime, {
             io: this.io,
             stageBounds: this.stageBounds,
             renderer: null,
             audio: this.audio,
+            theme: this.theme,
         });
-        this.theme = settings?.theme ?? defaultTheme;
         this.io.username = settings?.username ?? '';
 
         this.io.addEventListener('dragstart', event => {

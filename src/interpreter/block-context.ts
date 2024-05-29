@@ -6,6 +6,7 @@ import Rectangle from '../rectangle.js';
 import Renderer from '../renderer/renderer.js';
 import Target from '../target.js';
 import {TypedEvent} from '../typed-events.js';
+import {Theme} from '../theme.js';
 
 import Interpreter from './interpreter.js';
 import Thread, {PARK_THREAD, ThreadStatus} from './thread.js';
@@ -15,6 +16,7 @@ export type BlockContextParams = {
     renderer: Renderer | null;
     audio: AudioEngine | null;
     stageBounds: Rectangle;
+    theme: Theme;
 };
 
 export default class BlockContext {
@@ -27,6 +29,7 @@ export default class BlockContext {
     public thread!: Thread;
     public renderer: Renderer | null;
     public audio: AudioEngine | null;
+    public theme: Theme;
 
     constructor(interpreter: Interpreter, params: BlockContextParams) {
         this.interpreter = interpreter;
@@ -34,6 +37,7 @@ export default class BlockContext {
         this.renderer = params.renderer;
         this.audio = params.audio;
         this.stageBounds = params.stageBounds;
+        this.theme = params.theme;
     }
 
     *evaluate(input: Block | Block[] | string | number | boolean): BlockGenerator {

@@ -460,10 +460,19 @@ const parseBlock = (
             throw new Error('Custom block mutation is missing proccode');
         }
         const customBlockDefinition = customBlocks.get(jsonBlock.mutation.proccode);
-        if (!customBlockDefinition) {
-            throw new Error(`Custom block "${jsonBlock.mutation.proccode}" does not exist`);
+        if (customBlockDefinition) {
+            protoBlock = customBlockDefinition.proto;
+        } else if (jsonBlock.mutation.proccode === '\u200B\u200Blog\u200B\u200B %s') {
+            protoBlock = getBlockByOpcode('internal_scratchAddons_log') as unknown as ProtoBlock;
+        } else if (jsonBlock.mutation.proccode === '\u200B\u200Bwarn\u200B\u200B %s') {
+            protoBlock = getBlockByOpcode('internal_scratchAddons_warn') as unknown as ProtoBlock;
+        } else if (jsonBlock.mutation.proccode === '\u200B\u200Berror\u200B\u200B %s') {
+            protoBlock = getBlockByOpcode('internal_scratchAddons_error') as unknown as ProtoBlock;
+        } else {
+            // eslint-disable-next-line no-console
+            console.warn(`Custom block "${jsonBlock.mutation.proccode}" does not exist`);
+            protoBlock = getBlockByOpcode('internal_noop') as unknown as ProtoBlock;
         }
-        protoBlock = customBlockDefinition.proto;
     } else {
         protoBlock = getBlockByOpcode(jsonBlock.opcode) as unknown as ProtoBlock;
     }
