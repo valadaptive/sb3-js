@@ -29,8 +29,7 @@
                     return;
                 }
                 const file = event.target.files[0];
-                const project = await projectElem.runtime.loadProjectFromZip(file);
-                projectElem.runtime.setProject(project);
+                await projectElem.loadProjectFromZip(file);
 
                 projectElem.start();
             }

@@ -4,7 +4,7 @@ import {GreenFlagEvent, KeyPressedEvent} from './events.js';
 import IO from './io.js';
 import Interpreter from './interpreter/interpreter.js';
 import {Loader, WebLoader, ZipLoader, ZipSrc} from './loader.js';
-import parseProject from './parser.js';
+import parseProject, {ProgressCallback} from './parser.js';
 import Project, {CreateMonitorEvent, QuestionEvent} from './project.js';
 import Renderer from './renderer/renderer.js';
 import Sound from './sound.js';
@@ -84,19 +84,19 @@ export default class Runtime {
         });
     }
 
-    public async loadProjectFromLoader(loader: Loader): Promise<Project> {
+    public async loadProjectFromLoader(loader: Loader, progressCallback?: ProgressCallback): Promise<Project> {
         const manifest = await loader.loadProjectManifest();
-        return parseProject(manifest, loader, this);
+        return parseProject(manifest, loader, this, progressCallback);
     }
 
-    public async loadProjectFromID(id: string): Promise<Project> {
+    public async loadProjectFromID(id: string, progressCallback?: ProgressCallback): Promise<Project> {
         const loader = new WebLoader(id);
-        return this.loadProjectFromLoader(loader);
+        return this.loadProjectFromLoader(loader, progressCallback);
     }
 
-    public async loadProjectFromZip(zip: ZipSrc): Promise<Project> {
+    public async loadProjectFromZip(zip: ZipSrc, progressCallback?: ProgressCallback): Promise<Project> {
         const loader = new ZipLoader(zip);
-        return this.loadProjectFromLoader(loader);
+        return this.loadProjectFromLoader(loader, progressCallback);
     }
 
     public setProject(project: Project | null) {

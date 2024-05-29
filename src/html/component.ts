@@ -1,6 +1,8 @@
 import h from './html.js';
 import Runtime from '../runtime.js';
 import {InternalStageElement, internalStage} from './stage.js';
+import {LoadingScreenElement, internalLoadingScreen} from './loading-screen.js';
+import {ZipSrc} from '../loader.js';
 
 const style = `
 #container {
@@ -31,12 +33,21 @@ const style = `
     background: rgba(22, 117, 206, 0.5);
 }
 
-#stage {
+#stage-container {
     border-radius: 4px;
     border: 1px solid rgba(127, 127, 127, 0.25);
     flex: 1 1 auto;
     display: flex;
     overflow: hidden;
+    position: relative;
+}
+
+#loading-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 `;
 
@@ -51,43 +62,75 @@ const template = h('template',
                 h('img', {width: 24, height: 24, src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath fill='%23eb2126' d='M8.272 21 3 15.728V8.272L8.272 3h7.456L21 8.272v7.456L15.728 21z'/%3E%3Cpath fill='%23f5f5f5' d='M7.443 1 1 7.443v9.114L7.443 23h9.114L23 16.557V7.443L16.557 1zm1.243 3h6.628L20 8.686v6.628L15.314 20H8.686L4 15.314V8.686z'/%3E%3Cpath fill='none' stroke='%23a71122' stroke-linejoin='round' stroke-width='2' d='M7.444 23 1 16.556V7.444L7.444 1h9.112L23 7.444v9.112L16.556 23z'/%3E%3C/svg%3E"}),
             ),
         ),
-        internalStage.h({id: 'stage'}),
+        h('div', {id: 'stage-container'},
+            internalStage.h({id: 'stage'}),
+            internalLoadingScreen.h({id: 'loading-screen'}),
+        ),
     ),
 );
 
 export default class ProjectElement extends HTMLElement {
-    public runtime: Runtime;
+    private runtime: Runtime | null = null;
+    private loadingScreen: LoadingScreenElement | null = null;
     constructor() {
         super();
-        this.runtime = new Runtime();
     }
 
     connectedCallback() {
+        this.runtime = new Runtime();
         const shadow = this.attachShadow({mode: 'open'});
 
         const templateContents = template.content.cloneNode(true);
         shadow.append(templateContents);
         const greenFlag = shadow.getElementById('green-flag') as HTMLButtonElement;
         greenFlag.addEventListener('click', () => {
-            this.runtime.greenFlag();
+            this.runtime?.greenFlag();
         });
         const stopAll = shadow.getElementById('stop-all') as HTMLButtonElement;
         stopAll.addEventListener('click', () => {
-            this.runtime.stopAll();
+            this.runtime?.stopAll();
         });
         const stage = shadow.querySelector<InternalStageElement>(internalStage.tagName)!;
         this.runtime.attachStage(stage);
+
+        const loadingScreen = shadow.getElementById('loading-screen') as LoadingScreenElement;
+        this.loadingScreen = loadingScreen;
+        this.loadingScreen.style.display = 'none';
+    }
+
+    private updateLoadingScreen(totalAssets: number, loadedAssets: number) {
+        this.loadingScreen?.setAttribute('total-assets', String(totalAssets));
+        this.loadingScreen?.setAttribute('loaded-assets', String(loadedAssets));
+    }
+
+    async loadProjectFromID(id: string) {
+        if (!this.runtime) return;
+        this.loadingScreen?.resetAnimation();
+        this.loadingScreen?.style.removeProperty('display');
+        const project = await this.runtime.loadProjectFromID(id, this.updateLoadingScreen.bind(this));
+        this.runtime.setProject(project);
+        //this.loadingScreen?.style.setProperty('display', 'none');
+    }
+
+    async loadProjectFromZip(zip: ZipSrc) {
+        if (!this.runtime) return;
+        this.loadingScreen?.resetAnimation();
+        this.loadingScreen?.style.removeProperty('display');
+        const project = await this.runtime.loadProjectFromZip(zip, this.updateLoadingScreen.bind(this));
+        this.runtime.setProject(project);
+        this.loadingScreen?.style.setProperty('display', 'none');
     }
 
     disconnectedCallback() {
-        this.runtime.destroy();
+        this.runtime?.destroy();
+        this.runtime = null;
     }
 
     start() {
-        this.runtime.start();
+        this.runtime?.start();
     }
 
     stop() {
-        this.runtime.stop();
+        this.runtime?.stop();
     }
 }

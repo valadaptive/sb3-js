@@ -8,6 +8,7 @@ import {Block, BlockInputValue, BlockInputValueShapeFor, ProtoBlock} from './blo
 import Runtime from './runtime.js';
 import {CustomBlockStub, makeCustomBlockStub} from './custom-blocks.js';
 import {MonitorMode} from './monitor.js';
+import {TypedEvent, TypedEventTarget} from './typed-events.js';
 
 const enum ShadowInfo {
     /**
@@ -615,6 +616,52 @@ const parseScript = (
     return blocks;
 };
 
+type ParseTargetCtx = {
+    loader: Loader;
+    runtime: Runtime;
+    project: Project;
+    progress: Progress;
+};
+
+class ProgressEvent extends TypedEvent<'progress'> {
+    totalAssets: number;
+    loadedAssets: number;
+    constructor(totalAssets: number, loadedAssets: number) {
+        super('progress');
+        this.totalAssets = totalAssets;
+        this.loadedAssets = loadedAssets;
+    }
+}
+
+class Progress extends TypedEventTarget<ProgressEvent> {
+    private _totalAssets: number;
+    private _loadedAssets: number;
+
+    constructor() {
+        super();
+        this._totalAssets = 0;
+        this._loadedAssets = 0;
+    }
+
+    get totalAssets() {
+        return this._totalAssets;
+    }
+
+    set totalAssets(total: number) {
+        this._totalAssets = total;
+        this.dispatchEvent(new ProgressEvent(this._totalAssets, this._loadedAssets));
+    }
+
+    get loadedAssets() {
+        return this._loadedAssets;
+    }
+
+    set loadedAssets(loaded: number) {
+        this._loadedAssets = loaded;
+        this.dispatchEvent(new ProgressEvent(this._totalAssets, this._loadedAssets));
+    }
+}
+
 const contentTypeForDataFormat = {
     png: 'image/png',
     svg: 'image/svg+xml',
@@ -625,9 +672,7 @@ const contentTypeForDataFormat = {
 
 const parseTarget = async(
     jsonTarget: Sb3Target | Sb3SpriteTarget,
-    loader: Loader,
-    runtime: Runtime,
-    project: Project,
+    {loader, runtime, project, progress}: ParseTargetCtx,
 ): Promise<{sprite: Sprite; target: Target; layerOrder: number}> => {
     const scripts: Block[][] = [];
     const topLevelBlocks: {block: Sb3Block; id: string}[] = [];
@@ -676,6 +721,8 @@ const parseTarget = async(
         lists.set(name, value);
     }
 
+    progress.totalAssets += jsonTarget.costumes.length + jsonTarget.sounds.length;
+
     const costumePromises = jsonTarget.costumes.map(async jsonCostume => {
         const asset = await loader.loadAsset(
             `${jsonCostume.assetId}.${jsonCostume.dataFormat}`,
@@ -686,6 +733,7 @@ const parseTarget = async(
             bitmapResolution: jsonCostume.bitmapResolution ?? 1,
             type: jsonCostume.dataFormat === 'svg' ? 'svg' : 'bitmap',
         });
+        progress.loadedAssets++;
         return costume;
     });
 
@@ -695,6 +743,7 @@ const parseTarget = async(
             contentTypeForDataFormat[jsonSound.dataFormat],
         );
         const sound = await runtime.loadSound(jsonSound.name, asset);
+        progress.loadedAssets++;
         return sound;
     });
 
@@ -801,7 +850,14 @@ const parseMonitor = (
     );
 };
 
-const parseProject = async(projectJsonString: string, loader: Loader, runtime: Runtime): Promise<Project> => {
+export type ProgressCallback = (totalAssets: number, loadedAssets: number) => unknown;
+
+const parseProject = async(
+    projectJsonString: string,
+    loader: Loader,
+    runtime: Runtime,
+    progressCallback?: ProgressCallback,
+): Promise<Project> => {
     const projectJson = JSON.parse(projectJsonString) as unknown;
     if (!validateJson(sb3ProjectSchema, projectJson)) {
         validateJsonOrError(sb3ProjectSchema, projectJson);
@@ -810,11 +866,21 @@ const parseProject = async(projectJsonString: string, loader: Loader, runtime: R
     const jsonTargets = projectJson.targets;
 
     const project = new Project();
+    const progress = new Progress();
+    progress.addEventListener('progress', event => {
+        progressCallback?.(event.totalAssets, event.loadedAssets);
+    });
 
+    const ctx = {
+        loader,
+        runtime,
+        project,
+        progress,
+    };
     const parsedTargetPromises: Promise<{sprite: Sprite; target: Target; layerOrder: number}>[] = [];
 
     for (const jsonTarget of jsonTargets) {
-        parsedTargetPromises.push(parseTarget(jsonTarget, loader, runtime, project));
+        parsedTargetPromises.push(parseTarget(jsonTarget, ctx));
     }
 
     const parsedTargets = await Promise.all(parsedTargetPromises);
