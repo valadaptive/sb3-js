@@ -63,7 +63,7 @@ export default class PenLayer implements Samplable {
         mat3.translate(this.transform, this.transform, [-0.5, -0.5]);
         this.inverseTransform = mat3.invert(mat3.create(), this.transform);
     }
-    getSamplingBounds(result: Rectangle): Rectangle {
+    getSamplingBounds(silhouette: Silhouette, result: Rectangle): Rectangle {
         return Rectangle.fromOther(this.bounds, result);
     }
 

@@ -10,6 +10,7 @@ import {GraphicEffects} from '../effects.js';
 import Silhouette from './silhouette.js';
 import PenLayer from './pen-layer.js';
 import Samplable from './samplable.js';
+import Renderer from './renderer.js';
 
 const __localPosition = vec2.create();
 const __intersectionBoundsSelf = new Rectangle();
@@ -139,9 +140,9 @@ export default class Drawable {
         return Rectangle.fromMatrix(this.transform, result);
     }
 
-    getTightBounds(result = new Rectangle()) {
+    getTightBounds(silhouette: Silhouette | null, result = new Rectangle()) {
         if (this.transformedHullDirty) {
-            this.updateTransformedHull();
+            this.updateTransformedHull(silhouette);
         }
 
         let left = Infinity;
@@ -180,13 +181,13 @@ export default class Drawable {
      * Return the best pixel-snapped bounds currently available, used to estimate the area needed for touching queries.
      * Uses the convex hull if available, otherwise uses the tight bounds.
      */
-    getSamplingBounds(result = new Rectangle()) {
+    getSamplingBounds(silhouette: Silhouette, result = new Rectangle()) {
         // Note that this isn't transformedHullDirty, but convexHullDirty. Transforming the hull isn't expensive
         // compared to calculating it in the first place, and saves a lot of pixel checks.
         if (this.convexHullDirty) {
             return this.getAABB(result).expandToInt();
         }
-        return this.getTightBounds(result).expandToInt();
+        return this.getTightBounds(silhouette, result).expandToInt();
     }
 
     /**
@@ -240,8 +241,8 @@ export default class Drawable {
         return textureColor;
     }
 
-    public isTouchingPoint(x: number, y: number) {
-        const silhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+    isTouchingPoint(renderer: Renderer, x: number, y: number) {
+        const silhouette = renderer.getSilhouetteForTarget(this.target);
         if (!silhouette) return false;
         if (this.inverseTransformDirty) {
             this.updateInverseTransform();
@@ -249,15 +250,15 @@ export default class Drawable {
         return this.checkPointCollision(x, y, silhouette);
     }
 
-    isTouchingTargets(others: Target[], stageBounds: Rectangle) {
-        const myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
-        const mySilhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+    isTouchingTargets(renderer: Renderer, others: Target[], stageBounds: Rectangle) {
+        const mySilhouette = renderer.getSilhouetteForTarget(this.target);
         if (!mySilhouette) return false;
+        const myBounds = this.getSamplingBounds(mySilhouette, __intersectionBoundsSelf);
         if (this.inverseTransformDirty) {
             this.updateInverseTransform();
         }
 
-        const candidates = this.candidatesTouching(others, null, stageBounds);
+        const candidates = this.candidatesTouching(renderer, mySilhouette, others, null, stageBounds);
 
         if (candidates.length === 0) return false;
         const candidatesBounds = new Rectangle();
@@ -268,7 +269,7 @@ export default class Drawable {
         candidatesBounds.top = -Infinity;
 
         for (const candidate of candidates) {
-            let bounds = candidate.samplable.getSamplingBounds(__intersectionBoundsOther);
+            let bounds = candidate.samplable.getSamplingBounds(candidate.silhouette, __intersectionBoundsOther);
             bounds = Rectangle.intersection(stageBounds, bounds, __intersectionBoundsOther);
             bounds = Rectangle.intersection(myBounds, bounds, __intersectionBoundsOther);
             Rectangle.union(bounds, candidatesBounds, candidatesBounds);
@@ -362,26 +363,28 @@ export default class Drawable {
      * @returns Every target that could be touching this drawable, along with their silhouettes.
      */
     private candidatesTouching(
+        renderer: Renderer,
+        mySilhouette: Silhouette,
         targets: Target[],
         penLayer: PenLayer | null,
         stageBounds: Rectangle,
     ): {samplable: Samplable; silhouette: Silhouette}[] {
-        let myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
+        let myBounds = this.getSamplingBounds(mySilhouette, __intersectionBoundsSelf);
         myBounds = Rectangle.intersection(stageBounds, myBounds, __intersectionBoundsSelf);
         const candidates: {samplable: Samplable; silhouette: Silhouette}[] = [];
         for (let i = 0; i < targets.length; i++) {
             const target = targets[i];
             if (target !== this.target) {
                 const drawable = target.drawable;
-                let otherBounds = drawable.getSamplingBounds(__intersectionBoundsOther);
-                otherBounds = Rectangle.intersection(stageBounds, otherBounds, __intersectionBoundsOther);
-                if (otherBounds.intersects(myBounds)) {
-                    const silhouette = drawable.costume.skin?.getSilhouette(target.size * 0.01);
-                    if (silhouette) {
+                const otherSilhouette = renderer.getSilhouetteForTarget(target);
+                if (otherSilhouette) {
+                    let otherBounds = drawable.getSamplingBounds(otherSilhouette, __intersectionBoundsOther);
+                    otherBounds = Rectangle.intersection(stageBounds, otherBounds, __intersectionBoundsOther);
+                    if (otherBounds.intersects(myBounds)) {
                         if (drawable.inverseTransformDirty) {
                             drawable.updateInverseTransform();
                         }
-                        candidates.push({samplable: drawable, silhouette});
+                        candidates.push({samplable: drawable, silhouette: otherSilhouette});
                     }
                 }
             }
@@ -403,22 +406,23 @@ export default class Drawable {
      * @returns whether this drawable is touching the given color.
      */
     isTouchingColor(
+        renderer: Renderer,
         targets: Target[],
         penLayer: PenLayer | null,
         color: Uint8ClampedArray,
         stageBounds: Rectangle,
         colorMask: Uint8ClampedArray | null = null,
     ) {
-        const mySilhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+        const mySilhouette = renderer.getSilhouetteForTarget(this.target);
         if (!mySilhouette) return false;
-        let myBounds = this.getSamplingBounds(__intersectionBoundsSelf);
+        let myBounds = this.getSamplingBounds(mySilhouette, __intersectionBoundsSelf);
         myBounds = Rectangle.intersection(stageBounds, myBounds, __intersectionBoundsSelf);
         if (this.inverseTransformDirty) {
             this.updateInverseTransform();
         }
         const hasMask = !!colorMask;
 
-        const candidates = this.candidatesTouching(targets, penLayer, stageBounds);
+        const candidates = this.candidatesTouching(renderer, mySilhouette, targets, penLayer, stageBounds);
         let candidatesBounds = new Rectangle();
         if (Drawable.colorMatches(color, BACKGROUND_COLOR)) {
             // If we are checking for the background color, we can't limit the check to other sprites' bounds. The
@@ -433,7 +437,7 @@ export default class Drawable {
             candidatesBounds.top = -Infinity;
 
             for (const candidate of candidates) {
-                let bounds = candidate.samplable.getSamplingBounds(__intersectionBoundsOther);
+                let bounds = candidate.samplable.getSamplingBounds(candidate.silhouette, __intersectionBoundsOther);
                 bounds = Rectangle.intersection(stageBounds, bounds, __intersectionBoundsOther);
                 bounds = Rectangle.intersection(myBounds, bounds, __intersectionBoundsOther);
                 Rectangle.union(bounds, candidatesBounds, candidatesBounds);
@@ -462,8 +466,7 @@ export default class Drawable {
      * Recalculate this drawable's convex hull (used for the tight bounding box) after a change to the costume or
      * distortion effects.
      */
-    private updateConvexHull() {
-        const silhouette = this.costume.skin?.getSilhouette(this.target.size * 0.01);
+    private updateConvexHull(silhouette: Silhouette | null) {
         if (!silhouette) {
             this.convexHull.length = 0;
             return;
@@ -567,13 +570,13 @@ export default class Drawable {
         }
     }
 
-    private updateTransformedHull() {
+    private updateTransformedHull(silhouette: Silhouette | null) {
         if (this.transformDirty) {
             this.updateTransform();
         }
 
         if (this.convexHullDirty) {
-            this.updateConvexHull();
+            this.updateConvexHull(silhouette);
         }
 
         const hull = this.convexHull;

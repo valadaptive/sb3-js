@@ -35,7 +35,7 @@ export default class Runtime {
     public audio: AudioEngine;
     private project: Project | null = null;
     private interpreter: Interpreter;
-    private renderer: Renderer | null = null;
+    public renderer: Renderer | null = null;
     private io: IO;
     private stage: InternalStageElement | null = null;
     private stageAbortController: AbortController | null = null;

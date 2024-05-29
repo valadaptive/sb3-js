@@ -424,7 +424,9 @@ export default class Target {
     }
 
     public isTouchingEdge(): boolean {
-        const bounds = this.drawable.getTightBounds(__boundsRect);
+        const renderer = this.runtime.renderer;
+        if (!renderer) return false;
+        const bounds = renderer.getTightBoundsForTarget(this, __boundsRect);
         return bounds.left < this.runtime.stageBounds.left ||
             bounds.right > this.runtime.stageBounds.right ||
             bounds.top > this.runtime.stageBounds.top ||

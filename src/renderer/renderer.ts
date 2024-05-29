@@ -8,6 +8,8 @@ import TextBubble from './text-bubble.js';
 import {mat3} from 'gl-matrix';
 import TextWrapper from './text-wrapper.js';
 import PenLayer from './pen-layer.js';
+import Skin from './skin.js';
+import Silhouette from './silhouette.js';
 
 /** Reused memory location for the currently-being-drawn text bubble's transform matrix */
 const __textBubbleMatrix = mat3.create();
@@ -150,7 +152,7 @@ export default class Renderer {
 
         // Position bubble relative to sprite
         const bubbleSize = bubbleSkin.getDimensions(textBubble.text, this.textWrapper);
-        const targetBounds = target.drawable.getTightBounds();
+        const targetBounds = target.drawable.getTightBounds(this.getSilhouetteForTarget(target));
         const bubblePosition = [
             Math.round(textBubble.direction === 'right' ?
                 targetBounds.left - bubbleSize.width :
@@ -200,22 +202,36 @@ export default class Renderer {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 
-    private drawTarget(target: Target, screenSpaceScalingFactor: number) {
-        const gl = this.gl;
+    getSkinForTarget(target: Target): Skin {
         const costume = target.sprite.costumes[target.currentCostume];
         let skin = costume.skin;
         if (!skin) {
             switch (costume.type) {
                 case 'bitmap':
-                    skin = new BitmapSkin(gl, costume);
+                    skin = new BitmapSkin(this.gl, costume);
                     break;
                 case 'svg':
-                    skin = new SVGSkin(gl, costume);
+                    skin = new SVGSkin(this.gl, costume);
                     break;
             }
 
             costume.skin = skin;
         }
+        return skin;
+    }
+
+    getSilhouetteForTarget(target: Target): Silhouette | null {
+        return this.getSkinForTarget(target).getSilhouette(target.size * 0.01);
+    }
+
+    getTightBoundsForTarget(target: Target, result = new Rectangle()): Rectangle {
+        const silhouette = this.getSilhouetteForTarget(target);
+        return target.drawable.getTightBounds(silhouette, result);
+    }
+
+    private drawTarget(target: Target, screenSpaceScalingFactor: number) {
+        const gl = this.gl;
+        const skin = this.getSkinForTarget(target);
 
         this.setShader(target.effects.bitmask ? this.spriteEffectsShader : this.spriteShader);
 
@@ -270,7 +286,7 @@ export default class Renderer {
         for (let i = targets.length - 1; i >= 0; i--) {
             const target = targets[i];
             if (!target.visible || target.effects.ghost >= 100) continue;
-            if (target.drawable.isTouchingPoint(x, y)) {
+            if (target.drawable.isTouchingPoint(this, x, y)) {
                 return target;
             }
         }

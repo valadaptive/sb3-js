@@ -12,5 +12,5 @@ export default interface Samplable {
 
     checkPointCollision(x: number, y: number, silhouette: Silhouette): boolean;
 
-    getSamplingBounds(result?: Rectangle): Rectangle;
+    getSamplingBounds(silhouette: Silhouette | null, result?: Rectangle): Rectangle;
 }

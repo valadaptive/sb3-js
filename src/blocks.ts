@@ -287,8 +287,11 @@ export const motion_ifonedgebounce = new ProtoBlock({
     opcode: 'motion_ifonedgebounce',
     inputs: {},
     execute: function* (_, ctx) {
+        const renderer = ctx.renderer;
+        // Can't do anything with no renderer to give us a bounding box
+        if (!renderer) return;
         const stageBounds = ctx.stageBounds;
-        let targetBounds = ctx.target.drawable.getTightBounds();
+        let targetBounds = renderer.getTightBoundsForTarget(ctx.target);
 
         // Distance from the edge of the stage to the edge of the target
         const distLeft = Math.max(0, -stageBounds.left + targetBounds.left);
@@ -336,7 +339,7 @@ export const motion_ifonedgebounce = new ProtoBlock({
         const newDirection = (-Math.atan2(diry, dirx) * 180 / Math.PI) + 90;
         ctx.target.direction = newDirection;
         // Recalculate bounds after changing direction
-        targetBounds = ctx.target.drawable.getTightBounds();
+        targetBounds = renderer.getTightBoundsForTarget(ctx.target);
         // Move away from the edge
         let dx = 0;
         let dy = 0;
@@ -1253,14 +1256,18 @@ export const sensing_touchingobject = new ProtoBlock({
         const target = toString(ctx.evaluateFast(TOUCHINGOBJECTMENU));
         if (target === '_mouse_') {
             const {x, y} = ctx.io.mousePosition;
-            const isTouching = ctx.target.drawable.isTouchingPoint(x, y);
+            const isTouching = !!ctx.renderer && ctx.target.drawable.isTouchingPoint(ctx.renderer, x, y);
             return isTouching;
         } else if (target === '_edge_') {
             return ctx.target.isTouchingEdge();
         } else {
             const other = ctx.project.getTargetByName(target);
             if (other) {
-                const isTouching = ctx.target.drawable.isTouchingTargets(other.sprite.clones, ctx.stageBounds);
+                const isTouching = !!ctx.renderer && ctx.target.drawable.isTouchingTargets(
+                    ctx.renderer,
+                    other.sprite.clones,
+                    ctx.stageBounds,
+                );
                 return isTouching;
             } else {
                 return false;
@@ -1291,7 +1298,8 @@ export const sensing_touchingcolor = new ProtoBlock({
     },
     execute: function* ({COLOR}, ctx) {
         const color = evaluateColorInput(COLOR, ctx, __color);
-        const isTouching = ctx.target.drawable.isTouchingColor(
+        const isTouching = !!ctx.renderer && ctx.target.drawable.isTouchingColor(
+            ctx.renderer,
             ctx.project.targets,
             ctx.renderer?.penLayer ?? null,
             color,
@@ -1314,7 +1322,8 @@ export const sensing_coloristouchingcolor = new ProtoBlock({
         const color2 = evaluateColorInput(COLOR2, ctx, __color2);
         // COLOR is the mask and COLOR2 is the target color, as opposed to "touching color" where COLOR is the target
         // color. Why? Ask Scratch.
-        const isTouching = ctx.target.drawable.isTouchingColor(
+        const isTouching = !!ctx.renderer && ctx.target.drawable.isTouchingColor(
+            ctx.renderer,
             ctx.project.targets,
             ctx.renderer?.penLayer ?? null,
             color2,
