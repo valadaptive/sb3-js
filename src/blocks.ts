@@ -1263,6 +1263,10 @@ export const sensing_touchingobject = new ProtoBlock({
         } else {
             const other = ctx.project.getTargetByName(target);
             if (other) {
+                let targets = other.sprite.clones;
+                if (targets.some(target => target.dragging)) {
+                    targets = targets.filter(target => !target.dragging);
+                }
                 const isTouching = !!ctx.renderer && ctx.target.drawable.isTouchingTargets(
                     ctx.renderer,
                     other.sprite.clones,
