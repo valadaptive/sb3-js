@@ -49,7 +49,7 @@ const loadingScreenTemplate = h('template',
         }
 
         #loading-bar-progress.active {
-            transition: right 0.1s linear;
+            /* transition: right 0.05s linear; */
         }
 
         #error-message {
