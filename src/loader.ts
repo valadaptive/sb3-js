@@ -1,12 +1,14 @@
 import {type ZipInfo, unzip, type ZipEntry, TypedArray, Reader} from 'unzipit';
-import PromisePool from './promise-pool.js';
+import PromisePool from './util/promise-pool.js';
 
 export abstract class Loader {
     private assetCache: Map<string, Promise<Blob>>;
     private pool = new PromisePool(100);
+    protected signal?: AbortSignal;
 
-    constructor() {
+    constructor(signal?: AbortSignal) {
         this.assetCache = new Map();
+        this.signal = signal;
     }
 
     /** Actually fetch the asset if it's not in the cache. */
@@ -15,6 +17,9 @@ export abstract class Loader {
     abstract loadProjectManifest(): Promise<string>;
 
     async loadAsset(filename: string, contentType: string): Promise<Blob> {
+        if (this.signal?.aborted) {
+            throw new Error(this.signal.reason ?? 'The operation was aborted');
+        }
         const assetKey = `${filename}_${contentType}`;
         const cachedAsset = this.assetCache.get(assetKey);
         if (cachedAsset) return cachedAsset;
@@ -32,8 +37,8 @@ export class WebLoader extends Loader {
 
     private projectID: string;
 
-    constructor(projectID: string) {
-        super();
+    constructor(projectID: string, signal?: AbortSignal) {
+        super(signal);
         this.projectID = projectID;
     }
 
@@ -42,14 +47,20 @@ export class WebLoader extends Loader {
             headers: {
                 'Accept': contentType,
             },
+            signal: this.signal,
         });
         return await response.blob();
     }
 
     async loadProjectManifest(): Promise<string> {
-        const projectMetaResponse = await fetch(`${WebLoader.projectMetaPath}/${this.projectID}`);
+        const projectMetaResponse = await fetch(`${WebLoader.projectMetaPath}/${this.projectID}`, {
+            signal: this.signal,
+        });
         const projectMeta = await projectMetaResponse.json() as {project_token: string};
-        const response = await fetch(`${WebLoader.projectPath}/${this.projectID}?token=${encodeURIComponent(projectMeta.project_token)}`);
+        const url = `${WebLoader.projectPath}/${this.projectID}?token=${encodeURIComponent(projectMeta.project_token)}`;
+        const response = await fetch(url, {
+            signal: this.signal,
+        });
         return await response.text();
     }
 }
@@ -59,8 +70,8 @@ export type ZipSrc = ArrayBuffer | TypedArray | Blob | Reader;
 export class ZipLoader extends Loader {
     private zip: Promise<ZipInfo>;
 
-    constructor(zip: ZipSrc) {
-        super();
+    constructor(zip: ZipSrc, signal?: AbortSignal) {
+        super(signal);
         this.zip = unzip(zip);
     }
 

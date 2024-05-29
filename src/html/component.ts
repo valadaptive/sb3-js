@@ -3,6 +3,8 @@ import Runtime from '../runtime.js';
 import {InternalStageElement, internalStage} from './stage.js';
 import {LoadingScreenElement, internalLoadingScreen} from './loading-screen.js';
 import {ZipSrc} from '../loader.js';
+import Project from '../project.js';
+import {ParseProjectParams} from '../parser.js';
 
 const style = `
 #container {
@@ -72,6 +74,7 @@ const template = h('template',
 export default class ProjectElement extends HTMLElement {
     private runtime: Runtime | null = null;
     private loadingScreen: LoadingScreenElement | null = null;
+    private abortCurrentProjectLoad: AbortController | null = null;
     constructor() {
         super();
     }
@@ -103,22 +106,48 @@ export default class ProjectElement extends HTMLElement {
         this.loadingScreen?.setAttribute('loaded-assets', String(loadedAssets));
     }
 
-    async loadProjectFromID(id: string) {
+    private async loadProjectFromCallback(cb: () => Promise<Project>) {
         if (!this.runtime) return;
         this.loadingScreen?.resetAnimation();
         this.loadingScreen?.style.removeProperty('display');
-        const project = await this.runtime.loadProjectFromID(id, this.updateLoadingScreen.bind(this));
+        if (this.abortCurrentProjectLoad) {
+            this.abortCurrentProjectLoad.abort();
+            this.abortCurrentProjectLoad = new AbortController();
+        }
+        const project = await cb();
+        this.abortCurrentProjectLoad = null;
         this.runtime.setProject(project);
-        //this.loadingScreen?.style.setProperty('display', 'none');
+        this.loadingScreen?.style.setProperty('display', 'none');
+    }
+
+    private async loadProjectGeneric<T>(
+        source: T,
+        loadFn: (source: T, params?: ParseProjectParams) => Promise<Project>,
+    ) {
+        if (!this.runtime) return;
+        this.loadingScreen?.resetAnimation();
+        this.loadingScreen?.style.removeProperty('display');
+        if (this.abortCurrentProjectLoad) {
+            this.abortCurrentProjectLoad.abort('started loading a new project');
+        }
+        this.abortCurrentProjectLoad = new AbortController();
+        const project = await loadFn(source, {
+            progressCallback: this.updateLoadingScreen.bind(this),
+            signal: this.abortCurrentProjectLoad?.signal,
+        });
+        this.abortCurrentProjectLoad = null;
+        this.runtime.setProject(project);
+        this.loadingScreen?.style.setProperty('display', 'none');
+    }
+
+    async loadProjectFromID(id: string) {
+        if (!this.runtime) return;
+        await this.loadProjectGeneric(id, this.runtime.loadProjectFromID.bind(this.runtime));
     }
 
     async loadProjectFromZip(zip: ZipSrc) {
         if (!this.runtime) return;
-        this.loadingScreen?.resetAnimation();
-        this.loadingScreen?.style.removeProperty('display');
-        const project = await this.runtime.loadProjectFromZip(zip, this.updateLoadingScreen.bind(this));
-        this.runtime.setProject(project);
-        this.loadingScreen?.style.setProperty('display', 'none');
+        await this.loadProjectGeneric(zip, this.runtime.loadProjectFromZip.bind(this.runtime));
     }
 
     disconnectedCallback() {

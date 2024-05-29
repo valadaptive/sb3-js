@@ -9,7 +9,7 @@ import Runtime from './runtime.js';
 import {CustomBlockStub, makeCustomBlockStub} from './custom-blocks.js';
 import {MonitorMode} from './monitor.js';
 import {TypedEvent, TypedEventTarget} from './typed-events.js';
-import PromisePool from './promise-pool.js';
+import PromisePool from './util/promise-pool.js';
 
 const enum ShadowInfo {
     /**
@@ -856,13 +856,16 @@ const parseMonitor = (
     );
 };
 
-export type ProgressCallback = (totalAssets: number, loadedAssets: number) => unknown;
+export type ParseProjectParams = {
+    progressCallback?: (totalAssets: number, loadedAssets: number) => unknown;
+    signal?: AbortSignal;
+};
 
 const parseProject = async(
     projectJsonString: string,
     loader: Loader,
     runtime: Runtime,
-    progressCallback?: ProgressCallback,
+    params: ParseProjectParams = {},
 ): Promise<Project> => {
     const projectJson = JSON.parse(projectJsonString) as unknown;
     if (!validateJson(sb3ProjectSchema, projectJson)) {
@@ -874,7 +877,7 @@ const parseProject = async(
     const project = new Project();
     const progress = new Progress();
     progress.addEventListener('progress', event => {
-        progressCallback?.(event.totalAssets, event.loadedAssets);
+        params.progressCallback?.(event.totalAssets, event.loadedAssets);
     });
 
     const ctx = {

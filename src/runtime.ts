@@ -4,7 +4,7 @@ import {GreenFlagEvent, KeyPressedEvent} from './events.js';
 import IO from './io.js';
 import Interpreter from './interpreter/interpreter.js';
 import {Loader, WebLoader, ZipLoader, ZipSrc} from './loader.js';
-import parseProject, {ProgressCallback} from './parser.js';
+import parseProject, {ParseProjectParams} from './parser.js';
 import Project, {CreateMonitorEvent, QuestionEvent} from './project.js';
 import Renderer from './renderer/renderer.js';
 import Sound from './sound.js';
@@ -84,19 +84,19 @@ export default class Runtime {
         });
     }
 
-    public async loadProjectFromLoader(loader: Loader, progressCallback?: ProgressCallback): Promise<Project> {
+    public async loadProjectFromLoader(loader: Loader, params?: ParseProjectParams): Promise<Project> {
         const manifest = await loader.loadProjectManifest();
-        return parseProject(manifest, loader, this, progressCallback);
+        return parseProject(manifest, loader, this, params);
     }
 
-    public async loadProjectFromID(id: string, progressCallback?: ProgressCallback): Promise<Project> {
-        const loader = new WebLoader(id);
-        return this.loadProjectFromLoader(loader, progressCallback);
+    public async loadProjectFromID(id: string, params?: ParseProjectParams): Promise<Project> {
+        const loader = new WebLoader(id, params?.signal);
+        return this.loadProjectFromLoader(loader, params);
     }
 
-    public async loadProjectFromZip(zip: ZipSrc, progressCallback?: ProgressCallback): Promise<Project> {
-        const loader = new ZipLoader(zip);
-        return this.loadProjectFromLoader(loader, progressCallback);
+    public async loadProjectFromZip(zip: ZipSrc, params?: ParseProjectParams): Promise<Project> {
+        const loader = new ZipLoader(zip, params?.signal);
+        return this.loadProjectFromLoader(loader, params);
     }
 
     public setProject(project: Project | null) {
