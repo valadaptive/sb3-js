@@ -9,16 +9,16 @@ export class MonitorSliderChangeEvent extends TypedEvent<'sliderchange'> {
     }
 }
 
-export interface MonitorView extends TypedEventTarget<MonitorSliderChangeEvent> {
-    update(monitor: Monitor): void;
+export interface MonitorView<T> extends TypedEventTarget<MonitorSliderChangeEvent> {
+    update(monitor: BaseMonitor<T>): void;
     setColor(fg: string, bg: string): void;
     getBounds(): Rectangle | null;
     layout(monitorRects: Rectangle[]): {x: number; y: number} | null;
     remove(): void;
 }
 
-export class UpdateMonitorEvent extends TypedEvent<'updatemonitor'> {
-    constructor(public readonly monitor: Monitor) {
+export class UpdateMonitorEvent<T> extends TypedEvent<'updatemonitor'> {
+    constructor(public readonly monitor: BaseMonitor<T>) {
         super('updatemonitor');
     }
 }
@@ -50,12 +50,11 @@ export type ListMonitorParams = {
     mode: ListMonitorMode;
 };
 
-class BaseMonitor extends TypedEventTarget<UpdateMonitorEvent> {
+abstract class BaseMonitor<T> extends TypedEventTarget<UpdateMonitorEvent<T>> {
     public target: Target | null;
     public readonly block: Block;
 
     protected _label: string;
-    protected _value: string | number | boolean | (string | number | boolean)[] | null;
     protected _visible: boolean;
     protected _position: {x: number; y: number} | null;
     protected _mode: MonitorMode = {mode: 'default'};
@@ -66,19 +65,18 @@ class BaseMonitor extends TypedEventTarget<UpdateMonitorEvent> {
         this.block = block;
 
         this._label = params.label;
-        this._value = null;
         this._visible = params.visible;
         this._position = params.position;
         this._mode = params.mode;
     }
 
+    abstract setValue(value: T): void;
+
     get label() {
         return this._label;
     }
 
-    get value() {
-        return this._value;
-    }
+    abstract get value(): T;
 
     get visible() {
         return this._visible;
@@ -100,8 +98,8 @@ class BaseMonitor extends TypedEventTarget<UpdateMonitorEvent> {
         }
         if (typeof value !== 'undefined') {
             // Always consider arrays to be changed (it's faster than a deep comparison)
-            changed ||= this._value !== value || Array.isArray(value);
-            this._value = value;
+            changed ||= this.value !== value || Array.isArray(value);
+            this.setValue(value as T);
         }
         if (typeof visible !== 'undefined') {
             changed ||= this._visible !== visible;
@@ -117,17 +115,19 @@ class BaseMonitor extends TypedEventTarget<UpdateMonitorEvent> {
             changed ||= this._mode !== mode;
             this._mode = mode;
         }
-        if (changed) this.dispatchEvent(new UpdateMonitorEvent(this as Monitor));
+        if (changed) this.dispatchEvent(new UpdateMonitorEvent(this));
     }
 }
 
-export class ScalarMonitor extends BaseMonitor {
+export class ScalarMonitor extends BaseMonitor<string | number | boolean> {
+    private _value: string | number | boolean;
     constructor(target: Target | null, block: Block, params: Omit<ScalarMonitorParams, 'value'>) {
         super(target, block, params);
+        this._value = '';
     }
 
     get mode(): ScalarMonitorMode {
-        return this._mode as ScalarMonitorMode;
+        return super.mode as ScalarMonitorMode;
     }
 
     public update(params: Partial<ScalarMonitorParams>): void {
@@ -137,15 +137,21 @@ export class ScalarMonitor extends BaseMonitor {
     get value() {
         return this._value as string | number | boolean;
     }
+
+    setValue(value: string | number | boolean) {
+        this._value = value;
+    }
 }
 
-export class ListMonitor extends BaseMonitor {
+export class ListMonitor extends BaseMonitor<(string | number | boolean)[]> {
+    private _value: (string | number | boolean)[];
     constructor(
         target: Target | null,
         block: Block,
         params: Omit<ListMonitorParams, 'value'>,
     ) {
         super(target, block, params);
+        this._value = [];
     }
 
     get mode(): ListMonitorMode {
@@ -159,11 +165,16 @@ export class ListMonitor extends BaseMonitor {
     get value() {
         return this._value as (string | number | boolean)[];
     }
+
+    setValue(value: (string | number | boolean)[]) {
+        this._value = value;
+    }
 }
 
-export type Monitor = ListMonitor | ScalarMonitor;
+export type Monitor = BaseMonitor<string | number | boolean | (string | number | boolean)[]>;
 
-const MonitorInput = new BlockInput('monitor', instanceInput(BaseMonitor));
+const MonitorConstructor = BaseMonitor as new(...args: unknown[]) => Monitor;
+const MonitorInput = new BlockInput('monitor', instanceInput(MonitorConstructor));
 
 export const updateMonitor = new ProtoBlock({
     opcode: 'vm_update_monitor',

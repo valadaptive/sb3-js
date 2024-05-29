@@ -1,4 +1,4 @@
-import {Monitor, MonitorMode, MonitorSliderChangeEvent, MonitorView} from '../monitor.js';
+import {ListMonitor, MonitorMode, MonitorSliderChangeEvent, MonitorView, ScalarMonitor} from '../monitor.js';
 import Rectangle from '../rectangle.js';
 import h from './html.js';
 import {defineInternalElement} from './internal-element.js';
@@ -73,7 +73,9 @@ const placeMonitor = (monitorRects: Rectangle[], monitor: {width: number; height
     };
 };
 
-export class MonitorElement extends HTMLElement implements MonitorView {
+type MonitorableTypes = string | number | boolean | (string | number | boolean)[];
+
+export class MonitorElement extends HTMLElement implements MonitorView<MonitorableTypes> {
     private monitorElement: ScalarMonitorElement | ListMonitorElement | null = null;
     private monitorType: 'none' | 'scalar' | 'list' = 'none';
     private shadow: ShadowRoot;
@@ -82,7 +84,7 @@ export class MonitorElement extends HTMLElement implements MonitorView {
         this.shadow = this.attachShadow({mode: 'open'});
     }
 
-    update(monitor: Monitor): void {
+    update(monitor: ScalarMonitor | ListMonitor): void {
         const monitorType = monitor.mode.mode === 'list' ? 'list' : 'scalar';
         if (this.monitorType !== monitorType) {
             if (this.monitorElement) this.monitorElement.remove();
@@ -98,21 +100,10 @@ export class MonitorElement extends HTMLElement implements MonitorView {
 
         if (monitor.mode.mode === 'list') {
             (this.monitorElement as ListMonitorElement).setSize(monitor.mode.size.width, monitor.mode.size.height);
-            (this.monitorElement as ListMonitorElement).setValue(
-                Array.isArray(monitor.value) ?
-                    monitor.value :
-                    // eslint-disable-next-line eqeqeq
-                    monitor.value == null ?
-                        [] :
-                        [monitor.value],
-            );
+            (this.monitorElement as ListMonitorElement).setValue((monitor as ListMonitor).value);
         } else {
-            (this.monitorElement as ScalarMonitorElement).setMode(monitor.mode);
-            (this.monitorElement as ScalarMonitorElement).setValue(
-                Array.isArray(monitor.value) ?
-                    monitor.value.join(' ') :
-                    monitor.value,
-            );
+            (this.monitorElement as ScalarMonitorElement).setMode((monitor as ScalarMonitor).mode);
+            (this.monitorElement as ScalarMonitorElement).setValue((monitor as ScalarMonitor).value);
         }
         if (monitor.position) this.setPosition(monitor.position);
 

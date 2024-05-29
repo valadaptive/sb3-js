@@ -40,7 +40,7 @@ export default class Runtime {
     private stage: InternalStageElement | null = null;
     private stageAbortController: AbortController | null = null;
     private theme: Theme;
-    private monitorViews: Map<Monitor, {view: MonitorView; abort: AbortController}> = new Map();
+    private monitorViews: Map<Monitor, {view: MonitorView<unknown>; abort: AbortController}> = new Map();
 
     private dragOffset: {x: number; y: number} | null = null;
     private draggedTarget: Target | null = null;
@@ -354,7 +354,7 @@ export default class Runtime {
         // Fetch or create the view for this monitor
         let viewAndAbortController = this.monitorViews.get(monitor);
         if (!viewAndAbortController) {
-            const view = this.stage.createMonitorView() as MonitorView;
+            const view = this.stage.createMonitorView() as MonitorView<unknown>;
             const abort = new AbortController();
             viewAndAbortController = {
                 view,
