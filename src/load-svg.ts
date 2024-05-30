@@ -40,7 +40,7 @@ const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, s
                     // causes the font to render completely blank if the SVG is drawn too quickly and the blob URL
                     // doesn't get a chance to "load".
                     let i = 0;
-                    for (; i < bytes.byteLength; i += 8) {
+                    for (; i + 7 < bytes.byteLength; i += 8) {
                         binary += String.fromCharCode(bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3],
                             bytes[i + 4], bytes[i + 5], bytes[i + 6], bytes[i + 7]);
                     }
