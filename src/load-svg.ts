@@ -22,14 +22,16 @@ const loadedFonts: Record<FontName, Promise<string> | null> = {
     'Scratch': null,
 };
 
+const isFont = (fontName: string): fontName is FontName => Object.prototype.hasOwnProperty.call(loadedFonts, fontName);
+
 // Load fonts for SVG costumes on-demand.
 const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, string>> => {
     for (const name of fontNames) {
-        if (!Object.prototype.hasOwnProperty.call(loadedFonts, name)) {
+        if (!isFont(name)) {
             continue;
         }
-        if (loadedFonts[name as FontName] === null) {
-            loadedFonts[name as FontName] = fetch(import.meta.resolve(fonts[name as FontName]))
+        if (loadedFonts[name] === null) {
+            loadedFonts[name] = fetch(import.meta.resolve(fonts[name]))
                 .then(response => response.blob())
                 .then(blob => new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -99,10 +101,10 @@ const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => 
 
             // Inject fonts as data URLs into the SVG
             for (const fontName of foundFonts) {
-                if (!Object.prototype.hasOwnProperty.call(fonts, fontName)) {
+                if (!isFont(fontName)) {
                     continue;
                 }
-                const fontURL = fontURLs[fontName as FontName];
+                const fontURL = fontURLs[fontName];
                 css.push("@font-face{font-family:'", fontName, "';src:url('", fontURL, "')}");
             }
 
