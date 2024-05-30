@@ -1464,6 +1464,17 @@ export const sensing_mousey = new ProtoBlock({
     colorCategory: 'sensing',
 });
 
+export const sensing_setdragmode = new ProtoBlock({
+    opcode: 'sensing_setdragmode',
+    inputs: {
+        DRAG_MODE: StringField,
+    },
+    execute: function* ({DRAG_MODE}, ctx) {
+        ctx.target.draggable = DRAG_MODE === 'draggable';
+    },
+    colorCategory: 'sensing',
+});
+
 export const sensing_loudness = new ProtoBlock({
     opcode: 'sensing_loudness',
     inputs: {},
