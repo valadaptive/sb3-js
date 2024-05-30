@@ -1,5 +1,4 @@
 import Rectangle from './rectangle.js';
-import toBase64 from './util/to-base64.js';
 
 const fonts = {
     'Sans Serif': './assets/fonts/NotoSans-Medium.woff2',
@@ -13,39 +12,39 @@ const fonts = {
 
 type FontName = keyof typeof fonts;
 
-const loadedFonts: Record<FontName, Promise<string> | null> = {
-    'Sans Serif': null,
-    'Serif': null,
-    'Handwriting': null,
-    'Marker': null,
-    'Curly': null,
-    'Pixel': null,
-    'Scratch': null,
-};
+const isFont = Object.prototype.hasOwnProperty.bind(fonts) as (font: unknown) => font is keyof typeof fonts;
+
+const fontPromises: Partial<Record<FontName, Promise<void>>> = {};
+
+const fontURLs: Partial<Record<FontName, string>> = {};
 
 // Load fonts for SVG costumes on-demand.
-const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, string>> => {
+const loadFonts = async(fontNames: Iterable<string>) => {
+    const promises: Promise<void>[] = [];
     for (const name of fontNames) {
-        if (!Object.prototype.hasOwnProperty.call(loadedFonts, name)) {
+        if (!isFont(name)) {
             continue;
         }
-        if (loadedFonts[name as FontName] === null) {
-            loadedFonts[name as FontName] = fetch(import.meta.resolve(fonts[name as FontName]))
-                .then(response => response.blob())
-                .then(blob => blob.arrayBuffer())
-                .then(buffer => {
-                    const base64 = toBase64(new Uint8Array(buffer));
-                    return `data:font/woff2;base64,${base64}`;
-                });
-        }
+        const cachedPromise = fontPromises[name];
+        promises.push(
+            !cachedPromise ?
+                fontPromises[name] = fetch(import.meta.resolve(fonts[name]))
+                    .then(response => response.blob())
+                    .then(blob => new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            fontURLs[name] = reader.result as string;
+                            resolve();
+                        };
+                        reader.onerror = () => {
+                            reject(reader.error);
+                        };
+                        reader.readAsDataURL(blob);
+                    })) :
+                cachedPromise,
+        );
     }
-
-    const fontURLs = {} as Record<FontName, string>;
-    const fontPromises = await Promise.all(Object.values(loadedFonts));
-    for (let i = 0; i < fontPromises.length; i++) {
-        fontURLs[Object.keys(loadedFonts)[i] as FontName] = fontPromises[i]!;
-    }
-    return fontURLs;
+    await Promise.all(promises);
 };
 
 const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => {
@@ -89,21 +88,24 @@ const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => 
         }
 
         if (foundFonts.size > 0) {
-            const fontURLs = await loadFonts(foundFonts.values());
+            await loadFonts(foundFonts.values());
+
+            const css = [];
 
             // Inject fonts as data URLs into the SVG
             for (const fontName of foundFonts) {
-                if (!Object.prototype.hasOwnProperty.call(fonts, fontName)) {
-                    continue;
+                const fontURL = isFont(fontName) && fontURLs[fontName];
+                if (fontURL) {
+                    css.push("@font-face{font-family:'", fontName, "';src:url('", fontURL, "')}");
                 }
-                const defs = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'defs');
-                const style = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'style');
-                style.setAttribute('type', 'text/css');
-                defs.appendChild(style);
-                const fontURL = fontURLs[fontName as FontName];
-                style.append(`@font-face { font-family: '${fontName}'; src: url(${JSON.stringify(fontURL)}); }`);
-                svgTag.insertBefore(defs, svgTag.firstChild);
             }
+
+            const defs = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const style = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'style');
+            style.setAttribute('type', 'text/css');
+            defs.appendChild(style);
+            style.append(...css);
+            svgTag.insertBefore(defs, svgTag.firstChild);
 
             src = new Blob([new XMLSerializer().serializeToString(svgDOM)], {type: 'image/svg+xml'});
         }

@@ -14,7 +14,7 @@ export default {
         typescript({noEmitOnError: !process.env.ROLLUP_WATCH}),
         copy({
             targets: [
-                { src: 'src/assets/**/*', dest: 'dist/assets' }
+                { src: 'src/assets/*', dest: 'dist/assets' }
             ]
         })
     ]

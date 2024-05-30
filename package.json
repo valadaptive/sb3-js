@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest test/*",
-    "lint": "eslint \"./src\" \"./test\" --ext .js,.ts",
+    "lint": "tsc && eslint \"./src\" \"./test\" --ext .js,.ts",
     "build": "rollup -c rollup.config.js",
     "watch": "rollup --watch -c rollup.config.js",
     "dev": "rollup --watch -c rollup.config.js & sirv ./ --port 8000 -D"

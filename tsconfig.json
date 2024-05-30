@@ -7,10 +7,11 @@
         "sourceMap": true,
         "strictNullChecks": true,
         "strict": true,
+        "skipLibCheck": true,
         "module": "Node16",
         "target": "ES2022",
         "noErrorTruncation": true,
-        "outDir": "dist",
+        "noEmit": true,
         "lib": ["ESNext", "dom"]
     },
     "include": ["src/**/*", "test/**/*", "./*.cjs"]

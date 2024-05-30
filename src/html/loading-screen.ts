@@ -43,13 +43,14 @@ const loadingScreenTemplate = h('template',
             position: absolute;
             top: 0;
             left: 0;
-            right: 100%;
+            right: 0;
             bottom: 0;
             background-color: rgba(22, 117, 206, 1);
+            transform: translateX(-100%);
         }
 
         #loading-bar-progress.active {
-            /* transition: right 0.05s linear; */
+            /* transition: transform 0.05s linear; */
         }
 
         #error-message {
@@ -140,7 +141,7 @@ export class LoadingScreenElement extends HTMLElement {
             const progress = this.totalAssets === 0 ?
                 0 :
                 this.loadedAssets / this.totalAssets;
-            loadingBarProgress.style.right = `${(1 - progress) * 100}%`;
+            loadingBarProgress.style.transform = `translateX(-${(1 - progress) * 100}%)`;
         }
     }
 
