@@ -1700,8 +1700,8 @@ export const operator_lt = new ProtoBlock({
         OPERAND2: NumberInput,
     },
     execute: function* ({OPERAND1, OPERAND2}, ctx) {
-        const a = toNumber(ctx.evaluateFast(OPERAND1));
-        const b = toNumber(ctx.evaluateFast(OPERAND2));
+        const a = ctx.evaluateFast(OPERAND1);
+        const b = ctx.evaluateFast(OPERAND2);
         return compare(a, b) < 0;
     },
     pure: true,
@@ -1732,8 +1732,8 @@ export const operator_gt = new ProtoBlock({
         OPERAND2: NumberInput,
     },
     execute: function* ({OPERAND1, OPERAND2}, ctx) {
-        const a = toNumber(ctx.evaluateFast(OPERAND1));
-        const b = toNumber(ctx.evaluateFast(OPERAND2));
+        const a = ctx.evaluateFast(OPERAND1);
+        const b = ctx.evaluateFast(OPERAND2);
         return compare(a, b) > 0;
     },
     pure: true,
