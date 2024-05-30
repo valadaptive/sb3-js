@@ -1,4 +1,5 @@
 import Rectangle from './rectangle.js';
+import toBase64 from './util/to-base64.js';
 
 const fonts = {
     'Sans Serif': './assets/fonts/NotoSans-Medium.woff2',
@@ -33,21 +34,7 @@ const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, s
                 .then(response => response.blob())
                 .then(blob => blob.arrayBuffer())
                 .then(buffer => {
-                    let binary = '';
-                    const bytes = new Uint8Array(buffer);
-                    // Encode the bytes as a base64 string. It's more efficient to do so 8 bytes at a time.
-                    // A blob URL does not appear to work here--in Chrome it doesn't do anything, and in Firefox it
-                    // causes the font to render completely blank if the SVG is drawn too quickly and the blob URL
-                    // doesn't get a chance to "load".
-                    let i = 0;
-                    for (; i + 7 < bytes.byteLength; i += 8) {
-                        binary += String.fromCharCode(bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3],
-                            bytes[i + 4], bytes[i + 5], bytes[i + 6], bytes[i + 7]);
-                    }
-                    for (; i < bytes.byteLength; i++) {
-                        binary += String.fromCharCode(bytes[i]);
-                    }
-                    const base64 = btoa(binary);
+                    const base64 = toBase64(new Uint8Array(buffer));
                     return `data:font/woff2;base64,${base64}`;
                 });
         }
