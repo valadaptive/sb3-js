@@ -12,39 +12,44 @@ const fonts = {
 
 type FontName = keyof typeof fonts;
 
-const isFont = Object.prototype.hasOwnProperty.bind(fonts) as (font: unknown) => font is keyof typeof fonts;
-
-const fontPromises: Partial<Record<FontName, Promise<void>>> = {};
-
-const fontURLs: Partial<Record<FontName, string>> = {};
+const loadedFonts: Record<FontName, Promise<string> | null> = {
+    'Sans Serif': null,
+    'Serif': null,
+    'Handwriting': null,
+    'Marker': null,
+    'Curly': null,
+    'Pixel': null,
+    'Scratch': null,
+};
 
 // Load fonts for SVG costumes on-demand.
-const loadFonts = async(fontNames: Iterable<string>) => {
-    const promises: Promise<void>[] = [];
+const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, string>> => {
     for (const name of fontNames) {
-        if (!isFont(name)) {
+        if (!Object.prototype.hasOwnProperty.call(loadedFonts, name)) {
             continue;
         }
-        const cachedPromise = fontPromises[name];
-        promises.push(
-            !cachedPromise ?
-                fontPromises[name] = fetch(import.meta.resolve(fonts[name]))
-                    .then(response => response.blob())
-                    .then(blob => new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            fontURLs[name] = reader.result as string;
-                            resolve();
-                        };
-                        reader.onerror = () => {
-                            reject(reader.error);
-                        };
-                        reader.readAsDataURL(blob);
-                    })) :
-                cachedPromise,
-        );
+        if (loadedFonts[name as FontName] === null) {
+            loadedFonts[name as FontName] = fetch(import.meta.resolve(fonts[name as FontName]))
+                .then(response => response.blob())
+                .then(blob => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve(reader.result as string);
+                    };
+                    reader.onerror = () => {
+                        reject(reader.error);
+                    };
+                    reader.readAsDataURL(blob);
+                }));
+        }
     }
-    await Promise.all(promises);
+
+    const fontURLs = {} as Record<FontName, string>;
+    const fontPromises = await Promise.all(Object.values(loadedFonts));
+    for (let i = 0; i < fontPromises.length; i++) {
+        fontURLs[Object.keys(loadedFonts)[i] as FontName] = fontPromises[i]!;
+    }
+    return fontURLs;
 };
 
 const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => {
@@ -88,16 +93,17 @@ const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => 
         }
 
         if (foundFonts.size > 0) {
-            await loadFonts(foundFonts.values());
+            const fontURLs = await loadFonts(foundFonts.values());
 
             const css = [];
 
             // Inject fonts as data URLs into the SVG
             for (const fontName of foundFonts) {
-                const fontURL = isFont(fontName) && fontURLs[fontName];
-                if (fontURL) {
-                    css.push("@font-face{font-family:'", fontName, "';src:url('", fontURL, "')}");
+                if (!Object.prototype.hasOwnProperty.call(fonts, fontName)) {
+                    continue;
                 }
+                const fontURL = fontURLs[fontName as FontName];
+                css.push("@font-face{font-family:'", fontName, "';src:url('", fontURL, "')}");
             }
 
             const defs = svgDOM.createElementNS('http://www.w3.org/2000/svg', 'defs');
