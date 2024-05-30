@@ -79,6 +79,13 @@ export default class Costume {
         }
 
         await Costume.waitForImageToLoad(image);
+
+        if (image.naturalWidth === 0 || image.naturalHeight === 0) {
+            // A Scratch bug caused 0x0 costumes to have a rotation center of -480, -360. While the bug is now fixed,
+            // the costumes remain in projects created before the fix. Fix up the rotation centers of such costumes.
+            params.rotationCenter.x = params.rotationCenter.y = 0;
+        }
+
         return new Costume(name, image, {width: image.naturalWidth, height: image.naturalHeight}, params);
     }
 
