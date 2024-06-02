@@ -29,6 +29,7 @@ export default class Drawable {
 
     private convexHull: vec2[] = [];
     private convexHullDirty = true;
+    private convexHullSilhouette: Silhouette | null = null;
 
     private transformedHull: vec2[] = [];
     private transformedHullDirty = true;
@@ -468,6 +469,7 @@ export default class Drawable {
      * distortion effects.
      */
     private updateConvexHull(silhouette: Silhouette | null) {
+        this.convexHullSilhouette = silhouette;
         if (!silhouette) {
             this.convexHull.length = 0;
             return;
@@ -569,6 +571,8 @@ export default class Drawable {
         for (let i = rightHull.length - 1; i >= 0; i--) {
             leftHull.push(rightHull[i]);
         }
+
+        this.convexHullDirty = false;
     }
 
     private updateTransformedHull(silhouette: Silhouette | null) {
@@ -576,7 +580,7 @@ export default class Drawable {
             this.updateTransform();
         }
 
-        if (this.convexHullDirty) {
+        if (this.convexHullDirty || this.convexHullSilhouette !== silhouette) {
             this.updateConvexHull(silhouette);
         }
 
@@ -585,10 +589,11 @@ export default class Drawable {
         // Reuse existing hull points instead of allocating new ones.
         if (transformedHull.length > hull.length) transformedHull.length = hull.length;
         for (let i = 0; i < hull.length; i++) {
-            let point = hull[i];
-            if (!point) point = vec2.create();
-            const transformedPoint = vec2.transformMat3(point, point, this.transform);
+            const point = hull[i];
+            const transformedPoint = transformedHull[i] ?? vec2.create();
+            vec2.transformMat3(transformedPoint, point, this.transform);
             transformedHull[i] = transformedPoint;
         }
+        this.transformedHullDirty = false;
     }
 }
