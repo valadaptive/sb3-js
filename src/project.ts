@@ -154,6 +154,7 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
                 target.destroy();
             }
         }
+        this.cloneCount = 0;
         this.targets.length = nextOriginalTargetIndex;
         // Reset timer when the project is stopped
         this.timerStart = this.currentMSecs;
@@ -218,6 +219,10 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
     public removeTarget(target: Target) {
         const index = this.targets.indexOf(target);
         if (index === -1) return;
+
+        if (!target.isOriginal) {
+            this.cloneCount--;
+        }
 
         this.targets.splice(index, 1);
         target.destroy();
