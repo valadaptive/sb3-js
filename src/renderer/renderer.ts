@@ -188,6 +188,7 @@ export default class Renderer {
             textBubble.direction,
             this.textWrapper,
         );
+        this.setShader(this.spriteShader);
 
         mat3.fromTranslation(__textBubbleMatrix, bubblePosition);
         mat3.scale(
