@@ -2096,7 +2096,8 @@ export const data_insertatlist = new ProtoBlock({
         const item = ctx.evaluateFast(ITEM);
         const index = ctx.evaluateFast(INDEX);
         const list = ctx.lookupOrCreateList(LIST.value);
-        const numIndex = toListIndex(index, list.length);
+        // Allow new items to be inserted 1 past the end of the list
+        const numIndex = toListIndex(index, list.length + 1);
         if (numIndex !== 0) list.splice(numIndex - 1, 0, item);
     },
     colorCategory: 'data_lists',
