@@ -178,7 +178,6 @@ export default class Target {
 
     public remove() {
         this.project.removeTarget(this);
-        this.audio.disconnect();
         this.destroy();
     }
 
@@ -261,6 +260,7 @@ export default class Target {
 
     public destroy() {
         this.reset();
+        this.audio.disconnect();
         this.sprite.unregisterClone(this);
         this.scriptListenerCleanup();
         this.runtime.stopTargetThreads(this);
