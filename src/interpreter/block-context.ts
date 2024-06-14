@@ -41,11 +41,11 @@ export default class BlockContext {
     }
 
     *evaluate(input: Block | Block[] | string | number | boolean): BlockGenerator {
-        if (Array.isArray(input)) {
-            return yield* this.thread.evaluateScript(input);
-        }
         if (typeof input === 'string' || typeof input === 'number' || typeof input === 'boolean') {
             return input;
+        }
+        if (Array.isArray(input)) {
+            return yield* this.thread.evaluateScript(input);
         }
         return yield* this.thread.evaluateBlock(input);
     }
@@ -57,6 +57,10 @@ export default class BlockContext {
      * @param input The input to evaluate.
      */
     evaluateFast(input: Block | string | number | boolean): string | number | boolean {
+        // Fast path for scalar inputs; inlined to avoid a function call
+        if (typeof input === 'string' || typeof input === 'number' || typeof input === 'boolean') {
+            return input;
+        }
         const generator = this.evaluate(input);
         const {done, value} = generator.next();
         if (done) {
