@@ -1169,6 +1169,22 @@ export const control_repeat_until = new ProtoBlock({
     colorCategory: 'control',
 });
 
+export const control_while = new ProtoBlock({
+    opcode: 'control_while',
+    inputs: {
+        CONDITION: BooleanInput,
+        SUBSTACK: StackInput,
+    },
+    execute: function* ({CONDITION, SUBSTACK}, ctx) {
+        // Note that we can't use evaluateFast here because it's not re-entrant!
+        while (toBoolean(yield* ctx.evaluate(CONDITION))) {
+            yield* ctx.evaluate(SUBSTACK);
+            yield;
+        }
+    },
+    colorCategory: 'control',
+});
+
 export const control_stop = new ProtoBlock({
     opcode: 'control_stop',
     inputs: {
