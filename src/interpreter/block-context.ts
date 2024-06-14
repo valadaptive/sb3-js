@@ -182,9 +182,10 @@ export default class BlockContext {
 
     lookupOrCreateVariable(name: string): number | string | boolean {
         let value = this.target.variables.get(name);
+        if (typeof value !== 'undefined') return value;
         // Check local variables first, then global variables
-        if (value === undefined) value = this.stage.variables.get(name);
-        if (value !== undefined) return value;
+        value = this.stage.variables.get(name);
+        if (typeof value !== 'undefined') return value;
         // Create the variable locally if it doesn't exist
         this.target.variables.set(name, 0);
         return 0;
@@ -192,9 +193,10 @@ export default class BlockContext {
 
     lookupOrCreateList(name: string): (number | string | boolean)[] {
         let value = this.target.lists.get(name);
+        if (typeof value !== 'undefined') return value;
         // Check local lists first, then global lists
-        if (value === undefined) value = this.stage.lists.get(name);
-        if (value !== undefined) return value;
+        value = this.stage.lists.get(name);
+        if (typeof value !== 'undefined') return value;
         const list: (number | string | boolean)[] = [];
         this.target.lists.set(name, list);
         return list;
