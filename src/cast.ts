@@ -25,7 +25,7 @@ export const toBoolean = (value: string | number | boolean | void): boolean => {
             value === '' ||
             value === '0' ||
             // Don't perform toLowerCase (expensive) unless we know it's 5 characters long. and could be 'false'.
-            (value.length === 5 && value.toLowerCase() === 'false')
+            value === 'false' || (value.length === 5 && value.toLowerCase() === 'false')
         ) return false;
         return true;
     }
@@ -103,7 +103,7 @@ export const toColor = (
 };
 
 export const isWhiteSpace = (value: string | number | boolean): boolean =>
-    typeof value === 'string' && value.trim().length === 0;
+    typeof value === 'string' && (value === '' || value.trim().length === 0);
 
 /**
  * Compare two values using Scratch semantics.
@@ -152,6 +152,27 @@ export const compare = (v1: string | number | boolean, v2: string | number | boo
  * @returns true if v1 === v2, false otherwise.
  */
 export const equals = (v1: string | number | boolean, v2: string | number | boolean): boolean => {
+    if (v1 === v2) return true;
+
+    if (typeof v1 === 'number' && typeof v2 === 'number') {
+        // If the two compare equal, the fast path returns true. The only corner case is when both are NaN.
+        return Number.isNaN(v1) && Number.isNaN(v2);
+    }
+
+    if (typeof v1 === 'string' && typeof v2 === 'string') {
+        const n1 = Number(v1);
+        if (Number.isNaN(n1) || isWhiteSpace(v1)) return v1.toLowerCase() === v2.toLowerCase();
+        const n2 = Number(v2);
+        if (Number.isNaN(n2) || isWhiteSpace(v2)) return v1.toLowerCase() === v2.toLowerCase();
+
+        return equals(n1, n2);
+    }
+
+    // If v1 === v2, the fast path returns true.
+    if (typeof v1 === 'boolean' && typeof v2 === 'boolean') {
+        return false;
+    }
+
     return compare(v1, v2) === 0;
 };
 
