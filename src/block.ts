@@ -133,7 +133,7 @@ export class BlockInput<Type extends string = string, Value extends BlockInputVa
                 );
             });
         }
-        throw new Error(`Unhandled input type: ${valueType}`);
+        throw new Error(`Unhandled input type: ${String(valueType)}`);
     }
 
     validate(value: unknown): value is BlockInputValueShapeFor<Value> {

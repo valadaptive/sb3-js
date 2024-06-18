@@ -22,7 +22,8 @@ export const defineInternalElement = <Elem extends HTMLElement>(constructorFn: n
     customElements.define(tagName, constructorFn);
     return {
         tagName,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @stylistic/max-len
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument
         h: ((...args: any[]) => h(tagName, ...args)) as any,
         create: () => document.createElement(tagName) as Elem,
     };

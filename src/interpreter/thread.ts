@@ -221,12 +221,12 @@ export default class Thread {
 
                     // We handle promises by parking the thread and resuming it when the promise resolves. We then pass
                     // the resolved value of the promise back into the generator function.
-                    value.then(resolved => {
+                    void value.then(resolved => {
                         // If the thread has been stopped or restarted, we're working with stale state and shouldn't do
                         // anything.
                         if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
                         // On the next iteration of step(), this.resolvedValue will be passed back into the generator.
-                        this.resolvedValue = resolved;
+                        this.resolvedValue = resolved as string | number | boolean | void;
                         this.resume();
                     });
                 } else if (value === PARK_THREAD) {

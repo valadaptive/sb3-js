@@ -60,7 +60,7 @@ export class InternalStageElement extends HTMLElement {
     }
 
     createMonitorView(): MonitorElement {
-        const elem = internalMonitor.h({className: 'monitor'}) as MonitorElement;
+        const elem = internalMonitor.h({className: 'monitor'});
         elem.style.position = 'absolute';
         this.monitorContainer.append(elem);
         return elem;

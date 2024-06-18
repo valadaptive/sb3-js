@@ -19,7 +19,7 @@ export abstract class Loader {
 
     async loadAsset(filename: string, contentType: string): Promise<Blob> {
         if (this.signal?.aborted) {
-            throw new Error(this.signal.reason ?? 'The operation was aborted');
+            throw new Error(this.signal.reason ? String(this.signal.reason) : 'The operation was aborted');
         }
         const assetKey = `${filename}_${contentType}`;
         const cachedAsset = this.assetCache.get(assetKey);

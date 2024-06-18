@@ -44,11 +44,11 @@ export default class AudioEngine {
 
         // In case the audio context was suspended due to a lack of user interaction
         if (this.ctx.state === 'suspended') {
-            this.ctx.resume();
+            void this.ctx.resume();
         }
 
         if (this.microphoneRequestState.state === 'NotRequested') {
-            this.requestMicrophone();
+            void this.requestMicrophone();
         }
 
         if (this.microphoneRequestState.state !== 'Granted') {

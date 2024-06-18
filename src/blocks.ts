@@ -805,7 +805,7 @@ export const sound_play = new ProtoBlock({
         const soundName = toString(ctx.evaluateFast(SOUND_MENU));
         const sound = ctx.target.sprite.getSoundByName(soundName);
         if (!sound) return;
-        ctx.target.audio.play(sound);
+        void ctx.target.audio.play(sound);
     },
     colorCategory: 'sound',
 });

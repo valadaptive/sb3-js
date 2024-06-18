@@ -11,8 +11,8 @@ export default class Silhouette {
 
     constructor(image: HTMLImageElement | ImageData, premultipliedAlpha: boolean) {
         this.sampleTexel = premultipliedAlpha ?
-            this.sampleTexelPremultiplied :
-            this.sampleTexelStraight;
+            this.sampleTexelPremultiplied.bind(this) :
+            this.sampleTexelStraight.bind(this);
         this.update(image);
     }
 

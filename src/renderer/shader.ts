@@ -29,13 +29,13 @@ export default class Shader {
         this.attribLocations = {};
         this.uniformLocations = {};
 
-        const numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        const numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES) as number;
         for (let i = 0; i < numAttribs; i++) {
             const activeAttrib = gl.getActiveAttrib(program, i)!;
             this.attribLocations[activeAttrib.name] = gl.getAttribLocation(program, activeAttrib.name);
         }
 
-        const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS) as number;
         for (let i = 0; i < numUniforms; i++) {
             const activeUniform = gl.getActiveUniform(program, i)!;
             this.uniformLocations[activeUniform.name] = gl.getUniformLocation(program, activeUniform.name)!;

@@ -251,9 +251,11 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
                 // If variable field, check if the variable names match. Otherwise, do normal comparison. Special-casing
                 // this is a bit ugly, but I want to phase out VariableField and just use variable names everywhere so
                 // we can remove this code then.
-                const inputsMatch = proto .inputs[key] === VariableField ?
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const inputsMatch = proto.inputs[key] === VariableField ?
                     (innerBlock.inputValues[key] as BlockInputValueShapeFor<typeof VariableField>).value ===
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        // eslint-disable-next-line @stylistic/max-len
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
                         (inputValues[key] as any).value :
                     innerBlock.inputValues[key] === inputValues[key];
                 if (!inputsMatch) {

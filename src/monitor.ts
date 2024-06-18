@@ -163,7 +163,7 @@ export class ListMonitor extends BaseMonitor<(string | number | boolean)[]> {
     }
 
     get value() {
-        return this._value as (string | number | boolean)[];
+        return this._value;
     }
 
     setValue(value: (string | number | boolean)[]) {
@@ -196,7 +196,7 @@ export const listMonitorContents = new ProtoBlock({
     execute: function* ({LIST}, ctx) {
         // TODO: remove this once there's some strict return type validation and blocks can return arbitrary types.
         // This is fine for now because this block will never be executed outside "update monitor" threads.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
         return ctx.lookupOrCreateList(LIST.value) as any;
     },
     monitorLabel: ({LIST}) => LIST.value,

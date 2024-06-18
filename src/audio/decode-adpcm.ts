@@ -17,7 +17,7 @@ let __deltaTable: number[] | null = null;
 const getDeltaTable = () => {
     if (__deltaTable) return __deltaTable;
 
-    const deltaTable = new Array(STEP_TABLE.length * INDEX_TABLE.length);
+    const deltaTable = new Array<number>(STEP_TABLE.length * INDEX_TABLE.length);
 
     for (let stepIndex = 0; stepIndex < STEP_TABLE.length; stepIndex++) {
         const step = STEP_TABLE[stepIndex];

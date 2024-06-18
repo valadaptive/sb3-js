@@ -56,15 +56,19 @@ export default function h<Tag extends keyof HTMLElementTagNameMap>(
         for (const prop in props) {
             if (!Object.prototype.hasOwnProperty.call(props, prop)) continue;
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
             const value = props[prop as keyof typeof props] as any;
             if (prop.startsWith('$')) {
                 if (typeof value === 'function') {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     element.addEventListener(prop.slice(2), value);
                 } else {
+                    // eslint-disable-next-line @stylistic/max-len
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
                     element.addEventListener(prop.slice(2), value.listener, value.options);
                 }
             } else {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 element[prop as keyof HTMLElementTagNameMap[Tag]] = value;
             }
         }

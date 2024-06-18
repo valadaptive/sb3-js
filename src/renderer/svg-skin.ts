@@ -20,7 +20,7 @@ export default class SVGSkin implements Skin {
         this.costume = costume;
         // Make sure drawToCanvas always draws something the first time it's called
         this.canvas.width = this.canvas.height = 0;
-        this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+        this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
         const texture = gl.createTexture();
         if (!texture) {
             throw new Error('Failed to create texture');

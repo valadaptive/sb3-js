@@ -547,9 +547,9 @@ const parseCustomBlockPrototype = (
         throw new Error(`Invalid mutation: ${JSON.stringify(mutation)}`);
     }
 
-    const argumentids = JSON.parse(mutation.argumentids);
-    const argumentnames = JSON.parse(mutation.argumentnames);
-    const argumentdefaults = JSON.parse(mutation.argumentdefaults);
+    const argumentids = JSON.parse(mutation.argumentids) as unknown;
+    const argumentnames = JSON.parse(mutation.argumentnames) as unknown;
+    const argumentdefaults = JSON.parse(mutation.argumentdefaults) as unknown;
 
     if (!validateJson(arrayStringSchema, argumentids)) {
         throw new Error(`Invalid argumentids: ${JSON.stringify(mutation.argumentids)}`);
@@ -586,7 +586,7 @@ const parseCustomBlockDefinition = (
         allBlocks.procedures_definition as unknown as ProtoBlock,
         EMPTY_MAP,
     );
-    return Object.assign(customBlockDefinition as unknown as CustomBlockStub, {jsonBlock, blockId});
+    return Object.assign(customBlockDefinition as CustomBlockStub, {jsonBlock, blockId});
 };
 
 const parseScript = (
@@ -816,7 +816,7 @@ const parseMonitor = (
             param = jsonMonitor.params[inputName];
         }
         if (!input.validate(param)) {
-            throw new Error(`Monitor input ${inputName} has invalid value ${param}`);
+            throw new Error(`Monitor input ${inputName} has invalid value ${String(param)}`);
         }
         inputValues[inputName] = param;
     }
@@ -846,7 +846,7 @@ const parseMonitor = (
         inputValues,
         target,
         {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
             mode: mode as any,
             visible: jsonMonitor.visible,
             position: jsonMonitor.x !== undefined && jsonMonitor.y !== undefined ?

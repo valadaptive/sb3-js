@@ -97,7 +97,7 @@ export const validateJson = <S extends Schema>(schema: S, json: unknown): json i
     return false;
 };
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
 export const validateJsonOrError = <S>(
     schema: S,
     json: unknown,
@@ -198,6 +198,7 @@ export const validateJsonOrError = <S>(
         }
         const obj: any = {};
         for (const key of Object.keys(json)) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             obj[key] = validateJsonOrError<unknown>(schema2.items, json[key as keyof typeof json], `${path}[${JSON.stringify(key)}]`);
         }
         return obj;
@@ -205,4 +206,4 @@ export const validateJsonOrError = <S>(
 
     throw new Error(`Unhandled schema type ${(schema2 as any)}`);
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
