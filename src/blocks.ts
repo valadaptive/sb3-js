@@ -1330,7 +1330,7 @@ export const sensing_touchingcolor = new ProtoBlock({
     colorCategory: 'sensing',
 });
 
-const __color2 = new Uint8ClampedArray(3);
+const __color2 = new Uint8ClampedArray(4);
 export const sensing_coloristouchingcolor = new ProtoBlock({
     opcode: 'sensing_coloristouchingcolor',
     inputs: {

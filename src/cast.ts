@@ -74,7 +74,7 @@ export const toListIndex = (value: string | number | boolean | void, length: num
  */
 export const toColor = (
     value: string | number | boolean | void,
-    dst = new Uint8ClampedArray(4),
+    dst: Uint8ClampedArray = new Uint8ClampedArray(4),
 ): Uint8ClampedArray => {
     let color;
     if (typeof value === 'string' && value[0] === '#') {
