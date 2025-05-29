@@ -567,7 +567,6 @@ export const looks_switchbackdropto = new ProtoBlock({
         BACKDROP: StringInput,
     },
     execute: function* ({BACKDROP}, ctx) {
-        // TODO: trigger "when backdrop switches to" hats
         const costume = ctx.evaluateFast(BACKDROP);
         setBackdrop(costume, ctx);
     },
@@ -580,7 +579,6 @@ export const looks_switchbackdroptoandwait = new ProtoBlock({
         BACKDROP: StringInput,
     },
     execute: function* ({BACKDROP}, ctx) {
-        // TODO: trigger "when backdrop switches to" hats
         const costume = ctx.evaluateFast(BACKDROP);
         const startedThreads = setBackdrop(costume, ctx);
         if (startedThreads) {
@@ -594,7 +592,6 @@ export const looks_nextbackdrop = new ProtoBlock({
     opcode: 'looks_nextbackdrop',
     inputs: {},
     execute: function* (_, ctx) {
-        // TODO: trigger "when backdrop switches to" hats
         ctx.stage.currentCostume++;
     },
     colorCategory: 'looks',
