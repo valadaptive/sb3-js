@@ -65,10 +65,11 @@ export const makeCustomBlockStub = (
                     // since it has its own call stack and will loop forever, eating up more and more memory.
                     yield;
                 }
-                try {
-                    yield* ctx.evaluate(childScript);
-                } catch (e) {
-                    if (e !== STOP_THIS_SCRIPT) throw e;
+                // Inside a procedure, "stop this script" means "return from this procedure".
+                for (const value of ctx.evaluate(childScript)) {
+                    if (value === STOP_THIS_SCRIPT) {
+                        break;
+                    }
                 }
                 ctx.popFrame(warp);
             };

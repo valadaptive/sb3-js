@@ -108,8 +108,7 @@ export default class BlockContext {
     }
 
     *stopThisScript() {
-        // This throws an exception, so it technically doesn't need to be a generator function, but it makes it clearer.
-        this.thread.stopThisScript();
+        yield* this.thread.stopThisScript();
     }
 
     *stopAll() {

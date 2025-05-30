@@ -13,11 +13,6 @@ export type Params = {
     [paramName: string]: string | number | boolean;
 };
 
-/**
- * Symbol thrown to stop the current script. Custom procedure blocks will catch this and return from the procedure.
- * This *could* be done solely with generators, but we don't want anything other than the Thread class driving the
- * generator function.
- */
 export const STOP_THIS_SCRIPT = Symbol('STOP_THREAD');
 
 export const PARK_THREAD = Symbol('PARK_THREAD');
@@ -209,35 +204,29 @@ export default class Thread {
             // The thread was parked (or stopped), either last iteration or in a previous tick.
             if (this.status !== ThreadStatus.RUNNING) break;
 
-            try {
-                result = generator.next(this.resolvedValue);
-                const {done, value} = result;
-                if (done) {
-                    this.retire();
-                }
-                if (typeof value === 'object' && value instanceof Promise) {
-                    this.park();
-                    const generation = this.generation;
+            result = generator.next(this.resolvedValue);
+            const {done, value} = result;
+            if (done) {
+                this.retire();
+            }
+            if (typeof value === 'object' && value instanceof Promise) {
+                this.park();
+                const generation = this.generation;
 
-                    // We handle promises by parking the thread and resuming it when the promise resolves. We then pass
-                    // the resolved value of the promise back into the generator function.
-                    void value.then(resolved => {
-                        // If the thread has been stopped or restarted, we're working with stale state and shouldn't do
-                        // anything.
-                        if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
-                        // On the next iteration of step(), this.resolvedValue will be passed back into the generator.
-                        this.resolvedValue = resolved as string | number | boolean | void;
-                        this.resume();
-                    });
-                } else if (value === PARK_THREAD) {
-                    this.park();
-                }
-            } catch (e) {
-                if (e === STOP_THIS_SCRIPT) {
-                    this.retire();
-                } else {
-                    throw e;
-                }
+                // We handle promises by parking the thread and resuming it when the promise resolves. We then pass
+                // the resolved value of the promise back into the generator function.
+                void value.then(resolved => {
+                    // If the thread has been stopped or restarted, we're working with stale state and shouldn't do
+                    // anything.
+                    if (this.generation !== generation || this.status !== ThreadStatus.PARKED) return;
+                    // On the next iteration of step(), this.resolvedValue will be passed back into the generator.
+                    this.resolvedValue = resolved as string | number | boolean | void;
+                    this.resume();
+                });
+            } else if (value === PARK_THREAD) {
+                this.park();
+            } else if (value === STOP_THIS_SCRIPT) {
+                this.retire();
             }
             this.resolvedValue = undefined;
 
@@ -270,8 +259,8 @@ export default class Thread {
         if (warp) this.warpCounter--;
     }
 
-    stopThisScript() {
-        throw STOP_THIS_SCRIPT;
+    *stopThisScript() {
+        yield STOP_THIS_SCRIPT;
     }
 
     /**
