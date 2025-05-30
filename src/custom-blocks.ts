@@ -70,6 +70,7 @@ export const makeCustomBlockStub = (
                     if (value === STOP_THIS_SCRIPT) {
                         break;
                     }
+                    yield value;
                 }
                 ctx.popFrame(warp);
             };

@@ -206,7 +206,7 @@ export default class Thread {
 
             result = generator.next(this.resolvedValue);
             const {done, value} = result;
-            if (done) {
+            if (done || value === STOP_THIS_SCRIPT) {
                 this.retire();
             }
             if (typeof value === 'object' && value instanceof Promise) {
@@ -225,8 +225,6 @@ export default class Thread {
                 });
             } else if (value === PARK_THREAD) {
                 this.park();
-            } else if (value === STOP_THIS_SCRIPT) {
-                this.retire();
             }
             this.resolvedValue = undefined;
 
