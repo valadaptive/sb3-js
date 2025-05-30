@@ -61,7 +61,11 @@ export default class BlockContext {
         if (typeof input === 'string' || typeof input === 'number' || typeof input === 'boolean') {
             return input;
         }
-        const generator = this.evaluate(input);
+        // Inline Thread#evaluateBlock. Significant speedup.
+        const generator = (input.proto.execute as (...args: unknown[]) => BlockGenerator)(
+            input.inputValues,
+            this,
+        );
         const {done, value} = generator.next();
         if (done) {
             if (typeof value === 'undefined' || value === null) {

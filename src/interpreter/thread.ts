@@ -28,7 +28,7 @@ export default class Thread {
     public target: Target;
 
     private startingEvent: TypedEvent | null;
-    private blockContext: BlockContext;
+    public blockContext: BlockContext;
     private generator: BlockGenerator;
     /** Increments when we enter a warp-mode procedure; decrements when we exit one. */
     private warpCounter: number = 0;
@@ -115,10 +115,18 @@ export default class Thread {
      * @returns The block's return value, eventually.
      */
     *evaluateBlock(block: Block): BlockGenerator {
+        // Avoid arguments arity mismatch: pass the correct number of arguments depending on whether the block is a hat
+        // block
+        if (block.proto.hat) {
+            return yield* (block.proto.execute as (...args: unknown[]) => BlockGenerator)(
+                block.inputValues,
+                this.blockContext,
+                this.startingEvent,
+            );
+        }
         return yield* (block.proto.execute as (...args: unknown[]) => BlockGenerator)(
             block.inputValues,
             this.blockContext,
-            this.startingEvent,
         );
     }
 
