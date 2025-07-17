@@ -1,5 +1,5 @@
-import {type ZipInfo, unzip, type ZipEntry, TypedArray, Reader} from 'unzipit';
 import PromisePool from './util/promise-pool.js';
+import {AsyncUnzipInflate, Unzip} from 'fflate';
 
 export abstract class Loader {
     private assetCache: Map<string, Promise<Blob>>;
@@ -32,7 +32,7 @@ export abstract class Loader {
 }
 
 export class WebLoader extends Loader {
-    private static projectMetaPath = `https://trampoline.turbowarp.org/api/projects`;
+    private static projectMetaPath = 'https://trampoline.turbowarp.org/api/projects';
     private static projectPath = 'https://projects.scratch.mit.edu';
     private static assetPath = 'https://assets.scratch.mit.edu/internalapi/asset';
 
@@ -66,30 +66,102 @@ export class WebLoader extends Loader {
     }
 }
 
-export type ZipSrc = ArrayBuffer | TypedArray | Blob | Reader;
+export type ZipSrc = Uint8Array | Blob | ReadableStream<Uint8Array>;
 
+const DECODER = new TextDecoder();
 export class ZipLoader extends Loader {
-    private zip: Promise<ZipInfo>;
+    /** Map of filename -> promise that resolves with the file data */
+    private files: Promise<Map<string, () => Promise<Uint8Array[]>>>;
 
     constructor(zip: ZipSrc, signal?: AbortSignal) {
         super(100, signal);
-        this.zip = unzip(zip);
+        let zipStream: ReadableStream<Uint8Array>;
+        if (zip instanceof Blob) {
+            zipStream = zip.stream();
+        } else if (zip instanceof Uint8Array) {
+            zipStream = new ReadableStream({
+                start(controller) {
+                    controller.enqueue(zip);
+                    controller.close();
+                },
+            });
+        } else {
+            zipStream = zip;
+        }
+
+        const reader = zipStream.getReader();
+
+        const files = new Map<string, () => Promise<Uint8Array[]>>();
+
+        const unzip = new Unzip(file => {
+            // Convert a file pseudo-stream to a promise that resolves with the file data
+            const dataChunks: Uint8Array[] = [];
+            let filePromise: Promise<Uint8Array[]>;
+            const fileHandler = () => {
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                if (filePromise) return filePromise;
+                filePromise = new Promise<Uint8Array[]>((resolve, reject) => {
+                    file.ondata = (err, chunk, final) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+
+                        dataChunks.push(chunk);
+                        if (final) resolve(dataChunks);
+                    };
+                    file.start();
+                });
+                return filePromise;
+            };
+
+            files.set(file.name, fileHandler);
+        });
+        unzip.register(AsyncUnzipInflate);
+
+        this.files = (async() => {
+            try {
+                while (true) {
+                    const {done, value} = await reader.read();
+                    if (done) {
+                        unzip.push(new Uint8Array(0), true);
+                        break;
+                    }
+                    unzip.push(value);
+                }
+            } finally {
+                reader.releaseLock();
+            }
+            return files;
+        })();
     }
 
-    private async getEntry(filename: string): Promise<ZipEntry> {
-        const zip = await this.zip;
-        const zipEntry = zip.entries[filename];
-        if (!zipEntry) {
+    private async getEntry(filename: string): Promise<Uint8Array[]> {
+        const files = await this.files;
+        const fileLoader = files.get(filename);
+        if (!fileLoader) {
             throw new Error(`File not found: ${filename}`);
         }
-        return zipEntry;
+
+        try {
+            const file = await fileLoader();
+            return file;
+        } catch (err) {
+            const error = err as Error;
+            throw new Error(`Error reading file: ${error.message}`, {cause: error});
+        }
     }
 
     protected fetchAsset(filename: string, contentType: string): Promise<Blob> {
-        return this.getEntry(filename).then(entry => entry.blob(contentType));
+        return this.getEntry(filename).then(entry => new Blob(entry, {type: contentType}));
     }
 
-    loadProjectManifest(): Promise<string> {
-        return this.getEntry('project.json').then(entry => entry.text());
+    async loadProjectManifest(): Promise<string> {
+        const chunks = await this.getEntry('project.json');
+        let result = '';
+        for (let i = 0; i < chunks.length; i++) {
+            result += DECODER.decode(chunks[i], {stream: i === chunks.length - 1});
+        }
+        return result;
     }
 }
