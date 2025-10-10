@@ -1,5 +1,12 @@
 import {describe, test, expect} from '@jest/globals';
-import {compare, equals} from '../src/cast.js';
+import {compare, equals, toNumber} from '../src/cast.js';
+
+/** Used for printing the values we're testing. Handles infinities, signed zero, and NaN. */
+const stringify = (value: unknown) => {
+    if (Object.is(value, -0)) return '-0';
+    if (typeof value === 'number') return `${value}`;
+    return JSON.stringify(value);
+};
 
 describe('comparison and equality', () => {
     const testValues = [
@@ -86,13 +93,6 @@ describe('comparison and equality', () => {
     /** Like Math.sign, but returns 0 for -0. */
     const signOf = (n: number) => (n === 0 ? 0 : n > 0 ? 1 : -1);
 
-    /** Used for printing the values we're comparing. Handles infinities, signed zero, and NaN. */
-    const stringify = (value: unknown) => {
-        if (Object.is(value, -0)) return '-0';
-        if (typeof value === 'number') return `${value}`;
-        return JSON.stringify(value);
-    };
-
     for (let i = 0; i < testValues.length; i++) {
         for (let j = 0; j < testValues.length; j++) {
             const referenceResult = referenceImplementation(testValues[i], testValues[j]);
@@ -114,5 +114,81 @@ describe('comparison and equality', () => {
                 expect(equalsResult).toBe(referenceResult === 0);
             });
         }
+    }
+});
+
+describe('toNumber', () => {
+    const testValues = [
+        'apple',
+        'banana',
+        'ApPlE',
+        'BANANA',
+        'appl',
+        '',
+        '     ',
+        ' apple ',
+        '\n',
+        '\r\t\n\t\n',
+        '\u000b\u000c\ufeff',
+        '\u3000',
+
+        true,
+        false,
+        'true',
+        'false',
+        'TrUe',
+        'FaLsE',
+
+        0,
+        5,
+        -4,
+        -0,
+        0.1,
+        NaN,
+        Infinity,
+        -Infinity,
+        0xa11afacade,
+        '0',
+        '5',
+        '-4',
+        '-0',
+        '0.1',
+        'NaN',
+        'Infinity',
+        '-Infinity',
+        '0xa11afacade',
+        '691942378206', // '0xa11afacade' as decimal (should test equal to the hex version)
+    ];
+
+    /**
+     * scratch-vm's implementation of toNumber.
+     * https://github.com/scratchfoundation/scratch-vm/blob/40c6654bfd3130878a674778c74fee50fbcaddc9/src/util/cast.js#L22
+     */
+    const referenceImplementation = (value: unknown) => {
+        // If value is already a number we don't need to coerce it with
+        // Number().
+        if (typeof value === 'number') {
+            // Scratch treats NaN as 0, when needed as a number.
+            // E.g., 0 + NaN -> 0.
+            if (Number.isNaN(value)) {
+                return 0;
+            }
+            return value;
+        }
+        const n = Number(value);
+        if (Number.isNaN(n)) {
+            // Scratch treats NaN as 0, when needed as a number.
+            // E.g., 0 + NaN -> 0.
+            return 0;
+        }
+        return n;
+    };
+
+    for (let i = 0; i < testValues.length; i++) {
+
+        test(`toNumber ${stringify(testValues[i])}`, () => {
+            const referenceResult = referenceImplementation(testValues[i]);
+            expect(toNumber(testValues[i])).toBe(referenceResult);
+        });
     }
 });
