@@ -1,20 +1,19 @@
 import {Rules} from '@cto.af/linebreak';
 
-let segmentString: (text: string) => Generator<string>;
+let segmentString: (text: string) => Iterable<{segment: string}>;
 if (typeof Intl.Segmenter === 'function') {
     const segmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
-    segmentString = function*(text: string) {
-        for (const seg of segmenter.segment(text)) {
-            yield seg.segment;
-        }
+    segmentString = (text: string) => {
+        return segmenter.segment(text);
     };
 } else {
-    // TODO: remove this once Intl.Segmenter makes it to Firefox ESR
+    // TODO: remove this once Intl.Segmenter has been supported a while longer (it made it into a Firefox release in
+    // April 2024).
     segmentString = function*(text: string) {
         const regex = /\P{M}\p{M}*/uy;
         let match;
         while ((match = regex.exec(text)) !== null) {
-            yield match[0];
+            yield {segment: match[0]};
         }
     };
 }
@@ -43,7 +42,7 @@ export default class TextWrapper {
                 const wordWidth = ctx.measureText(word).width;
                 if (wordWidth > maxWidth) {
                     // If the word itself is too long, split it
-                    for (const segment of segmentString(word)) {
+                    for (const {segment} of segmentString(word)) {
                         const splitLine: string = (currentLine ?? '') + segment;
                         if (ctx.measureText(splitLine).width <= maxWidth) {
                             currentLine = splitLine;
