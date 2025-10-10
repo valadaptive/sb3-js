@@ -1,5 +1,5 @@
 import {describe, test, expect} from '@jest/globals';
-import {compare, equals, toNumber} from '../src/cast.js';
+import {compare, equals, toBoolean, toNumber} from '../src/cast.js';
 
 /** Used for printing the values we're testing. Handles infinities, signed zero, and NaN. */
 const stringify = (value: unknown) => {
@@ -8,49 +8,49 @@ const stringify = (value: unknown) => {
     return JSON.stringify(value);
 };
 
+const testValues = [
+    'apple',
+    'banana',
+    'ApPlE',
+    'BANANA',
+    'appl',
+    '',
+    '     ',
+    ' apple ',
+    '\n',
+    '\r\t\n\t\n',
+    '\u000b\u000c\ufeff',
+    '\u3000',
+
+    true,
+    false,
+    'true',
+    'false',
+    'TrUe',
+    'FaLsE',
+
+    0,
+    5,
+    -4,
+    -0,
+    0.1,
+    NaN,
+    Infinity,
+    -Infinity,
+    0xa11afacade,
+    '0',
+    '5',
+    '-4',
+    '-0',
+    '0.1',
+    'NaN',
+    'Infinity',
+    '-Infinity',
+    '0xa11afacade',
+    '691942378206', // '0xa11afacade' as decimal (should test equal to the hex version)
+];
+
 describe('comparison and equality', () => {
-    const testValues = [
-        'apple',
-        'banana',
-        'ApPlE',
-        'BANANA',
-        'appl',
-        '',
-        '     ',
-        ' apple ',
-        '\n',
-        '\r\t\n\t\n',
-        '\u000b\u000c\ufeff',
-        '\u3000',
-
-        true,
-        false,
-        'true',
-        'false',
-        'TrUe',
-        'FaLsE',
-
-        0,
-        5,
-        -4,
-        -0,
-        0.1,
-        NaN,
-        Infinity,
-        -Infinity,
-        0xa11afacade,
-        '0',
-        '5',
-        '-4',
-        '-0',
-        '0.1',
-        'NaN',
-        'Infinity',
-        '-Infinity',
-        '0xa11afacade',
-        '691942378206', // '0xa11afacade' as decimal (should test equal to the hex version)
-    ];
-
     /**
      * scratch-vm's implementation of compare.
      * https://github.com/scratchfoundation/scratch-vm/blob/40c6654bfd3130878a674778c74fee50fbcaddc9/src/util/cast.js#L121
@@ -118,48 +118,6 @@ describe('comparison and equality', () => {
 });
 
 describe('toNumber', () => {
-    const testValues = [
-        'apple',
-        'banana',
-        'ApPlE',
-        'BANANA',
-        'appl',
-        '',
-        '     ',
-        ' apple ',
-        '\n',
-        '\r\t\n\t\n',
-        '\u000b\u000c\ufeff',
-        '\u3000',
-
-        true,
-        false,
-        'true',
-        'false',
-        'TrUe',
-        'FaLsE',
-
-        0,
-        5,
-        -4,
-        -0,
-        0.1,
-        NaN,
-        Infinity,
-        -Infinity,
-        0xa11afacade,
-        '0',
-        '5',
-        '-4',
-        '-0',
-        '0.1',
-        'NaN',
-        'Infinity',
-        '-Infinity',
-        '0xa11afacade',
-        '691942378206', // '0xa11afacade' as decimal (should test equal to the hex version)
-    ];
-
     /**
      * scratch-vm's implementation of toNumber.
      * https://github.com/scratchfoundation/scratch-vm/blob/40c6654bfd3130878a674778c74fee50fbcaddc9/src/util/cast.js#L22
@@ -189,6 +147,39 @@ describe('toNumber', () => {
         test(`toNumber ${stringify(testValues[i])}`, () => {
             const referenceResult = referenceImplementation(testValues[i]);
             expect(toNumber(testValues[i])).toBe(referenceResult);
+        });
+    }
+});
+
+describe('toBoolean', () => {
+    /**
+     * scratch-vm's implementation of toBoolean.
+     * https://github.com/scratchfoundation/scratch-vm/blob/40c6654bfd3130878a674778c74fee50fbcaddc9/src/util/cast.js#L49
+     */
+    const referenceImplementation = (value: unknown) => {
+        // Already a boolean?
+        if (typeof value === 'boolean') {
+            return value;
+        }
+        if (typeof value === 'string') {
+            // These specific strings are treated as false in Scratch.
+            if ((value === '') ||
+                (value === '0') ||
+                (value.toLowerCase() === 'false')) {
+                return false;
+            }
+            // All other strings treated as true.
+            return true;
+        }
+        // Coerce other values and numbers.
+        return Boolean(value);
+    };
+
+    for (let i = 0; i < testValues.length; i++) {
+
+        test(`toBoolean ${stringify(testValues[i])}`, () => {
+            const referenceResult = referenceImplementation(testValues[i]);
+            expect(toBoolean(testValues[i])).toBe(referenceResult);
         });
     }
 });

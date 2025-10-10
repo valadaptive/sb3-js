@@ -177,7 +177,7 @@ export const equals = (v1: string | number | boolean, v2: string | number | bool
 };
 
 /**
- * Check if a (loosely-typed) value is an integer. Notably, this returns false for decimal strings, een ones that are
+ * Check if a (loosely-typed) value is an integer. Notably, this returns false for decimal strings, even ones that are
  * representable as integers (e.g. "1.0").
  * @param value The value to check.
  */
