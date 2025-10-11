@@ -20,7 +20,7 @@ export default class PenLayer implements Samplable {
     public transform: mat3;
     private inverseTransform: mat3;
     private silhouette: Silhouette;
-    private silhouetteData: Uint8ClampedArray;
+    private silhouetteData: Uint8ClampedArray<ArrayBuffer>;
     // Set to false by default because it initializes to fully transparent, saving a readPixels call if the project
     // never uses the pen layer.
     private silhouetteDirty = false;
@@ -71,8 +71,8 @@ export default class PenLayer implements Samplable {
         x: number,
         y: number,
         silhouette: Silhouette,
-        dst: Uint8ClampedArray,
-    ): Uint8ClampedArray {
+        dst: Uint8ClampedArray<ArrayBuffer>,
+    ): Uint8ClampedArray<ArrayBuffer> {
         vec2.set(__samplePoint, x, y);
         vec2.transformMat3(__samplePoint, __samplePoint, this.inverseTransform);
         // Flip y

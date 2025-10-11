@@ -1,7 +1,12 @@
 type MicrophoneRequestState =
     | {state: 'NotRequested'}
     | {state: 'Requested'}
-    | {state: 'Granted'; microphoneDataArray: Float32Array; analyser: AnalyserNode; lastValue: number | null}
+    | {
+        state: 'Granted';
+        microphoneDataArray: Float32Array<ArrayBuffer>;
+        analyser: AnalyserNode;
+        lastValue: number | null;
+    }
     | {state: 'Errored'};
 
 export default class AudioEngine {

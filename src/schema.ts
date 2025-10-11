@@ -79,7 +79,9 @@ export const validateJson = <S extends Schema>(schema: S, json: unknown): json i
     }
     if (schema2.type === 'array') {
         return Array.isArray(json) && json.every(item => {
-            return validateJson(schema2.items, item);
+            // eslint-disable-next-line @stylistic/max-len
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-explicit-any
+            return validateJson(schema2.items as any, item as any);
         });
     }
     if (schema2.type === 'literal') {
@@ -88,7 +90,9 @@ export const validateJson = <S extends Schema>(schema: S, json: unknown): json i
     if (schema2.type === 'tuple') {
         return Array.isArray(json) &&
             json.length === schema2.items.length &&
-            json.every((item, i) => validateJson(schema2.items[i], item));
+            // eslint-disable-next-line @stylistic/max-len
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-explicit-any
+            json.every((item, i) => validateJson(schema2.items[i] as any, item as any));
     }
     if (schema2.type === 'map') {
         return typeof json === 'object' && json !== null &&

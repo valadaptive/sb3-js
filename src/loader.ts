@@ -68,10 +68,9 @@ export class WebLoader extends Loader {
 
 export type ZipSrc = Uint8Array | Blob | ReadableStream<Uint8Array>;
 
-const DECODER = new TextDecoder();
 export class ZipLoader extends Loader {
     /** Map of filename -> promise that resolves with the file data */
-    private files: Promise<Map<string, () => Promise<Uint8Array[]>>>;
+    private files: Promise<Map<string, () => Promise<Uint8Array<ArrayBuffer>[]>>>;
 
     constructor(zip: ZipSrc, signal?: AbortSignal) {
         super(100, signal);
@@ -91,23 +90,23 @@ export class ZipLoader extends Loader {
 
         const reader = zipStream.getReader();
 
-        const files = new Map<string, () => Promise<Uint8Array[]>>();
+        const files = new Map<string, () => Promise<Uint8Array<ArrayBuffer>[]>>();
 
         const unzip = new Unzip(file => {
             // Convert a file pseudo-stream to a promise that resolves with the file data
-            const dataChunks: Uint8Array[] = [];
-            let filePromise: Promise<Uint8Array[]>;
+            const dataChunks: Uint8Array<ArrayBuffer>[] = [];
+            let filePromise: Promise<Uint8Array<ArrayBuffer>[]>;
             const fileHandler = () => {
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 if (filePromise) return filePromise;
-                filePromise = new Promise<Uint8Array[]>((resolve, reject) => {
+                filePromise = new Promise<Uint8Array<ArrayBuffer>[]>((resolve, reject) => {
                     file.ondata = (err, chunk, final) => {
                         if (err) {
                             reject(err);
                             return;
                         }
 
-                        dataChunks.push(chunk);
+                        dataChunks.push(chunk as Uint8Array<ArrayBuffer>);
                         if (final) resolve(dataChunks);
                     };
                     file.start();
@@ -136,7 +135,7 @@ export class ZipLoader extends Loader {
         })();
     }
 
-    private async getEntry(filename: string): Promise<Uint8Array[]> {
+    private async getEntry(filename: string): Promise<Uint8Array<ArrayBuffer>[]> {
         const files = await this.files;
         const fileLoader = files.get(filename);
         if (!fileLoader) {
@@ -159,8 +158,9 @@ export class ZipLoader extends Loader {
     async loadProjectManifest(): Promise<string> {
         const chunks = await this.getEntry('project.json');
         let result = '';
+        const decoder = new TextDecoder();
         for (let i = 0; i < chunks.length; i++) {
-            result += DECODER.decode(chunks[i], {stream: i === chunks.length - 1});
+            result += decoder.decode(chunks[i], {stream: i !== chunks.length - 1});
         }
         return result;
     }
