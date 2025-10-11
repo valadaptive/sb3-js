@@ -141,7 +141,7 @@ export const validateJsonOrError = <S>(
             try {
                 validateJsonOrError<unknown>(subschema, json, path);
                 succeeded = true;
-            } catch (e) {
+            } catch {
                 continue;
             }
         }

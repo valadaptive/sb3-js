@@ -247,9 +247,9 @@ export default class Target {
         }
         hatScripts.push(script);
         signal.addEventListener('abort', () => {
-            const index = hatScripts!.indexOf(script);
+            const index = hatScripts.indexOf(script);
             if (index !== -1) {
-                hatScripts!.splice(index, 1);
+                hatScripts.splice(index, 1);
             }
         }, {once: true});
     }

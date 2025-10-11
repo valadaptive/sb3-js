@@ -67,8 +67,8 @@ type BlockInputValueShapeForInner<T extends BlockInputValue, Iterations extends 
                                 : T extends {type: 'object'; values: {[x: string]: BlockInputValue}}
                                     ? {
                                         [K in keyof T['values']]: BlockInputValueShapeForInner<
-                                        T['values'][K],
-                                        Decrement<Iterations>
+                                            T['values'][K],
+                                            Decrement<Iterations>
                                         >
                                     }
                                     : T extends {type: 'instance'; of: new() => infer Instance}
@@ -180,10 +180,10 @@ export type HatInfo = ({
 };
 
 export type BlockGenerator = Generator<
-//Promise<string | number | boolean | void> | typeof GET_CUSTOM_BLOCK_ARG | void,
-unknown,
-string | number | boolean | void,
-string | number | boolean | void
+    //Promise<string | number | boolean | void> | typeof GET_CUSTOM_BLOCK_ARG | void,
+    unknown,
+    string | number | boolean | void,
+    string | number | boolean | void
 >;
 
 // TODO: concrete ProtoBlock instances are not currently a subtype of ProtoBlock due to variance.
@@ -266,10 +266,10 @@ export class ProtoBlock<
 }
 
 export type SomeProtoBlock = ProtoBlock<
-string,
-{[key: string]: BlockInput},
-BlockReturnType | null,
-HatInfo | undefined
+    string,
+    {[key: string]: BlockInput},
+    BlockReturnType | null,
+    HatInfo | undefined
 >;
 
 export class Block<P = unknown> {

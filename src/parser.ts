@@ -242,7 +242,7 @@ const sb3TargetSchema = {
 } as const satisfies Schema;
 type Sb3Target = ObjectForSchema<typeof sb3TargetSchema>;
 
-const sb3SpriteTargetSchema = {
+const __sb3SpriteTargetSchema = {
     type: 'object',
     props: Object.assign({}, sb3TargetSchema.props, {
         x: 'number',
@@ -258,7 +258,7 @@ const sb3SpriteTargetSchema = {
         ],
     } as const),
 } as const satisfies Schema;
-type Sb3SpriteTarget = ObjectForSchema<typeof sb3SpriteTargetSchema>;
+type Sb3SpriteTarget = ObjectForSchema<typeof __sb3SpriteTargetSchema>;
 
 const sb3ScalarMonitorSchema = {
     type: 'object',

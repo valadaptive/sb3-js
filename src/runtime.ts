@@ -162,7 +162,7 @@ export default class Runtime {
     }
 
     private setupEventListeners(stage: InternalStageElement) {
-        if (!this.renderer) null;
+        if (!this.renderer) return null;
         const abortController = new AbortController();
         const signal = abortController.signal;
 
@@ -260,7 +260,7 @@ export default class Runtime {
         let audioBuffer = null;
         try {
             audioBuffer = await this.audio.loadSound(buffer);
-        } catch (err) {
+        } catch {
             try {
                 audioBuffer = decodeADPCM(new Uint8Array(buffer));
             } catch (err) {

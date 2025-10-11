@@ -134,8 +134,8 @@ export class ScalarMonitor extends BaseMonitor<string | number | boolean> {
         super.update(params);
     }
 
-    get value() {
-        return this._value as string | number | boolean;
+    get value(): string | number | boolean {
+        return this._value;
     }
 
     setValue(value: string | number | boolean) {

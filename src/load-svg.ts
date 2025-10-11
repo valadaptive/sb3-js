@@ -39,7 +39,7 @@ const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, s
                         resolve(reader.result as string);
                     };
                     reader.onerror = () => {
-                        reject(reader.error);
+                        reject(reader.error!);
                     };
                     reader.readAsDataURL(blob);
                 }));
@@ -47,6 +47,8 @@ const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, s
     }
 
     const fontURLs = {} as Record<FontName, string>;
+    // another day, another typescript-eslint banger: https://github.com/typescript-eslint/typescript-eslint/issues/11609
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     const fontPromises = await Promise.all(Object.values(loadedFonts));
     for (let i = 0; i < fontPromises.length; i++) {
         fontURLs[Object.keys(loadedFonts)[i] as FontName] = fontPromises[i]!;

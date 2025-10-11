@@ -7,15 +7,15 @@ export default {
     output: {
         file: 'dist/index.js',
         format: 'esm',
-        sourcemap: true
+        sourcemap: true,
     },
     plugins: [
         nodeResolve({browser: true}),
         typescript({noEmitOnError: !process.env.ROLLUP_WATCH}),
         copy({
             targets: [
-                { src: 'src/assets/*', dest: 'dist/assets' }
-            ]
-        })
-    ]
+                {src: 'src/assets/*', dest: 'dist/assets'},
+            ],
+        }),
+    ],
 };
