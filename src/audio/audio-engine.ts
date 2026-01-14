@@ -42,15 +42,19 @@ export default class AudioEngine {
         }
     }
 
+    public resume() {
+        if (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted') {
+            void this.ctx.resume();
+        }
+    }
+
     public getLoudness(): number {
         if (this.cachedLoudness !== null) {
             return this.cachedLoudness;
         }
 
         // In case the audio context was suspended due to a lack of user interaction
-        if (this.ctx.state === 'suspended') {
-            void this.ctx.resume();
-        }
+        this.resume();
 
         if (this.microphoneRequestState.state === 'NotRequested') {
             void this.requestMicrophone();

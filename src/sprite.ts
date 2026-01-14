@@ -55,9 +55,29 @@ export default class Sprite {
         return this.costumeIndicesByName.get(name) ?? -1;
     }
 
-    public getSoundByName(name: string): Sound | null {
-        const index = this.soundIndicesByName.get(name);
-        if (typeof index === 'undefined') return null;
+    public getSoundByIndexOrName(indexOrName: string | number | boolean): Sound | null {
+        // Scratch doesn't seem to play *any* sound if the input is a Boolean. It implicitly flows into the parseInt
+        // path, but parseInt returns NaN for booleans so nothing matches.
+        if (typeof indexOrName === 'boolean') return null;
+
+        let index = -1;
+        // First try looking the sound up by name. Scratch uses an exact equality check when doing this rather than
+        // casting to a string. This means that numeric and string values are treated differently. For instance, an
+        // indexOrName with the *numeric* value 2 will play the second sound, but an indexOrName with the *string* value
+        // "2" will play the sound *named* "2" if one exists.
+        if (typeof indexOrName === 'string') {
+            index = this.soundIndicesByName.get(indexOrName) ?? -1;
+        }
+        // Look the sound up by numeric index. The `len > 0` check prevents a modulo 0 when wrapping.
+        const len = this.sounds.length;
+        if (index === -1 && len > 0) {
+            const numIndex = typeof indexOrName === 'number' ? indexOrName : parseInt(indexOrName, 10);
+            // Scratch wraps here for some reason. Note also that sounds are 1-indexed.
+            if (Number.isFinite(numIndex)) {
+                index = (((numIndex - 1) % len) + len) % len;
+            }
+        }
+        if (index === -1) return null;
         return this.sounds[index];
     }
 

@@ -785,8 +785,8 @@ export const sound_playuntildone = new ProtoBlock({
         SOUND_MENU: StringInput,
     },
     execute: function* ({SOUND_MENU}, ctx) {
-        const soundName = toString(ctx.evaluateFast(SOUND_MENU));
-        const sound = ctx.target.sprite.getSoundByName(soundName);
+        const soundName = ctx.evaluateFast(SOUND_MENU);
+        const sound = ctx.target.sprite.getSoundByIndexOrName(soundName);
         if (!sound) return;
         yield* ctx.await(ctx.target.audio.play(sound));
     },
@@ -799,8 +799,8 @@ export const sound_play = new ProtoBlock({
         SOUND_MENU: StringInput,
     },
     execute: function* ({SOUND_MENU}, ctx) {
-        const soundName = toString(ctx.evaluateFast(SOUND_MENU));
-        const sound = ctx.target.sprite.getSoundByName(soundName);
+        const soundName = ctx.evaluateFast(SOUND_MENU);
+        const sound = ctx.target.sprite.getSoundByIndexOrName(soundName);
         if (!sound) return;
         void ctx.target.audio.play(sound);
     },

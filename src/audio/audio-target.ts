@@ -44,6 +44,7 @@ export default class AudioTarget {
         source.buffer = buffer;
         source.connect(this.destinationNode);
         this.playingBuffers.set(sound, source);
+        this.audio.resume();
 
         return new Promise<void>(resolve => {
             source.start();
