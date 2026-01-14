@@ -1,13 +1,13 @@
 import Rectangle from './rectangle.js';
 
 const fonts = {
-    'Sans Serif': './assets/fonts/NotoSans-Medium.woff2',
-    'Serif': './assets/fonts/SourceSerifPro-Regular.woff2',
-    'Handwriting': './assets/fonts/handlee-regular.woff2',
-    'Marker': './assets/fonts/Knewave.woff2',
-    'Curly': './assets/fonts/Griffy-Regular.woff2',
-    'Pixel': './assets/fonts/Grand9K-Pixel.woff2',
-    'Scratch': './assets/fonts/ScratchSavers_b2.woff2',
+    'Sans Serif': new URL('./assets/fonts/NotoSans-Medium.woff2', import.meta.url),
+    'Serif': new URL('./assets/fonts/SourceSerifPro-Regular.woff2', import.meta.url),
+    'Handwriting': new URL('./assets/fonts/handlee-regular.woff2', import.meta.url),
+    'Marker': new URL('./assets/fonts/Knewave.woff2', import.meta.url),
+    'Curly': new URL('./assets/fonts/Griffy-Regular.woff2', import.meta.url),
+    'Pixel': new URL('./assets/fonts/Grand9K-Pixel.woff2', import.meta.url),
+    'Scratch': new URL('./assets/fonts/ScratchSavers_b2.woff2', import.meta.url),
 };
 
 type FontName = keyof typeof fonts;
@@ -31,7 +31,7 @@ const loadFonts = async(fontNames: Iterable<string>): Promise<Record<FontName, s
             continue;
         }
         if (loadedFonts[name] === null) {
-            loadedFonts[name] = fetch(import.meta.resolve(fonts[name]))
+            loadedFonts[name] = fetch(fonts[name])
                 .then(response => response.blob())
                 .then(blob => new Promise((resolve, reject) => {
                     const reader = new FileReader();
