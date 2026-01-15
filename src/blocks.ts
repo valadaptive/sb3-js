@@ -1182,6 +1182,29 @@ export const control_while = new ProtoBlock({
     colorCategory: 'control',
 });
 
+export const control_for_each = new ProtoBlock({
+    opcode: 'control_for_each',
+    inputs: {
+        VARIABLE: VariableField,
+        VALUE: NumberInput,
+        SUBSTACK: StackInput,
+    },
+    execute: function* ({VARIABLE, VALUE, SUBSTACK}, ctx) {
+        // Scratch re-evaluates the end value on each iteration, unlike "repeat"
+        for (let i = 1; i <= toNumber(yield* ctx.evaluate(VALUE)); i++) {
+
+            if (ctx.target.variables.has(VARIABLE.value)) {
+                ctx.target.variables.set(VARIABLE.value, i);
+            } else {
+                ctx.stage.variables.set(VARIABLE.value, i);
+            }
+            yield* ctx.evaluate(SUBSTACK);
+
+        }
+    },
+    colorCategory: 'control',
+});
+
 export const control_stop = new ProtoBlock({
     opcode: 'control_stop',
     inputs: {
