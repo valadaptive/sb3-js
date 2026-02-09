@@ -215,7 +215,7 @@ const sb3BlockSchema = {
         topLevel: 'boolean',
         mutation: sb3MutationSchema,
     },
-    optional: ['mutation', 'parent', 'next'],
+    optional: ['mutation', 'parent', 'next', 'shadow', 'topLevel'],
 } as const satisfies Schema;
 type Sb3Block = ObjectForSchema<typeof sb3BlockSchema>;
 
