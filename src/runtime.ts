@@ -19,6 +19,7 @@ import {RespondEvent} from './html/answer-box.js';
 import anyAbortSignal from './util/any-abort-signal.js';
 import AudioEngine from './audio/audio-engine.js';
 import decodeADPCM from './audio/decode-adpcm.js';
+import {toDisplayString} from './cast.js';
 
 /** Time between each interpreter step (aka framerate). */
 const STEP_TIME = 1000 / 30;
@@ -427,6 +428,11 @@ export default class Runtime {
             answerController.abort();
         }, {signal: anyAbortSignal(this.stageAbortController?.signal, answerController.signal)});
 
+        if (event.isStage) {
+            answerBox.setAttribute('prompt', toDisplayString(event.question.prompt));
+        } else {
+            answerBox.removeAttribute('prompt');
+        }
         answerBox.show();
     }
 }

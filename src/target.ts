@@ -9,6 +9,7 @@ import Runtime from './runtime.js';
 import Sprite from './sprite.js';
 import TextBubble from './renderer/text-bubble.js';
 import AudioTarget from './audio/audio-target.js';
+import {toDisplayString} from './cast.js';
 
 export type RotationStyle = 'all around' | 'left-right' | 'don\'t rotate';
 
@@ -330,17 +331,14 @@ export default class Target {
             return id;
         }
 
-        let formattedText = text;
-        if (typeof text === 'number' && Math.abs(text) >= 0.01 && text % 1 !== 0) {
-            formattedText = text.toFixed(2);
-        }
+        const formattedText = toDisplayString(text);
 
         if (this.textBubble) {
             this.textBubble.type = type;
-            this.textBubble.text = String(formattedText);
+            this.textBubble.text = formattedText;
             this.textBubble.id = id;
         } else {
-            this.textBubble = {type, text: String(formattedText), bubble: null, direction: 'left', id};
+            this.textBubble = {type, text: formattedText, bubble: null, direction: 'left', id};
         }
         return id;
     }

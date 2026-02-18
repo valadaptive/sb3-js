@@ -199,3 +199,17 @@ export const isInt = (value: string | number | boolean): boolean => {
     // This should be unreachable, but TypeScript can't infer that.
     return false;
 };
+
+/**
+ * Cast a value to a string suitable for display in text bubbles.
+ * @param value The value to cast.
+ * @returns A stringified representation of the value.
+ */
+export const toDisplayString = (value: string | number | boolean): string => {
+    let formattedText = value;
+    if (typeof value === 'number' && Math.abs(value) >= 0.01 && value % 1 !== 0) {
+        formattedText = value.toFixed(2);
+    }
+
+    return String(formattedText);
+};

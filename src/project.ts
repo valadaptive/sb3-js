@@ -21,7 +21,7 @@ export class CreateMonitorEvent extends TypedEvent<'createmonitor'> {
 }
 
 export class QuestionEvent extends TypedEvent<'question'> {
-    constructor(public readonly question: Question) {
+    constructor(public readonly question: Question, public readonly isStage: boolean) {
         super('question');
     }
 }
@@ -169,7 +169,8 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
         const question = this.questionQueue[0];
 
         let bubbleId: symbol | undefined;
-        if (!question.target.sprite.isStage) {
+        const isStage = question.target.sprite.isStage;
+        if (!isStage) {
             bubbleId = question.target.setTextBubble('ask', question.prompt);
         }
 
@@ -182,7 +183,7 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
             }
         };
 
-        this.dispatchEvent(new QuestionEvent(question));
+        this.dispatchEvent(new QuestionEvent(question, isStage));
         question.addEventListener('answer', onAnswerOrCancel);
         question.addEventListener('cancel', onAnswerOrCancel);
     }
