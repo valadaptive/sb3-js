@@ -129,7 +129,8 @@ export default class IO extends TypedEventTarget<DragStartEvent | DragStopEvent>
             key === 'up arrow' ||
             key === 'right arrow' ||
             key === 'down arrow' ||
-            key === 'enter'
+            key === 'enter' ||
+            key === 'any'
         ) {
             return keyStr;
         }
