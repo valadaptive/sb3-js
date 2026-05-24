@@ -63,7 +63,7 @@ const loadSVG = async(src: Blob): Promise<{url: string; viewBox: Rectangle}> => 
 
     // If the viewBox is not set, use the width and height attributes
     let viewBox;
-    if (svgTag.viewBox.baseVal === null) {
+    if (!svgTag.hasAttribute('viewBox')) {
         viewBox = Rectangle.fromBounds(
             0,
             svgTag.width.baseVal.value,
