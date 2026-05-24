@@ -21,10 +21,6 @@ export default class SVGSkin implements Skin {
         // Make sure drawToCanvas always draws something the first time it's called
         this.canvas.width = this.canvas.height = 0;
         this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
-        const texture = gl.createTexture();
-        if (!texture) {
-            throw new Error('Failed to create texture');
-        }
         const ctx = this.canvas.getContext('2d');
         if (!ctx) {
             throw new Error('Failed to create 2d context');
