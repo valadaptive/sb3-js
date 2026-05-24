@@ -90,6 +90,11 @@ export class GraphicEffects {
     }
 
     public clear() {
+        // If any distortion effect was active, the cached convex hull was computed with it applied and must be
+        // recomputed now that the effects are gone.
+        if (this.bitmask & GraphicEffects.DISTORTION_EFFECTS) {
+            this.target.drawable.setConvexHullDirty();
+        }
         this.bitmask = 0;
         this.effectValues = {
             color: 0,
