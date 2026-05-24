@@ -43,7 +43,6 @@ export default class Sprite {
                     id: Symbol('EDGE_ACTIVATED_HAT_WRAPPER'),
                 });
                 this.edgeActivatedScripts.push({hat: topBlock.proto, script: [wrapperBlock]});
-                break;
             }
         }
 
