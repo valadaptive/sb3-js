@@ -1305,7 +1305,7 @@ export const sensing_touchingobject = new ProtoBlock({
                 }
                 const isTouching = !!ctx.renderer && ctx.target.drawable.isTouchingTargets(
                     ctx.renderer,
-                    other.sprite.clones,
+                    targets,
                     ctx.stageBounds,
                 );
                 return isTouching;
@@ -1559,11 +1559,12 @@ export const sensing_of = new ProtoBlock({
         OBJECT: StringInput,
     },
     execute: function* ({PROPERTY, OBJECT}, ctx) {
+        const objectName = toString(ctx.evaluateFast(OBJECT));
         let target;
-        if (OBJECT === '_stage_') {
+        if (objectName === '_stage_') {
             target = ctx.stage;
         } else {
-            target = ctx.project.getTargetByName(toString(ctx.evaluateFast(OBJECT)));
+            target = ctx.project.getTargetByName(objectName);
         }
         if (!target) return 0;
 
