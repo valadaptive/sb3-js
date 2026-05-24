@@ -98,7 +98,10 @@ export default class PenState {
         pen._color = this._color;
         pen._saturation = this._saturation;
         pen._brightness = this._brightness;
-        pen.thickness = this.thickness;
+        pen._transparency = this._transparency;
+        pen._legacyShade = this._legacyShade;
+        pen._thickness = this._thickness;
+        pen.rgbDirty = true;
         return pen;
     }
 

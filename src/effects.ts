@@ -68,7 +68,7 @@ export class GraphicEffects {
                     setter = (value: number) => {
                         this.effectValues[effectName] = value;
                         this.bitmask = value === 0 ? this.bitmask & ~(1 << i) : this.bitmask | (1 << i);
-                        if (i & GraphicEffects.DISTORTION_EFFECTS) {
+                        if ((1 << i) & GraphicEffects.DISTORTION_EFFECTS) {
                             this.target.drawable.setConvexHullDirty();
                         }
                     };

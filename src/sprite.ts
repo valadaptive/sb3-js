@@ -93,7 +93,7 @@ export default class Sprite {
 
     unregisterClone(clone: Target) {
         const cloneIndex = this.clones.indexOf(clone);
-        if (!cloneIndex) return;
+        if (cloneIndex === -1) return;
         this.clones.splice(cloneIndex, 1);
     }
 }

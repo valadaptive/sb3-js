@@ -149,10 +149,10 @@ export const motion_glideto = new ProtoBlock({
     execute: function* ({SECS, TO}, ctx) {
         const duration = toNumber(ctx.evaluateFast(SECS)) * 1000;
         const target = toString(ctx.evaluateFast(TO));
-        const position = getPositionByName(target, ctx);
-        if (position) {
-            const position = ctx.target.position;
-            yield* glideTo(position.x, position.y, position.x, position.y, duration, ctx);
+        const dest = getPositionByName(target, ctx);
+        if (dest) {
+            const pos = ctx.target.position;
+            yield* glideTo(pos.x, pos.y, dest.x, dest.y, duration, ctx);
         }
     },
     colorCategory: 'motion',
@@ -399,7 +399,7 @@ export const motion_direction = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.target.direction;
     },
-    monitorLabel: () => 'y position',
+    monitorLabel: () => 'direction',
     colorCategory: 'motion',
 });
 
@@ -1414,8 +1414,6 @@ export const sensing_distanceto = new ProtoBlock({
         const dx = ctx.target.position.x - targetX;
         const dy = ctx.target.position.y - targetY;
         return Math.sqrt((dx * dx) + (dy * dy));
-
-        return 0;
     },
     returnType: ['number'],
     colorCategory: 'sensing',
@@ -1486,7 +1484,7 @@ export const sensing_mousex = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.io.mousePosition.x;
     },
-    returnType: ['boolean'],
+    returnType: ['number'],
     colorCategory: 'sensing',
 });
 
@@ -1496,7 +1494,7 @@ export const sensing_mousey = new ProtoBlock({
     execute: function* (_, ctx) {
         return ctx.io.mousePosition.y;
     },
-    returnType: ['boolean'],
+    returnType: ['number'],
     colorCategory: 'sensing',
 });
 

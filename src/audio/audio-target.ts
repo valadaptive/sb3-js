@@ -42,7 +42,11 @@ export default class AudioTarget {
 
         const source = this.audio.ctx.createBufferSource();
         source.buffer = buffer;
-        source.connect(this.destinationNode);
+        if (this._pan !== 0) {
+            source.connect(this.pannerNode);
+        } else {
+            source.connect(this.destinationNode);
+        }
         this.playingBuffers.set(sound, source);
         this.audio.resume();
 
