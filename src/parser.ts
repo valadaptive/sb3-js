@@ -452,7 +452,7 @@ const parseBlock = (
     jsonTarget: Sb3Target,
     customBlocks: CustomBlocks,
 ): Block => {
-    let protoBlock;
+    let protoBlock: ProtoBlock;
     // procedures_call blocks are replaced with Block instances whose proto is the custom block's definition
     if (jsonBlock.opcode === 'procedures_call') {
         if (!jsonBlock.mutation) {
@@ -465,18 +465,18 @@ const parseBlock = (
         if (customBlockDefinition) {
             protoBlock = customBlockDefinition.proto;
         } else if (jsonBlock.mutation.proccode === '\u200B\u200Blog\u200B\u200B %s') {
-            protoBlock = getBlockByOpcode('internal_scratchAddons_log') as unknown as ProtoBlock;
+            protoBlock = getBlockByOpcode('internal_scratchAddons_log') as ProtoBlock;
         } else if (jsonBlock.mutation.proccode === '\u200B\u200Bwarn\u200B\u200B %s') {
-            protoBlock = getBlockByOpcode('internal_scratchAddons_warn') as unknown as ProtoBlock;
+            protoBlock = getBlockByOpcode('internal_scratchAddons_warn') as ProtoBlock;
         } else if (jsonBlock.mutation.proccode === '\u200B\u200Berror\u200B\u200B %s') {
-            protoBlock = getBlockByOpcode('internal_scratchAddons_error') as unknown as ProtoBlock;
+            protoBlock = getBlockByOpcode('internal_scratchAddons_error') as ProtoBlock;
         } else {
             // eslint-disable-next-line no-console
             console.warn(`Custom block "${jsonBlock.mutation.proccode}" does not exist`);
-            protoBlock = getBlockByOpcode('internal_noop') as unknown as ProtoBlock;
+            protoBlock = getBlockByOpcode('internal_noop') as ProtoBlock;
         }
     } else {
-        protoBlock = getBlockByOpcode(jsonBlock.opcode) as unknown as ProtoBlock;
+        protoBlock = getBlockByOpcode(jsonBlock.opcode) as ProtoBlock;
     }
 
     const inputValues: Record<string, BlockInputValueShapeFor<BlockInputValue>> = {};

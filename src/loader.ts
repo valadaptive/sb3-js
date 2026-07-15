@@ -106,7 +106,7 @@ export class ZipLoader extends Loader {
                             return;
                         }
 
-                        dataChunks.push(chunk as Uint8Array<ArrayBuffer>);
+                        dataChunks.push(chunk);
                         if (final) resolve(dataChunks);
                     };
                     file.start();
@@ -147,7 +147,7 @@ export class ZipLoader extends Loader {
             return file;
         } catch (err) {
             const error = err as Error;
-            throw new Error(`Error reading file: ${error.message}`, {cause: error});
+            throw new Error(`Error reading file: ${error.message}`, {cause: err});
         }
     }
 

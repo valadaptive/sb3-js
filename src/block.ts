@@ -230,17 +230,17 @@ export class ProtoBlock<
             ? (
                 inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
                 ctx: BlockContext,
-                event: Evt
+                event: Evt,
             ) => Generator<unknown, boolean, boolean>
             : (
                 inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
-                ctx: BlockContext
+                ctx: BlockContext,
             ) => BlockGenerator;
         returnType?: MyReturnType;
         pure?: boolean;
         hat?: MyHatInfo;
         monitorLabel?: (
-            inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>}
+            inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
         ) => string;
         monitorSliderHandler?: (
             inputValues: {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>},
