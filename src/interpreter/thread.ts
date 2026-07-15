@@ -195,7 +195,7 @@ export default class Thread {
      * Step the thread until it yields, parks, or finishes.
      */
     public step() {
-        this.stepGenerator(this.generator);
+        return this.stepGenerator(this.generator);
     }
 
     private stepGenerator(generator: BlockGenerator): ReturnType<BlockGenerator['next']> | undefined {

@@ -12,7 +12,8 @@
         "target": "ES2022",
         "noErrorTruncation": true,
         "noEmit": true,
-        "lib": ["ESNext", "dom"]
+        "lib": ["ESNext", "dom"],
+        "types": [],
     },
     "include": ["src/**/*", "test/**/*", "./*.cjs"]
 }

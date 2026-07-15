@@ -107,7 +107,7 @@ export class MonitorElement extends HTMLElement implements MonitorView<Monitorab
         }
         if (monitor.position) this.setPosition(monitor.position);
 
-        const label = !monitor.target || monitor.target?.sprite.isStage ?
+        const label = monitor.target.sprite.isStage ?
             monitor.label :
             `${monitor.target.sprite.name}: ${monitor.label}`;
 

@@ -2,7 +2,6 @@ import Target from './target.js';
 import Sprite from './sprite.js';
 import {
     Monitor,
-    updateMonitor,
     ScalarMonitor,
     ListMonitor,
     ScalarMonitorParams,
@@ -60,10 +59,7 @@ export class Question extends TypedEventTarget<AnswerEvent | QuestionCancelEvent
 export default class Project extends TypedEventTarget<CreateMonitorEvent | QuestionEvent> {
     public readonly targets: Target[] = [];
     public readonly sprites: Sprite[] = [];
-    public readonly monitors: readonly {
-        monitor: Monitor;
-        updateMonitorBlock: Block<typeof updateMonitor>;
-    }[] = [];
+    public readonly monitors: Monitor[] = [];
     public stage: Target | null = null;
     public cloneCount = 0;
     public timerStart: number = Date.now();
@@ -235,7 +231,7 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
         inputValues: P extends ProtoBlock<string, infer MyInputs>
             ? {[key in keyof MyInputs]: BlockInputShape<MyInputs[key]>}
             : never,
-        target: Target | null,
+        targetPartial: Target | null,
         params?: Partial<ScalarMonitorParams> | Partial<ListMonitorParams>,
     ): Monitor {
         if (proto === data_listcontents) {
@@ -243,7 +239,13 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
             // itself
             proto = listMonitorContents as P;
         }
-        for (const {monitor} of this.monitors) {
+        let target = targetPartial;
+        if (target === null) {
+            const stage = this.stage;
+            if (!stage) throw new Error('Project has no stage');
+            target = stage;
+        }
+        for (const monitor of this.monitors) {
             const innerBlock = monitor.block;
             if (innerBlock.proto !== proto) continue;
             if (monitor.target !== target) continue;
@@ -293,15 +295,7 @@ export default class Project extends TypedEventTarget<CreateMonitorEvent | Quest
     }
 
     private addMonitor(monitor: Monitor) {
-        const updateMonitorBlock = new Block({
-            proto: updateMonitor,
-            id: Symbol('updateMonitor'),
-            inputValues: {MONITOR: monitor},
-        });
-        (this.monitors as {
-            monitor: Monitor;
-            updateMonitorBlock: Block;
-        }[]).push({monitor, updateMonitorBlock});
+        this.monitors.push(monitor);
         this.dispatchEvent(new CreateMonitorEvent(monitor));
     }
 }

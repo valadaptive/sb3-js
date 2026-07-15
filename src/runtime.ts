@@ -46,7 +46,7 @@ export default class Runtime {
     private dragOffset: {x: number; y: number} | null = null;
     private draggedTarget: Target | null = null;
 
-    private steppingInterval: NodeJS.Timeout | null = null;
+    private steppingInterval: number | null = null;
 
     private unregisterPreviousProject: (() => void) | null = null;
     private unsetPreviousStage: (() => void) | null = null;
@@ -117,7 +117,7 @@ export default class Runtime {
             this.handleMonitorCreated.bind(this, controller.signal),
             {signal: controller.signal},
         );
-        for (const {monitor} of project.monitors) {
+        for (const monitor of project.monitors) {
             this.handleMonitorCreated(controller.signal, new CreateMonitorEvent(monitor));
         }
         project.addEventListener('question', this.handleQuestionAsked.bind(this), {signal: controller.signal});
@@ -127,7 +127,7 @@ export default class Runtime {
             this.stopAll();
             this.project = null;
             this.stop();
-            for (const {monitor} of project.monitors) {
+            for (const monitor of project.monitors) {
                 this.removeMonitorView(monitor);
             }
             this.penLayer?.clear();
@@ -338,9 +338,9 @@ export default class Runtime {
         const {monitors, stage} = this.project;
         if (!stage) throw new Error('Project has no stage');
 
-        for (const {monitor, updateMonitorBlock} of monitors) {
+        for (const monitor of monitors) {
             if (!monitor.visible) continue;
-            this.interpreter.launch([updateMonitorBlock], monitor.target ?? stage, null, true);
+            this.interpreter.evaluateMonitor(monitor);
         }
     }
 
@@ -380,7 +380,7 @@ export default class Runtime {
         // its size, then once more to position it.
         if (!monitor.position) {
             const monitorRects = [];
-            for (const {monitor: otherMonitor} of this.project.monitors) {
+            for (const otherMonitor of this.project.monitors) {
                 if (otherMonitor === monitor) continue;
                 const viewAndAbortController = this.monitorViews.get(otherMonitor);
                 if (!viewAndAbortController) continue;

@@ -1,4 +1,4 @@
-import {Block, BlockInput, ProtoBlock, VariableField, instanceInput} from './block.js';
+import {Block, ProtoBlock, VariableField} from './block.js';
 import Rectangle from './rectangle.js';
 import Target from './target.js';
 import {TypedEvent, TypedEventTarget} from './typed-events.js';
@@ -51,7 +51,7 @@ export type ListMonitorParams = {
 };
 
 abstract class BaseMonitor<T> extends TypedEventTarget<UpdateMonitorEvent<T>> {
-    public target: Target | null;
+    public target: Target;
     public readonly block: Block;
 
     protected _label: string;
@@ -59,7 +59,7 @@ abstract class BaseMonitor<T> extends TypedEventTarget<UpdateMonitorEvent<T>> {
     protected _position: {x: number; y: number} | null;
     protected _mode: MonitorMode = {mode: 'default'};
 
-    constructor(target: Target | null, block: Block, params: Omit<BaseMonitorParams, 'value'>) {
+    constructor(target: Target, block: Block, params: Omit<BaseMonitorParams, 'value'>) {
         super();
         this.target = target;
         this.block = block;
@@ -121,7 +121,7 @@ abstract class BaseMonitor<T> extends TypedEventTarget<UpdateMonitorEvent<T>> {
 
 export class ScalarMonitor extends BaseMonitor<string | number | boolean> {
     private _value: string | number | boolean;
-    constructor(target: Target | null, block: Block, params: Omit<ScalarMonitorParams, 'value'>) {
+    constructor(target: Target, block: Block, params: Omit<ScalarMonitorParams, 'value'>) {
         super(target, block, params);
         this._value = '';
     }
@@ -146,7 +146,7 @@ export class ScalarMonitor extends BaseMonitor<string | number | boolean> {
 export class ListMonitor extends BaseMonitor<(string | number | boolean)[]> {
     private _value: (string | number | boolean)[];
     constructor(
-        target: Target | null,
+        target: Target,
         block: Block,
         params: Omit<ListMonitorParams, 'value'>,
     ) {
@@ -172,21 +172,6 @@ export class ListMonitor extends BaseMonitor<(string | number | boolean)[]> {
 }
 
 export type Monitor = BaseMonitor<string | number | boolean | (string | number | boolean)[]>;
-
-const MonitorConstructor = BaseMonitor as new(...args: unknown[]) => Monitor;
-const MonitorInput = new BlockInput('monitor', instanceInput(MonitorConstructor));
-
-export const updateMonitor = new ProtoBlock({
-    opcode: 'vm_update_monitor',
-    inputs: {
-        MONITOR: MonitorInput,
-    },
-    execute: function* ({MONITOR}, ctx) {
-        const value = (yield* ctx.evaluate(MONITOR.block)) as string | number | boolean | (string | number | boolean)[];
-        MONITOR.update({value});
-    },
-    colorCategory: 'internal',
-});
 
 export const listMonitorContents = new ProtoBlock({
     opcode: 'vm_list_monitor_contents',

@@ -26,7 +26,7 @@ export default class IO extends TypedEventTarget<DragStartEvent | DragStopEvent>
     private _mouseDownPosition: {x: number; y: number} = {x: 0, y: 0};
     private _mouseDown: boolean = false;
     private keysDown: Set<string> = new Set();
-    private mouseDownTimeout: NodeJS.Timeout | null = null;
+    private mouseDownTimeout: number | null = null;
     private dragging: boolean = false;
     public username: string = '';
 

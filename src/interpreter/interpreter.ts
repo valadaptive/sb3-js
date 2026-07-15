@@ -1,4 +1,5 @@
 import {Block, SomeProtoBlock} from '../block.js';
+import {Monitor} from '../monitor.js';
 import Project from '../project.js';
 import Renderer from '../renderer/renderer.js';
 import Target from '../target.js';
@@ -64,12 +65,22 @@ export default class Interpreter {
         }
 
         const thread = new Thread(script, target, this.blockContext, event);
-        //console.log(target.sprite.name, event, thread.hatBlockMatches(event));
         if (event && !thread.hatBlockMatches(event)) {
             return null;
         }
         this.threads.push(thread);
         return thread;
+    }
+
+    public evaluateMonitor(monitor: Monitor) {
+        const script = [monitor.block];
+        const thread = new Thread(script, monitor.target, this.blockContext, null);
+        const result = thread.step();
+        if (!result?.done) {
+            throw new Error('Monitor block did not finish synchronously');
+        }
+        // TODO: we should perhaps throw if the monitor block didn't return a value?
+        monitor.update({value: result.value ?? ''});
     }
 
     public stopAllThreads() {
