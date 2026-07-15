@@ -119,7 +119,7 @@ export default class Target {
         this.lists = options.lists;
 
         this.sprite.registerClone(this);
-        this.audio.connect(this.runtime.audio);
+        this.audio.connect();
 
         this.scriptListenerCleanup = this.setUpScriptListeners();
     }

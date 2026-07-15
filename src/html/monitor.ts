@@ -224,21 +224,28 @@ class ScalarMonitorElement extends HTMLElement {
             this.monitorElement.classList.remove('large');
         }
 
-        if (to.mode === 'slider' && !this.sliderElement) {
-            const slider = h('input', {
-                type: 'range',
-                min: String(to.min),
-                max: String(to.max),
-                step: to.isDiscrete ? '1' : 'any',
-                value: this.value,
-            });
-            this.sliderElement = slider;
-            this.monitorElement.append(slider);
-            slider.addEventListener('input', () => {
-                const evt = new MonitorSliderChangeEvent(Number(slider.value), {composed: true});
-                this.dispatchEvent(evt);
-            });
-        } else if (to.mode !== 'slider' && this.sliderElement) {
+        if (to.mode === 'slider') {
+            if (!this.sliderElement) {
+                const slider = h('input', {
+                    type: 'range',
+                    min: String(to.min),
+                    max: String(to.max),
+                    step: to.isDiscrete ? '1' : 'any',
+                    value: this.value,
+                });
+                this.sliderElement = slider;
+                this.monitorElement.append(slider);
+                slider.addEventListener('input', () => {
+                    const evt = new MonitorSliderChangeEvent(Number(slider.value), {composed: true});
+                    this.dispatchEvent(evt);
+                });
+            } else {
+                // The slider already exists; keep its bounds in sync with the (possibly changed) monitor range.
+                this.sliderElement.min = String(to.min);
+                this.sliderElement.max = String(to.max);
+                this.sliderElement.step = to.isDiscrete ? '1' : 'any';
+            }
+        } else if (this.sliderElement) {
             this.sliderElement.remove();
             this.sliderElement = null;
         }
@@ -466,14 +473,19 @@ class ListMonitorElement extends HTMLElement {
             }
         }
 
-        // List items were deleted. Remove all excess rows.
+        // List items were deleted. Remove all excess rows. Note that children/renderedValues are indexed relative to
+        // startElemIndex: child `i` holds the row for absolute index `startElemIndex + i`. We must therefore convert
+        // the absolute item count into a relative count of rows to keep, and clamp startElemIndex if the list shrank
+        // past the scrolled region.
         if (this.endElemIndex > this.items.length) {
             const children = this.scrollerElement.children;
-            for (let i = children.length - 1; i >= this.items.length; i--) {
+            const keep = Math.max(0, this.items.length - this.startElemIndex);
+            for (let i = children.length - 1; i >= keep; i--) {
                 children[i].remove();
             }
-            this.renderedValues.length = this.items.length;
-            this.endElemIndex = this.items.length;
+            this.renderedValues.length = keep;
+            // If the list shrank below startElemIndex, this makes start === end so the reset below takes over.
+            this.endElemIndex = Math.max(this.startElemIndex, this.items.length);
         }
 
         // We removed all rows; start from the first visible row

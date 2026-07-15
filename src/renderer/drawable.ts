@@ -199,8 +199,8 @@ export default class Drawable {
         vec2.set(dst, x + 0.5, y + 0.5);
         vec2.transformMat3(dst, dst, this.inverseTransform);
         // Our texture's Y-axis is flipped
-        __localPosition[1] = 1 - __localPosition[1];
-        return __localPosition;
+        dst[1] = 1 - dst[1];
+        return dst;
     }
 
     /**
@@ -209,12 +209,18 @@ export default class Drawable {
      */
     checkPointCollision(x: number, y: number, silhouette: Silhouette) {
         const localPosition = this.getLocalPosition(x, y, __localPosition);
+        const effects = this.target.effects;
+        // Apply distortion effects only to points inside the quad (matching scratch-render's getLocalPosition), then
+        // reject points that fall outside it--the distortion can map an in-quad point to outside the texture, and the
+        // silhouette would otherwise clamp such coordinates to edge texels.
+        if (
+            (effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0 &&
+            localPosition[0] >= 0 && localPosition[0] < 1 && localPosition[1] >= 0 && localPosition[1] < 1
+        ) {
+            effectTransformPoint(effects, this.costume.dimensions, localPosition, localPosition);
+        }
         if (localPosition[0] < 0 || localPosition[0] > 1 || localPosition[1] < 0 || localPosition[1] > 1) {
             return false;
-        }
-        const effects = this.target.effects;
-        if ((effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0) {
-            effectTransformPoint(effects, this.costume.dimensions, localPosition, localPosition);
         }
         return silhouette.isTouching(localPosition[0], localPosition[1]);
     }
@@ -232,8 +238,18 @@ export default class Drawable {
     ) {
         const localPosition = this.getLocalPosition(x, y, __localPosition);
         const effects = this.target.effects;
-        if ((effects.bitmask & effectMask & GraphicEffects.DISTORTION_EFFECTS) !== 0) {
+        // Apply distortion effects only to points inside the quad (matching scratch-render's getLocalPosition).
+        if (
+            (effects.bitmask & effectMask & GraphicEffects.DISTORTION_EFFECTS) !== 0 &&
+            localPosition[0] >= 0 && localPosition[0] < 1 && localPosition[1] >= 0 && localPosition[1] < 1
+        ) {
             effectTransformPoint(effects, this.costume.dimensions, localPosition, localPosition);
+        }
+        // Points outside the quad (after distortion) are fully transparent. Without this the silhouette would clamp
+        // out-of-range coordinates to (potentially opaque) edge texels, causing "touching color" false positives.
+        if (localPosition[0] < 0 || localPosition[0] > 1 || localPosition[1] < 0 || localPosition[1] > 1) {
+            dst[0] = dst[1] = dst[2] = dst[3] = 0;
+            return dst;
         }
         const textureColor = silhouette.sample(localPosition[0], localPosition[1], dst);
         if (effects.bitmask & effectMask & GraphicEffects.COLOR_EFFECTS) {
@@ -497,6 +513,8 @@ export default class Drawable {
         const rightHull = __rightHull;
         rightHull.length = 0;
         const pixelPos = vec2.create();
+        // The effect-transformed position is used *only* to sample the silhouette; the hull vertex we store is always
+        // the original (untransformed) pixel position, matching scratch-render's convex hull algorithm.
         const effectPos = vec2.create();
         let currentPoint: vec2 | undefined;
         const useEffects = (effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0;
@@ -512,9 +530,9 @@ export default class Drawable {
                 let pixelX = x;
                 let pixelY = y;
                 if (useEffects) {
-                    effectTransformPoint(effects, costumeDimensions, pixelPos, pixelPos);
-                    pixelX = Math.floor(pixelPos[0] * width);
-                    pixelY = height - Math.floor(pixelPos[1] * height) - 1;
+                    effectTransformPoint(effects, costumeDimensions, pixelPos, effectPos);
+                    pixelX = Math.floor(effectPos[0] * width);
+                    pixelY = height - Math.floor(effectPos[1] * height) - 1;
                 }
 
                 if (silhouette.sampleTexelAlpha(pixelX, pixelY) > 0) {
@@ -546,8 +564,8 @@ export default class Drawable {
                 let pixelY = y;
                 if (useEffects) {
                     effectTransformPoint(effects, costumeDimensions, pixelPos, effectPos);
-                    pixelX = Math.floor(pixelPos[0] * width);
-                    pixelY = height - Math.floor(pixelPos[1] * height) - 1;
+                    pixelX = Math.floor(effectPos[0] * width);
+                    pixelY = height - Math.floor(effectPos[1] * height) - 1;
                 }
 
                 if (silhouette.sampleTexelAlpha(pixelX, pixelY) > 0) {

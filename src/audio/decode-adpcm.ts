@@ -57,9 +57,14 @@ const decodeRiff = (data: Uint8Array, topLevel: boolean): Chunk => {
         id = DECODER.decode(data.subarray(8, 12));
         const subchunks = [];
         let offset = 12;
-        while (offset < size) {
+        // `size` counts the bytes after the size field (i.e. from byte 8), so the container's contents end at the
+        // absolute offset `size + 8`.
+        while (offset < size + 8) {
             const subchunk = decodeRiff(data.subarray(offset), false);
             offset += subchunk.byteLength;
+            // RIFF chunks are word-aligned: an odd-sized chunk is followed by a pad byte that isn't counted in its
+            // size. Skip it so subsequent chunk offsets stay aligned.
+            if (offset & 1) offset++;
             subchunks.push(subchunk);
         }
 

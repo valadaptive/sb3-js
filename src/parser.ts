@@ -597,21 +597,24 @@ const parseScript = (
 ): Block[] => {
     const blocks: Block[] = [];
     let currentBlock: Sb3Block | Sb3InputPrimitive | null = jsonBlock;
-    let currentBlockId: string | null | undefined = blockId;
+    let currentBlockId = blockId;
 
     while (true) {
-        blocks.push(parseBlock(currentBlock, currentBlockId!, jsonTarget, customBlocks));
+        blocks.push(parseBlock(currentBlock, currentBlockId, jsonTarget, customBlocks));
         if (typeof currentBlock.next !== 'string') {
             break;
         }
         if (!Object.prototype.hasOwnProperty.call(jsonTarget.blocks, currentBlock.next)) {
             throw new Error(`Block ${currentBlock.opcode} has next block ${currentBlock.next} which does not exist`);
         }
-        currentBlock = jsonTarget.blocks[currentBlock.next];
+        // Capture the next block's ID before reassigning currentBlock, otherwise currentBlockId ends up being the ID
+        // of the block *after* the new current block.
+        const nextBlockId: string = currentBlock.next;
+        currentBlock = jsonTarget.blocks[nextBlockId];
         if (isCompressedPrimitive(currentBlock)) {
-            throw new Error(`Unexpected compressed primitive with ID ${currentBlockId} in script`);
+            throw new Error(`Unexpected compressed primitive with ID ${nextBlockId} in script`);
         }
-        currentBlockId = currentBlock.next;
+        currentBlockId = nextBlockId;
     }
 
     return blocks;

@@ -126,16 +126,9 @@ export default class AnswerBoxElement extends HTMLElement {
         }
     }
 
-    attributeAddedCallback(name: string, value: string) {
-        if (name === 'prompt') this.setPrompt(value);
-    }
-
-    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        if (name === 'prompt') this.setPrompt(newValue);
-    }
-
-    attributeRemovedCallback(name: string) {
-        if (name === 'prompt') this.setPrompt('');
+    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+        // newValue is null when the attribute is removed; treat that as an empty prompt rather than rendering "null".
+        if (name === 'prompt') this.setPrompt(newValue ?? '');
     }
 
     show() {
