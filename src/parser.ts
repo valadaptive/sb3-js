@@ -586,7 +586,7 @@ const parseCustomBlockDefinition = (
         allBlocks.procedures_definition as unknown as ProtoBlock,
         EMPTY_MAP,
     );
-    return Object.assign(customBlockDefinition as CustomBlockStub, {jsonBlock, blockId});
+    return Object.assign(customBlockDefinition as unknown as CustomBlockStub, {jsonBlock, blockId});
 };
 
 const parseScript = (

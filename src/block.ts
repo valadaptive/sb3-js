@@ -9,23 +9,16 @@ export type BlockInputValue =
     | 'string'
     | 'number'
     | 'boolean'
-    | 'null'
     | 'block'
     | {type: 'union'; values: BlockInputValue[]}
     | {type: 'array'; items: BlockInputValue}
     | {type: 'object'; values: {[x: string]: BlockInputValue}}
-    | {type: 'instance'; of: new() => unknown}
-    | {type: 'literal'; value: string}
     | BlockInput<string, BlockInputValue>;
 
 export const objectInput = <T extends {[x: string]: BlockInputValue}>(values: T): {type: 'object'; values: T} => ({
     type: 'object',
     values,
 });
-
-export const instanceInput = <T>(of: new(...args: any[]) => T) => ({type: 'instance', of} as const);
-
-export const literalInput = <T extends string>(value: T): {type: 'literal'; value: T} => ({type: 'literal', value});
 
 export const arrayInput = <T extends BlockInputValue>(items: T): {type: 'array'; items: T} => ({
     type: 'array',
@@ -51,34 +44,27 @@ type BlockInputValueShapeForInner<T extends BlockInputValue, Iterations extends 
             ? number
             : T extends 'boolean'
                 ? boolean
-                : T extends 'null'
-                    ? null
-                    : T extends 'block'
-                        ? Block<ProtoBlock>
-                        : T extends {type: 'union'; values: (infer UnionItem)[]}
-                            ? UnionItem extends BlockInputValue
-                                ? BlockInputValueShapeForInner<UnionItem, Decrement<Iterations>>
+                : T extends 'block'
+                    ? Block<ProtoBlock>
+                    : T extends {type: 'union'; values: (infer UnionItem)[]}
+                        ? UnionItem extends BlockInputValue
+                            ? BlockInputValueShapeForInner<UnionItem, Decrement<Iterations>>
+                            : never
+                        : T extends {type: 'array'; items: infer ArrayItem}
+                            ? ArrayItem extends BlockInputValue
+                                ?
+                                BlockInputValueShapeForInner<ArrayItem, Decrement<Iterations>>[]
                                 : never
-                            : T extends {type: 'array'; items: infer ArrayItem}
-                                ? ArrayItem extends BlockInputValue
-                                    ?
-                                    BlockInputValueShapeForInner<ArrayItem, Decrement<Iterations>>[]
-                                    : never
-                                : T extends {type: 'object'; values: {[x: string]: BlockInputValue}}
-                                    ? {
-                                        [K in keyof T['values']]: BlockInputValueShapeForInner<
-                                            T['values'][K],
-                                            Decrement<Iterations>
-                                        >
-                                    }
-                                    : T extends {type: 'instance'; of: new() => infer Instance}
-                                        ? Instance
-                                        : T extends {type: 'literal'; value: infer LiteralValue extends string}
-                                            ? LiteralValue
-                                            :
-                                            T extends BlockInput<string, infer Value>
-                                                ? BlockInputValueShapeForInner<Value, Decrement<Iterations>> :
-                                                never;
+                            : T extends {type: 'object'; values: {[x: string]: BlockInputValue}}
+                                ? {
+                                    [K in keyof T['values']]: BlockInputValueShapeForInner<
+                                        T['values'][K],
+                                        Decrement<Iterations>
+                                    >
+                                }
+                                : T extends BlockInput<string, infer Value>
+                                    ? BlockInputValueShapeForInner<Value, Decrement<Iterations>> :
+                                    never;
 
 /** Map the user-defined BlockInput type to its TypeScript type. */
 export type BlockInputValueShapeFor<T extends BlockInputValue> = BlockInputValueShapeForInner<T, 4>;
@@ -104,7 +90,7 @@ export class BlockInput<Type extends string = string, Value extends BlockInputVa
         if (valueType === 'block') {
             return value instanceof Block;
         }
-        if (valueType === 'string' || valueType === 'number' || valueType === 'boolean' || valueType === 'null') {
+        if (valueType === 'string' || valueType === 'number' || valueType === 'boolean') {
             return typeof value === valueType;
         }
         if (valueType.type === 'union') {
@@ -115,12 +101,6 @@ export class BlockInput<Type extends string = string, Value extends BlockInputVa
                 return false;
             }
             return value.every(item => BlockInput.validateInput(valueType.items, item));
-        }
-        if (valueType.type === 'instance') {
-            return value instanceof valueType.of;
-        }
-        if (valueType.type === 'literal') {
-            return value === valueType.value;
         }
         if (valueType.type === 'object') {
             if (typeof value !== 'object' || value === null) {
