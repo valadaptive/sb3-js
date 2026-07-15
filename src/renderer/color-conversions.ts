@@ -1,10 +1,8 @@
-import {vec3} from 'gl-matrix';
-
 /**
- * Convert an RGB color (in 0..1) to an HSV color (in 0..1).
+ * Convert an RGB color (in 0..1) to an HSV color (in 0..1), written to the first 3 components of `dst`.
  * Taken from https://web.archive.org/web/20190723013736/http://lolengine.net/blog/2013/01/13/fast-rgb-to-hsv.
  */
-export const rgbToHsv = ([r, g, b]: vec3, dst: vec3) => {
+export const rgbToHsv = (r: number, g: number, b: number, dst: Float32Array) => {
     let K = 0;
 
     if (g < b) {
@@ -37,10 +35,10 @@ export const rgbToHsv = ([r, g, b]: vec3, dst: vec3) => {
 };
 
 /**
- * Convert an HSV color (in 0..1) to an RGB color (in 0..1).
+ * Convert an HSV color (in 0..1) to an RGB color (in 0..1), written to the first 3 components of `dst`.
  * Taken from https://github.com/stolk/hsvbench.
  */
-export const hsvToRgb = ([h, s, v]: vec3, dst: vec3) => {
+export const hsvToRgb = (h: number, s: number, v: number, dst: Float32Array) => {
     const h6 = h * 6;
     const r = Math.max(0, Math.min(Math.abs(h6 - 3) - 1, 1));
     const g = Math.max(0, Math.min(2 - Math.abs(h6 - 2), 1));

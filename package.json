@@ -34,7 +34,6 @@
   "description": "",
   "dependencies": {
     "@cto.af/linebreak": "^4.0.0",
-    "fflate": "^0.8.2",
-    "gl-matrix": "=3.4.3"
+    "fflate": "^0.8.2"
   }
 }

@@ -1,9 +1,9 @@
-import {vec2, vec3} from 'gl-matrix';
 import {GraphicEffects} from '../effects.js';
 import {rgbToHsv, hsvToRgb} from './color-conversions.js';
+import {vec2, Vec2} from './vec2.js';
 
-const __hsv = vec3.create();
-const __rgb = vec3.create();
+const __hsv = new Float32Array(3);
+const __rgb = new Float32Array(3);
 
 /**
  * Apply a graphic-effect transformation to a color.
@@ -37,7 +37,7 @@ export const effectTransformColor = (
 
         if (enableColor) {
             // vec3 hsv = rgb2hsv(unmultiplied);
-            rgbToHsv([rS, gS, bS], __hsv);
+            rgbToHsv(rS, gS, bS, __hsv);
             // const float minLightness = 0.055;
             // const float minSaturation = 0.09;
             // hsv.z = max(hsv.z, minLightness);
@@ -50,7 +50,7 @@ export const effectTransformColor = (
             // hsv.x = fract(hsv.x + color_effect);
             __hsv[0] = (__hsv[0] + colorEffect) % 1;
             // unmultiplied = hsv2rgb(hsv);
-            hsvToRgb(__hsv, __rgb);
+            hsvToRgb(__hsv[0], __hsv[1], __hsv[2], __rgb);
             rS = __rgb[0];
             gS = __rgb[1];
             bS = __rgb[2];
@@ -93,8 +93,8 @@ export const effectTransformColor = (
 export const effectTransformPoint = (
     effects: GraphicEffects,
     dimensions: {width: number; height: number},
-    src: vec2,
-    dst: vec2,
+    src: Vec2,
+    dst: Vec2,
 ) => {
     vec2.copy(dst, src);
     const effectMask = effects.bitmask;

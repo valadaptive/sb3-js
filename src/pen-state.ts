@@ -1,8 +1,7 @@
-import {vec3, vec4} from 'gl-matrix';
 import {hsvToRgb, rgbToHsv} from './renderer/color-conversions.js';
 
-const __hsv = vec3.create();
-const __rgbNorm = vec3.create();
+const __hsv = new Float32Array(3);
+const __rgbNorm = new Float32Array(3);
 
 export default class PenState {
     public down = false;
@@ -12,7 +11,7 @@ export default class PenState {
     private _transparency = 0;
     private _legacyShade = 50; // Used for Scratch 2 change/set pen param blocks
     private _thickness = 1;
-    private _rgba = vec4.create();
+    private _rgba = new Float32Array(4);
     private rgbDirty = true;
 
     get color() {
@@ -71,20 +70,14 @@ export default class PenState {
     get rgba() {
         if (this.rgbDirty) {
             this.rgbDirty = false;
-            __hsv[0] = this._color * 0.01;
-            __hsv[1] = this._saturation * 0.01;
-            __hsv[2] = this._brightness * 0.01;
-            hsvToRgb(__hsv, this._rgba as vec3);
+            hsvToRgb(this._color * 0.01, this._saturation * 0.01, this._brightness * 0.01, this._rgba);
         }
         this._rgba[3] = 1 - (this._transparency * 0.01);
         return this._rgba;
     }
 
     setFromRgbaInt(rgba: Uint8ClampedArray) {
-        __rgbNorm[0] = rgba[0] / 255;
-        __rgbNorm[1] = rgba[1] / 255;
-        __rgbNorm[2] = rgba[2] / 255;
-        rgbToHsv(__rgbNorm, __hsv);
+        rgbToHsv(rgba[0] / 255, rgba[1] / 255, rgba[2] / 255, __hsv);
         this._color = __hsv[0] * 100;
         this._saturation = __hsv[1] * 100;
         this._brightness = __hsv[2] * 100;
@@ -106,10 +99,7 @@ export default class PenState {
     }
 
     public updateLegacyColor() {
-        __hsv[0] = this._color * 0.01;
-        __hsv[1] = 1;
-        __hsv[2] = 1;
-        const rgb = hsvToRgb(__hsv, __rgbNorm);
+        const rgb = hsvToRgb(this._color * 0.01, 1, 1, __rgbNorm);
         const shade = (this._legacyShade > 100) ? 200 - this._legacyShade : this._legacyShade;
         if (shade < 50) {
             const t = (10 + shade) / 60;
@@ -122,7 +112,7 @@ export default class PenState {
             rgb[1] = (rgb[1] * (1 - t)) + t;
             rgb[2] = (rgb[2] * (1 - t)) + t;
         }
-        const hsv = rgbToHsv(rgb, __hsv);
+        const hsv = rgbToHsv(rgb[0], rgb[1], rgb[2], __hsv);
         this._color = hsv[0] * 100;
         this._saturation = hsv[1] * 100;
         this._brightness = hsv[2] * 100;

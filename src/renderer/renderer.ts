@@ -5,14 +5,14 @@ import BitmapSkin from './bitmap-skin.js';
 import SVGSkin from './svg-skin.js';
 import Rectangle from '../rectangle.js';
 import TextBubble from './text-bubble.js';
-import {mat3} from 'gl-matrix';
 import TextWrapper from './text-wrapper.js';
 import PenLayer from './pen-layer.js';
 import Skin from './skin.js';
 import Silhouette from './silhouette.js';
+import {mat2d} from './mat2d.js';
 
 /** Reused memory location for the currently-being-drawn text bubble's transform matrix */
-const __textBubbleMatrix = mat3.create();
+const __textBubbleMatrix = mat2d.create();
 
 export type FramebufferInfo = {width: number; height: number; framebuffer: WebGLFramebuffer};
 
@@ -133,7 +133,7 @@ export default class Renderer {
         const gl = this.gl;
 
         this.setShader(this.spriteShader);
-        gl.uniformMatrix3fv(this.currentShader.uniformLocations.u_transform, false, this.penLayer.transform);
+        gl.uniformMatrix3x2fv(this.currentShader.uniformLocations.u_transform, false, this.penLayer.transform);
 
         gl.bindTexture(gl.TEXTURE_2D, this.penLayer.texture);
         gl.uniform1i(this.currentShader.uniformLocations.u_texture, 0);
@@ -190,13 +190,14 @@ export default class Renderer {
         );
         this.setShader(this.spriteShader);
 
-        mat3.fromTranslation(__textBubbleMatrix, bubblePosition);
-        mat3.scale(
+        mat2d.fromTranslation(__textBubbleMatrix, bubblePosition[0], bubblePosition[1]);
+        mat2d.scale(
             __textBubbleMatrix,
             __textBubbleMatrix,
-            [Math.round(bubbleSize.width), Math.round(bubbleSize.height)],
+            Math.round(bubbleSize.width),
+            Math.round(bubbleSize.height),
         );
-        gl.uniformMatrix3fv(this.currentShader.uniformLocations.u_transform, false, __textBubbleMatrix);
+        gl.uniformMatrix3x2fv(this.currentShader.uniformLocations.u_transform, false, __textBubbleMatrix);
 
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.uniform1i(this.currentShader.uniformLocations.u_texture, 0);

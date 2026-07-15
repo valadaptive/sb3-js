@@ -1,24 +1,28 @@
-import {mat3, vec2, vec4} from 'gl-matrix';
 import Rectangle from '../rectangle.js';
 import Renderer, {FramebufferInfo} from './renderer.js';
 import Silhouette from './silhouette.js';
 import Samplable from './samplable.js';
+import {mat2d, Mat2D} from './mat2d.js';
+import {vec2} from './vec2.js';
 
 const __samplePoint = vec2.create();
+
+const rgbaEquals = (a: Float32Array, b: Float32Array) =>
+    a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
 
 export default class PenLayer implements Samplable {
     private gl: WebGL2RenderingContext;
     private renderer: Renderer;
-    private lastPenState: {rgba: vec4; thickness: number | null} = {
-        rgba: vec4.fromValues(-1, -1, -1, -1),
+    private lastPenState: {rgba: Float32Array; thickness: number | null} = {
+        rgba: new Float32Array([-1, -1, -1, -1]),
         thickness: null,
     };
     public framebuffer: FramebufferInfo;
     public texture: WebGLTexture;
     public isEmpty = true;
     public bounds: Rectangle;
-    public transform: mat3;
-    private inverseTransform: mat3;
+    public transform: Mat2D;
+    private inverseTransform: Mat2D;
     private silhouette: Silhouette;
     private silhouetteData: Uint8ClampedArray<ArrayBuffer>;
     // Set to false by default because it initializes to fully transparent, saving a readPixels call if the project
@@ -58,10 +62,11 @@ export default class PenLayer implements Samplable {
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(gl.COLOR_BUFFER_BIT);
 
-        this.transform = mat3.create();
-        mat3.fromScaling(this.transform, [this.framebuffer.width, -this.framebuffer.height]);
-        mat3.translate(this.transform, this.transform, [-0.5, -0.5]);
-        this.inverseTransform = mat3.invert(mat3.create(), this.transform);
+        this.transform = mat2d.create();
+        mat2d.fromScaling(this.transform, this.framebuffer.width, -this.framebuffer.height);
+        mat2d.translate(this.transform, this.transform, -0.5, -0.5);
+        this.inverseTransform = mat2d.create();
+        mat2d.invert(this.inverseTransform, this.transform);
     }
     getSamplingBounds(silhouette: Silhouette, result: Rectangle): Rectangle {
         return Rectangle.fromOther(this.bounds, result);
@@ -74,7 +79,7 @@ export default class PenLayer implements Samplable {
         dst: Uint8ClampedArray<ArrayBuffer>,
     ): Uint8ClampedArray<ArrayBuffer> {
         vec2.set(__samplePoint, x, y);
-        vec2.transformMat3(__samplePoint, __samplePoint, this.inverseTransform);
+        vec2.transformMat2D(__samplePoint, __samplePoint, this.inverseTransform);
         // Flip y
         __samplePoint[1] = 1 - __samplePoint[1];
         if (__samplePoint[0] < 0 || __samplePoint[0] > 1 || __samplePoint[1] < 0 || __samplePoint[1] > 1) {
@@ -90,7 +95,7 @@ export default class PenLayer implements Samplable {
 
     checkPointCollision(x: number, y: number, silhouette: Silhouette): boolean {
         vec2.set(__samplePoint, x, y);
-        vec2.transformMat3(__samplePoint, __samplePoint, this.inverseTransform);
+        vec2.transformMat2D(__samplePoint, __samplePoint, this.inverseTransform);
         // Flip y
         __samplePoint[1] = 1 - __samplePoint[1];
         if (__samplePoint[0] < 0 || __samplePoint[0] > 1 || __samplePoint[1] < 0 || __samplePoint[1] > 1) {
@@ -131,7 +136,7 @@ export default class PenLayer implements Samplable {
         y1: number,
         x2: number,
         y2: number,
-        color: vec4,
+        color: Float32Array,
         thickness: number,
     ) {
         this.renderer.setFramebuffer(this.framebuffer);
@@ -146,7 +151,7 @@ export default class PenLayer implements Samplable {
             );
         }
 
-        if (shaderChanged || !this.lastPenState.rgba || !vec4.exactEquals(this.lastPenState.rgba, color)) {
+        if (shaderChanged || !rgbaEquals(this.lastPenState.rgba, color)) {
             // Premultiply by alpha
             this.gl.uniform4f(
                 this.renderer.penLineShader.uniformLocations.u_penColor,
@@ -155,7 +160,7 @@ export default class PenLayer implements Samplable {
                 color[2] * color[3],
                 color[3],
             );
-            vec4.copy(this.lastPenState.rgba, color);
+            this.lastPenState.rgba.set(color);
         }
 
         if (shaderChanged || thickness !== this.lastPenState.thickness) {

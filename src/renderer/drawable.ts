@@ -1,5 +1,3 @@
-import {mat3, vec2} from 'gl-matrix';
-
 import Target from '../target.js';
 import Costume from '../costume.js';
 
@@ -11,27 +9,29 @@ import Silhouette from './silhouette.js';
 import PenLayer from './pen-layer.js';
 import Samplable from './samplable.js';
 import Renderer from './renderer.js';
+import {mat2d, Mat2D} from './mat2d.js';
+import {vec2, Vec2} from './vec2.js';
 
 const __localPosition = vec2.create();
 const __intersectionBoundsSelf = new Rectangle();
 const __intersectionBoundsOther = new Rectangle();
-const __rightHull: vec2[] = [];
+const __rightHull: Vec2[] = [];
 const __blendColor = new Uint8ClampedArray(4);
 const __sampleColor = new Uint8ClampedArray(4);
 const BACKGROUND_COLOR = new Uint8ClampedArray([255, 255, 255]);
 
 export default class Drawable {
-    private transform: mat3 = mat3.create();
+    private transform: Mat2D = mat2d.create();
     private transformDirty = true;
 
-    private inverseTransform: mat3 = mat3.create();
+    private inverseTransform: Mat2D = mat2d.create();
     private inverseTransformDirty = true;
 
-    private convexHull: vec2[] = [];
+    private convexHull: Vec2[] = [];
     private convexHullDirty = true;
     private convexHullSilhouette: Silhouette | null = null;
 
-    private transformedHull: vec2[] = [];
+    private transformedHull: Vec2[] = [];
     private transformedHullDirty = true;
 
     public target: Target;
@@ -65,30 +65,34 @@ export default class Drawable {
     private updateTransform() {
         const currentCostume = this.costume;
         const targetPosition = this.target.position;
-        mat3.fromTranslation(this.transform, [targetPosition.x, targetPosition.y]);
+        mat2d.fromTranslation(this.transform, targetPosition.x, targetPosition.y);
         switch (this.target.rotationStyle) {
             case 'all around':
-                mat3.rotate(this.transform, this.transform, -(this.target.direction - 90) * Math.PI / 180);
+                mat2d.rotate(this.transform, this.transform, -(this.target.direction - 90) * Math.PI / 180);
                 break;
             case 'left-right':
                 if (this.target.direction < 0) {
-                    mat3.scale(this.transform, this.transform, [-1, 1]);
+                    mat2d.scale(this.transform, this.transform, -1, 1);
                 }
                 break;
             case 'don\'t rotate':
                 break;
         }
-        mat3.scale(this.transform, this.transform, [this.target.size * 0.01, this.target.size * 0.01]);
+        mat2d.scale(this.transform, this.transform, this.target.size * 0.01, this.target.size * 0.01);
         const scalingFactor = 1 / currentCostume.bitmapResolution;
         // Rotation centers, unlike all other transforms, are in y-down coordinates.
-        mat3.translate(this.transform, this.transform, [
+        mat2d.translate(
+            this.transform,
+            this.transform,
             -currentCostume.rotationCenter.x * scalingFactor,
             (currentCostume.rotationCenter.y - currentCostume.dimensions.height) * scalingFactor,
-        ]);
-        mat3.scale(this.transform, this.transform, [
+        );
+        mat2d.scale(
+            this.transform,
+            this.transform,
             currentCostume.dimensions.width * scalingFactor,
             currentCostume.dimensions.height * scalingFactor,
-        ]);
+        );
 
         this.transformDirty = false;
     }
@@ -97,7 +101,7 @@ export default class Drawable {
         if (this.transformDirty) {
             this.updateTransform();
         }
-        mat3.invert(this.inverseTransform, this.transform);
+        mat2d.invert(this.inverseTransform, this.transform);
         this.inverseTransformDirty = false;
     }
 
@@ -106,7 +110,7 @@ export default class Drawable {
             this.updateTransform();
         }
 
-        gl.uniformMatrix3fv(shader.uniformLocations.u_transform, false, this.transform);
+        gl.uniformMatrix3x2fv(shader.uniformLocations.u_transform, false, this.transform);
 
         const effects = this.target.effects;
         if (effects.bitmask !== 0) {
@@ -163,11 +167,11 @@ export default class Drawable {
         // rotation (as we're treating pixels as squares, which change dimensions when rotated). Note that Scratch
         // doesn't do this (even though it really should). I do so here because I'm pedantic.
         const xa = this.transform[0] / 2;
-        const xb = this.transform[3] / 2;
+        const xb = this.transform[2] / 2;
         const halfPixelX =
             (Math.abs(xa) + Math.abs(xb)) / this.costume.dimensions.width;
         const ya = this.transform[1] / 2;
-        const yb = this.transform[4] / 2;
+        const yb = this.transform[3] / 2;
         const halfPixelY =
             (Math.abs(ya) + Math.abs(yb)) / this.costume.dimensions.height;
         left -= halfPixelX;
@@ -195,9 +199,9 @@ export default class Drawable {
      * Get the texture-space position within this drawable of a given Scratch-space point. Requires the inverse
      * transform to be up-to-date.
      */
-    private getLocalPosition(x: number, y: number, dst: vec2) {
+    private getLocalPosition(x: number, y: number, dst: Vec2) {
         vec2.set(dst, x + 0.5, y + 0.5);
-        vec2.transformMat3(dst, dst, this.inverseTransform);
+        vec2.transformMat2D(dst, dst, this.inverseTransform);
         // Our texture's Y-axis is flipped
         dst[1] = 1 - dst[1];
         return dst;
@@ -501,7 +505,7 @@ export default class Drawable {
          * The determinant is useful in this case to know if AC is counter-clockwise from AB.
          * A positive value means that AC is counter-clockwise from AB. A negative value means AC is clockwise from AB.
          */
-        const determinant = (A: vec2, B: vec2, C: vec2) => {
+        const determinant = (A: Vec2, B: Vec2, C: Vec2) => {
             // AB = B - A
             // AC = C - A
             // det (AB BC) = AB0 * AC1 - AB1 * AC0
@@ -516,7 +520,7 @@ export default class Drawable {
         // The effect-transformed position is used *only* to sample the silhouette; the hull vertex we store is always
         // the original (untransformed) pixel position, matching scratch-render's convex hull algorithm.
         const effectPos = vec2.create();
-        let currentPoint: vec2 | undefined;
+        let currentPoint: Vec2 | undefined;
         const useEffects = (effects.bitmask & GraphicEffects.DISTORTION_EFFECTS) !== 0;
 
         // Not Scratch-space: y increases as we go downwards.
@@ -609,7 +613,7 @@ export default class Drawable {
         for (let i = 0; i < hull.length; i++) {
             const point = hull[i];
             const transformedPoint = transformedHull[i] ?? vec2.create();
-            vec2.transformMat3(transformedPoint, point, this.transform);
+            vec2.transformMat2D(transformedPoint, point, this.transform);
             transformedHull[i] = transformedPoint;
         }
         this.transformedHullDirty = false;

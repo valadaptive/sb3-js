@@ -1,4 +1,4 @@
-import {mat3} from 'gl-matrix';
+import type {Mat2D} from './renderer/mat2d.js';
 
 /** "Scratch-space" (positive y = up) rectangle / bounding box. */
 export default class Rectangle {
@@ -22,17 +22,17 @@ export default class Rectangle {
         return result;
     }
 
-    public static fromMatrix(matrix: mat3, result = new Rectangle()) {
+    public static fromMatrix(matrix: Mat2D, result = new Rectangle()) {
         // Adapted somewhat from https://github.com/LLK/scratch-render/blob/develop/docs/Rectangle-AABB-Matrix.md
         const xa = matrix[0] / 2;
-        const xb = matrix[3] / 2;
+        const xb = matrix[2] / 2;
         const absx = Math.abs(xa) + Math.abs(xb);
-        const sumx = xa + xb + matrix[6];
+        const sumx = xa + xb + matrix[4];
 
         const ya = matrix[1] / 2;
-        const yb = matrix[4] / 2;
+        const yb = matrix[3] / 2;
         const absy = Math.abs(ya) + Math.abs(yb);
-        const sumy = ya + yb + matrix[7];
+        const sumy = ya + yb + matrix[5];
 
         result.left = sumx - absx;
         result.right = sumx + absx;
